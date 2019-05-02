@@ -21,7 +21,7 @@ class Application(tk.Frame):
 		self.browseBtn = tk.Button(self)
 		self.browseBtn["text"] = "Select Map Json"
 		self.browseBtn["command"] = self.readMapJson
-		self.browseBtn.pack(side="top")
+		self.browseBtn.pack(side=tk.TOP)
 
 	def readMapJson(self):
 		mapPath = filedialog.askopenfilename(initialdir = presetsDir, title = "Select Map", filetypes = (("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed

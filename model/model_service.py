@@ -7,6 +7,7 @@ class Model:
 			self.robots = []
 			self.obstacles = []
 			self.vertices = []
+			self.cable = []
 
 	instance = None
 

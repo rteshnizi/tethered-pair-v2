@@ -26,37 +26,43 @@ class Canvas(object):
 
 	def createEntities(self):
 		for e in self.parsedJson:
-			if (e == 'robots'):
-				self.createRobots(self.parsedJson[e])
+			if (e == 'cable'):
+				self.createCableAndRobots(self.parsedJson[e])
+			elif (e == 'cableLength'):
+				self.model.MAX_CABLE = float(self.parsedJson[e])
 			elif (e == 'destinations'):
 				self.createDestinations(self.parsedJson[e])
 			elif (e == 'obstacles'):
 				self.createObstacles(self.parsedJson[e])
-			elif (e == 'cableLength'):
-				self.model.MAX_CABLE = float(self.parsedJson[e])
 			else:
 				sys.stderr.write('unexpected json parameter %s' % e)
 
-	def createRobots(self, json):
+	def createCableAndRobots(self, ptList):
+		self.createRobots([ptList[0], ptList[-1]])
+		for pt in ptList:
+			coords = [float(c) for c in pt.split(',')]
+			self.model.cable.append(Point(*coords))
+
+	def createRobots(self, ptList):
 		i = 1
 		colors = ['Red', 'Blue']
-		for p in json:
-			coords = [float(c) for c in p.split(',')]
+		for pt in ptList:
+			coords = [float(c) for c in pt.split(',')]
 			r = Robot(canvas = self.canvas, color = colors[i - 1], name = "R%d" % i, loc = Point(*coords))
 			self.model.entities.append(r)
 			self.model.robots.append(r)
 			i += 1
 
-	def createDestinations(self, json):
+	def createDestinations(self, ptList):
 		i = 0
-		for p in json:
+		for p in ptList:
 			coords = [float(c) for c in p.split(',')]
 			self.model.robots[i].setDestination(Point(*coords))
 			i += 1
 
-	def createObstacles(self, json):
+	def createObstacles(self, obsArr):
 		i = 1
-		for obsVerts in json:
+		for obsVerts in obsArr:
 			verts = [Point(*[float(c) for c in v.split(',')]) for v in obsVerts]
 			for v in verts:
 				self.model.vertices.append(v)
