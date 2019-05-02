@@ -1,0 +1,14 @@
+{
+	"python.linting.pylintEnabled": true,
+	"python.linting.enabled": false,
+	"python.linting.pylintArgs": [
+		"--disable=all",
+		"--enable=F,E,unreachable,duplicate-key,unnecessary-semicolon,global-variable-not-assigned,unused-variable,binary-op-exception,bad-format-string,anomalous-backslash-in-string,bad-open-mode",
+		"--disable=relative-beyond-top-level"
+	],
+	"files.insertFinalNewline": true,
+	"editor.insertSpaces": false,
+	"files.trimFinalNewlines": true,
+	"files.trimTrailingWhitespace": true,
+	"python.formatting.provider": "autopep8"
+}
