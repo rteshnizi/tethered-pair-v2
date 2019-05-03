@@ -1,5 +1,4 @@
 from sympy.geometry.point import Point
-from sympy.geometry.polygon import Polygon
 
 def CreateCircle(canvas, center, radius, outline, fill, width):
 	"""
