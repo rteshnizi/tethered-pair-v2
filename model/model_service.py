@@ -7,14 +7,8 @@ class Model:
 			self.robots = []
 			self.obstacles = []
 			self.vertices = [] # This is strictly obstacle vertices
-			self.cable = []
+			self.cable = [] # Initial Cable Config
 			self._vertexByLocation = {} # This is all vertices including robots and destinations
-
-		def addVertexByLocation(self, vert):
-			self._vertexByLocation['%d,%d' % (vert.loc.x, vert.loc.y)] = vert
-
-		def getVertexByLocation(self, vert):
-			return self._vertexByLocation.get('%d,%d' % (vert.loc.x, vert.loc.y), None)
 
 	instance = None
 
@@ -24,3 +18,9 @@ class Model:
 
 	def __getattr__(self, name):
 		return getattr(self.instance, name)
+
+	def addVertexByLocation(self, vert):
+		self._vertexByLocation['%d,%d' % (vert.loc.x, vert.loc.y)] = vert
+
+	def getVertexByLocation(self, x, y):
+		return self._vertexByLocation.get('%d,%d' % (x, y), None)
