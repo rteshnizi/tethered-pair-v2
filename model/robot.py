@@ -1,10 +1,10 @@
-from .entity import PointEntity
+from model.entity import Vertex
 from utils.drawing import CreateCircle
 
 ROBOT_RADIUS = 5
 ROBOT_WIDTH = 2
 
-class Robot(PointEntity):
+class Robot(Vertex):
 	def __init__(self, canvas, color, name, loc):
 		"""
 		canvas: tk.Canvas
@@ -18,7 +18,6 @@ class Robot(PointEntity):
 
 		super().__init__(canvas = canvas, color = color, name = name, loc = loc)
 		self.destination = None
-		self.destinationShapeId = None
 		self.createShape()
 
 	def createShape(self):
@@ -28,19 +27,5 @@ class Robot(PointEntity):
 			radius = ROBOT_RADIUS,
 			outline = "",
 			fill = self.color,
-			width = 1
-		)
-
-	def setDestination(self, d):
-		"""
-		d: sympy.geometry.point.Point
-		"""
-		self.destination = d
-		self.destinationShapeId = CreateCircle(
-			canvas = self.canvas,
-			center = self.destination,
-			radius = ROBOT_RADIUS,
-			outline = self.color,
-			fill = "",
 			width = 1
 		)

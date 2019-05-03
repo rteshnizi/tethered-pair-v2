@@ -8,6 +8,8 @@ from sympy.geometry.point import Point
 from model.model_service import Model
 from model.robot import Robot
 from model.obstacle import Obstacle
+from model.destination import Destination
+from model.entity import Vertex
 
 class Canvas(object):
 	def __init__(self, master):
@@ -49,7 +51,8 @@ class Canvas(object):
 		for pt in ptList:
 			coords = [float(c) for c in pt.split(',')]
 			r = Robot(canvas = self.canvas, color = colors[i - 1], name = "R%d" % i, loc = Point(*coords))
-			self.model.entities.append(r)
+			self.model.entities[r.name] = r
+			self.model.addVertexByLocation(r)
 			self.model.robots.append(r)
 			i += 1
 
@@ -57,16 +60,21 @@ class Canvas(object):
 		i = 0
 		for p in ptList:
 			coords = [float(c) for c in p.split(',')]
-			self.model.robots[i].setDestination(Point(*coords))
+			d = Destination(canvas = self.canvas, robot = self.model.robots[i], loc = Point(*coords))
+			self.model.robots[i].destination = d
+			self.model.entities[d.name] = d
+			self.model.addVertexByLocation(d)
 			i += 1
 
 	def createObstacles(self, obsArr):
 		i = 1
 		for obsVerts in obsArr:
-			verts = [Point(*[float(c) for c in v.split(',')]) for v in obsVerts]
-			for v in verts:
-				self.model.vertices.append(v)
-			o = Obstacle(canvas = self.canvas, name = 'O%s' % i, verts = verts)
-			self.model.entities.append(o)
+			pts = [Point(*[float(c) for c in v.split(',')]) for v in obsVerts]
+			o = Obstacle(canvas = self.canvas, name = 'O%s' % i, pts = pts)
+			self.model.entities[o.name] = o
 			self.model.obstacles.append(o)
+			for v in o.vertices:
+				self.model.entities[v.name] = v
+				self.model.vertices.append(v)
+				self.model.addVertexByLocation(v)
 			i += 1

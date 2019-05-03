@@ -1,11 +1,14 @@
-from .entity import Entity
-from utils.drawing import CreatePolygon
 from sympy.geometry.polygon import Polygon
 
+from model.entity import Entity, Vertex
+from model.model_service import Model
+from utils.drawing import CreatePolygon
+
 OBSTACLE_COLOR = "Grey"
+mode = Model()
 
 class Obstacle(Entity):
-	def __init__(self, canvas, name, verts):
+	def __init__(self, canvas, name, pts):
 		"""
 		canvas: tk.Canvas
 
@@ -16,10 +19,16 @@ class Obstacle(Entity):
 		verts: [sympy.geometry.point.Point]
 		"""
 		super().__init__(canvas = canvas, color = OBSTACLE_COLOR, name = name)
-		self.verts = verts
+		self.vertices = []
 		self.polygon = None
-		self.createShape()
+		self.createVertices(pts)
+		self.createShape(pts)
 
-	def createShape(self):
-		self.canvasId = CreatePolygon(canvas = self.canvas, pointsList = self.verts, outline = "", fill = self.color, width = 1)
-		self.polygon = Polygon(*self.verts)
+	def createVertices(self, pts):
+		for i in range(0, len(pts)):
+			v = Vertex(canvas = self.canvas, name="%s-%d" % (self.name, i), loc = pts[i], render = True)
+			self.vertices.append(v)
+
+	def createShape(self, pts):
+		self.canvasId = CreatePolygon(canvas = self.canvas, pointsList = pts, outline = "", fill = self.color, width = 1)
+		self.polygon = Polygon(*pts)
