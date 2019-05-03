@@ -2,7 +2,8 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-from .canvas import Canvas
+from gui.canvas import Canvas
+from algorithm.aStar import aStar
 
 cwd = os.path.dirname(__file__)
 presetsDir = os.path.join(cwd, "..", "presets")
@@ -14,14 +15,20 @@ class Application(tk.Frame):
 		self.master.geometry("1100x800")
 		super().__init__(self.master)
 		self.pack()
-		self.createInputSelector()
+		self.createButtons()
 		self.canvas = Canvas(self.master)
 
-	def createInputSelector(self):
+	def createButtons(self):
 		self.browseBtn = tk.Button(self)
 		self.browseBtn["text"] = "Select Map Json"
 		self.browseBtn["command"] = self.readMapJson
-		self.browseBtn.pack(side=tk.TOP)
+		self.browseBtn.pack(side = tk.TOP)
+
+		self.runBtn = tk.Button(self)
+		self.runBtn["state"] = tk.DISABLED
+		self.runBtn["text"] = "Run"
+		self.runBtn["command"] = self.run
+		self.runBtn.pack(side = tk.TOP)
 
 	def readMapJson(self):
 		mapPath = filedialog.askopenfilename(initialdir = presetsDir, title = "Select Map", filetypes = (("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed
@@ -29,3 +36,7 @@ class Application(tk.Frame):
 			return
 		mapPath = os.path.abspath(mapPath)
 		self.canvas.parseJson(mapPath)
+		self.runBtn["state"] = tk.NORMAL
+
+	def run(self):
+		aStar()
