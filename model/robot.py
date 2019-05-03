@@ -7,9 +7,11 @@ ROBOT_WIDTH = 2
 class Robot(PointEntity):
 	def __init__(self, canvas, color, name, loc):
 		"""
-		name: str
-
 		canvas: tk.Canvas
+
+		color: color string
+
+		name: str
 
 		loc: sympy.geometry.point.Point
 		"""
@@ -20,7 +22,7 @@ class Robot(PointEntity):
 		self.createShape()
 
 	def createShape(self):
-		self.shapeId = CreateCircle(
+		self.canvasId = CreateCircle(
 			canvas = self.canvas,
 			center = self.loc,
 			radius = ROBOT_RADIUS,

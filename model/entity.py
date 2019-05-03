@@ -5,7 +5,7 @@ class Entity(ABC):
 		self.color = color
 		self.name = name
 		self.canvas = canvas
-		self.shapeId = -1
+		self.canvasId = -1
 
 	@abstractmethod
 	def createShape(self):
