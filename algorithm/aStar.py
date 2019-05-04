@@ -10,9 +10,9 @@ def aStar():
 	q.enqueue(root)
 	while (not q.isEmpty()):
 		n = q.dequeue()
-		if (_isAtDestination(n)):
+		if (isAtDestination(n)):
 			return # For now terminate at first solution
 
 
-def _isAtDestination(n):
+def isAtDestination(n):
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[1].destination.name

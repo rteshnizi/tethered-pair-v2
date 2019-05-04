@@ -1,8 +1,6 @@
-def FindLabeledGaps(r):
+def findGaps(v):
 	"""
-	r: robot
+	Given a vertex find all gaps for that vertex
 
-	Given a point find all the gaps
+	v: Vertex
 	"""
-	model
-	for v in

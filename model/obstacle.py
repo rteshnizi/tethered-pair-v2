@@ -26,7 +26,7 @@ class Obstacle(Entity):
 
 	def createVertices(self, pts):
 		for i in range(0, len(pts)):
-			v = Vertex(canvas = self.canvas, name="%s-%d" % (self.name, i), loc = pts[i], render = True)
+			v = Vertex(canvas = self.canvas, name="%s-%d" % (self.name, i), loc = pts[i], ownerObs=self, render = True)
 			self.vertices.append(v)
 
 	def createShape(self, pts):
