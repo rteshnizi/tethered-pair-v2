@@ -40,9 +40,11 @@ class Canvas(object):
 
 	def createCableAndRobots(self, ptList):
 		self.createRobots([ptList[0], ptList[-1]])
+		self.model.cable.append(self.model.robots[0])
 		for pt in ptList:
 			p = Point(*[float(c) for c in pt.split(',')])
 			self.model.cable.append(self.model.getVertexByLocation(p.x, p.y))
+		self.model.cable.append(self.model.robots[-1])
 
 	def createRobots(self, ptList):
 		i = 1
@@ -72,7 +74,12 @@ class Canvas(object):
 			o = Obstacle(canvas = self.canvas, name = 'O%s' % i, pts = pts)
 			self.model.entities[o.name] = o
 			self.model.obstacles.append(o)
-			for v in o.vertices:
+			numVerts = len(o.vertices)
+			for i in range(numVerts):
+				v = o.vertices[i]
+				prevV = o.vertices[i - 1]
+				nextV = o.vertices[i + 1 if i + 1 < numVerts else 0]
+				v.adjacent = [prevV, nextV]
 				self.model.entities[v.name] = v
 				self.model.vertices.append(v)
 				self.model.addVertexByLocation(v)

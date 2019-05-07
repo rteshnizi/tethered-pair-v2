@@ -2,6 +2,7 @@ from sympy.geometry.line import Segment
 from sympy.geometry.point import Point
 
 from model.model_service import Model
+from model.entity import Entity
 from utils.drawing import CreateCircle
 import utils.geometry as geometry
 
@@ -13,6 +14,7 @@ class Vertex(Entity):
 		super().__init__(canvas = canvas, color = color, name = name)
 		self.loc = loc
 		self.ownerObs = ownerObs
+		self.adjacent = []
 		if (render):
 			self.createShape()
 

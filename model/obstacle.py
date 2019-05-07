@@ -1,7 +1,8 @@
 from sympy.geometry.polygon import Polygon
 
-from model.entity import Entity, Vertex
+from model.entity import Entity
 from model.model_service import Model
+from model.vertex import Vertex
 from utils.drawing import CreatePolygon
 
 OBSTACLE_COLOR = "Grey"

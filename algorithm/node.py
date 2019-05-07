@@ -44,7 +44,7 @@ class Node(object):
 
 	def _heuristic1(self):
 		h1 = vertexDistance(self.cable[0], model.robots[0].destination)
-		h2 = vertexDistance(self.cable[-1], model.robots[1].destination)
+		h2 = vertexDistance(self.cable[-1], model.robots[-1].destination)
 		return Cost(vals = [h1, h2])
 
 	def _calcG(self):
