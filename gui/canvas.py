@@ -9,7 +9,6 @@ from model.model_service import Model
 from model.robot import Robot
 from model.obstacle import Obstacle
 from model.destination import Destination
-from model.entity import Vertex
 
 class Canvas(object):
 	def __init__(self, master):

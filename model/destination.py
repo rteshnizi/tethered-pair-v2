@@ -1,4 +1,4 @@
-from .entity import Vertex
+from model.vertex import Vertex
 from utils.drawing import CreateCircle
 
 DESTINATION_RADIUS = 5
