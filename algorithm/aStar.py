@@ -1,5 +1,4 @@
 from sympy.geometry.polygon import Polygon
-import numpy as np
 
 from algorithm.gap import gapDetector
 from algorithm.node import Node
@@ -21,7 +20,7 @@ def aStar():
 		V_B = gapDetector(n.cable[-1], model.robots[-1])
 		for va in V_A:
 			for vb in V_B:
-				c = tightenCable(n.cable, va, vb)
+				c = tightenCable(n.cable, va.vrt, vb.vrt)
 				if (len(c) == 0):
 					continue
 

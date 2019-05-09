@@ -5,8 +5,11 @@ model = Model()
 
 class Gap(object):
 	def __init__(self, vertex, robot):
-		self.vertex = vertex
-		self.robot = robot
+		self.vrt = vertex
+		self.rbt = robot
+
+	def __repr__(self):
+		return "<%s, %s>" % (self.vrt.name, self.rbt.name)
 
 def gapDetector(v, r):
 	# TODO: Only look at gaps that are inside the bounding box (or partially inside)

@@ -68,19 +68,19 @@ class Canvas(object):
 			i += 1
 
 	def createObstacles(self, obsArr):
-		i = 1
+		i = 0
 		for obsVerts in obsArr:
 			pts = [Point(*[float(c) for c in v.split(',')]) for v in obsVerts]
 			o = Obstacle(canvas = self.canvas, name = 'O%s' % i, pts = pts)
 			self.model.entities[o.name] = o
 			self.model.obstacles.append(o)
 			numVerts = len(o.vertices)
-			for i in range(numVerts):
-				v = o.vertices[i]
-				prevV = o.vertices[i - 1]
-				nextV = o.vertices[i + 1 if i + 1 < numVerts else 0]
+			i += 1
+			for j in range(numVerts):
+				v = o.vertices[j]
+				prevV = o.vertices[j - 1]
+				nextV = o.vertices[j + 1 if j + 1 < numVerts else 0]
 				v.adjacent = [prevV, nextV]
 				self.model.entities[v.name] = v
 				self.model.vertices.append(v)
 				self.model.addVertexByLocation(v)
-			i += 1

@@ -7,6 +7,9 @@ class Entity(ABC):
 		self.canvas = canvas
 		self.canvasId = None
 
+	def __repr__(self):
+		return "%s" % self.name
+
 	@abstractmethod
 	def createShape(self):
 		pass
