@@ -30,9 +30,19 @@ def isAtDestination(n):
 
 def tightenCable(cable, va, vb):
 	# polygon = Polygon([va.loc] + [v.loc for v in cable] + [v_b.loc])
-	sidesA = getSides(cable, va, +1)
-	sidesB = getSides(cable, vb, -1)
+	sidesA = [True] + getSides(cable, va, +1) + [True]
+	sidesB = [True] + getSides(cable, vb, -1) + [True]
 	newCable = [va] + cable + [vb]
+	tightened = []
+	for i in range(1, len(newCable) - 1):
+		v1 = newCable[i - 1]
+		v2 = newCable[i]
+		v3 = newCable[i + 1]
+		if (sidesA[i]):
+			inner = geometry.getInnerVertices(v1, v2, v3)
+			hull = geometry.getConvexHull(inner, v1, v3)
+			pass
+	return newCable
 
 def getSides(cable, v, direction):
 	"""
@@ -54,4 +64,5 @@ def getSides(cable, v, direction):
 		else:
 			c = geometry.cross(vert.loc, vert.adjacent[0].loc)
 			sides[i] = True if c * vCross > 0 else False # vert and v are on the same side of the cable
+		i += direction
 	return sides

@@ -1,11 +1,14 @@
 from sympy.geometry.line import Ray, Segment
 from sympy.geometry.point import Point
+from sympy.geometry.polygon import Polygon
 from math import sin
+
+from model.model_service import Model
 
 """
 Geometry Helper functions
 """
-
+model = Model()
 EPSILON_MULTIPLIER = 0.000001 # 1e-6
 
 def vertexDistance(v1, v2):
@@ -37,3 +40,11 @@ def cross(p1, p2):
 	r2 = Ray(origin, p2)
 	angle = r1.angle_between(r2)
 	return l1 * l2 * sin(angle)
+
+def getInnerVertices(v1, v2, v3):
+	poly = Polygon(v1.loc, v2.loc, v3.loc)
+	inner = []
+	for v in model.vertices:
+		if (poly.encloses_point(v.loc)):
+			inner.append(v)
+	return inner

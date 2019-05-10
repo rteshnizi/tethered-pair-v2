@@ -41,7 +41,7 @@ class Canvas(object):
 	def createCableAndRobots(self, ptList):
 		self.createRobots([ptList[0], ptList[-1]])
 		self.model.cable.append(self.model.robots[0])
-		for pt in ptList:
+		for pt in ptList[1:-1]:
 			p = Point(*[float(c) for c in pt.split(',')])
 			self.model.cable.append(self.model.getVertexByLocation(p.x, p.y))
 		self.model.cable.append(self.model.robots[-1])
