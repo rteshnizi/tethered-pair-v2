@@ -1,4 +1,4 @@
-from sympy.geometry.polygon import Polygon
+from sympy.geometry import Polygon
 
 from algorithm.gap import gapDetector
 from algorithm.node import Node
@@ -20,37 +20,28 @@ def aStar():
 		V_B = gapDetector(n.cable[-1], model.robots[-1])
 		for va in V_A:
 			for vb in V_B:
-				c = tightenCable(n.cable, va.vrt, vb.vrt)
-				if (len(c) == 0):
+				newCable = tightenCable(n.cable, va.vrt, +1)
+				newCable = tightenCable(newCable, vb.vrt, -1)
+				if (not newCable):
 					continue
 
 
 def isAtDestination(n):
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
 
-def tightenCable(cable, va, vb):
-	# polygon = Polygon([va.loc] + [v.loc for v in cable] + [v_b.loc])
-	sidesA = [True] + getSides(cable, va, +1) + [True]
-	sidesB = [True] + getSides(cable, vb, -1) + [True]
-	newCable = [va] + cable + [vb]
-	bound = len(newCable) - 1
-	i = 0
-	while (i < bound):
+def tightenCable(cable, dest, direction):
+	robotsInd = 0 if direction == +1 else -1
+	otherEnd = -1 if direction == +1 else 0
+	# First determine which side of the cable is the destination
+	mainSide = getSide(dest, cable[robotsInd], cable[robotsInd + direction])
+	# Then walk the cable and for every vertex on the opposite side tighten the cable
+	newCable = [dest] + cable if direction == +1 else cable + [dest]
+	i = robotsInd + direction
+	while (cable[i].name != cable[otherEnd].name):
 		v1 = newCable[i - 1]
 		v2 = newCable[i]
 		v3 = newCable[i + 1]
-		if (sidesA[i]):
-			inner = geometry.getInnerVertices(v1, v2, v3)
-			hull = geometry.getConvexHull(inner + [v1, v3])
-			newCable = newCable[:i] + hull + newCable[i + 1:]
-			bound = len(newCable) - 1
-		i += 1
-	i = len(newCable) - 2
-	while (i > 0):
-		v1 = newCable[i + 1]
-		v2 = newCable[i]
-		v3 = newCable[i - 1]
-		if (sidesB[i]):
+		if ((not v2.adjacent) or getSide(v2.adjacent[0], v2, v3)):
 			inner = geometry.getInnerVertices(v1, v2, v3)
 			hull = geometry.getConvexHull(inner + [v1, v3])
 			newCable = newCable[:i] + hull + newCable[i + 1:]
@@ -81,10 +72,9 @@ def getSides(cable, v, direction):
 		i += direction
 	return sides
 
-def getSide(cableVert, robot, dest):
-	if (len(cableVert.adjacent) == 0):
-		sides[i] = True
-	else:
-		c = geometry.cross(cableVert.loc, cableVert.adjacent[0].loc)
-		sides[i] = True if c * vCross > 0 else False # cableVert and v are on the same side of the cable
-	return sides
+def getSide(noneCableVert, commonVert, otherCableVert):
+	vec1 = noneCableVert.loc - commonVert.loc
+	vec2 = otherCableVert.loc - commonVert.loc
+	c = geometry.cross(vec1, vec2)
+	side = True if c > 0 else False
+	return side

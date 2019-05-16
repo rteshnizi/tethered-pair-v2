@@ -25,17 +25,17 @@ def getEpsilonVector(v1, v2):
 	v = v1.loc - v2.loc
 	return v * EPSILON_MULTIPLIER
 
-def cross(p1, p2):
+def cross(vec1, vec2):
 	"""
-	p1: sympy.geometry.points.Point
+	vec1: sympy.geometry.points.Point
 
-	p2: sympy.geometry.points.Point
+	vec2: sympy.geometry.points.Point
 	"""
 	origin = Point(0, 0)
-	l1 = p1.distance(origin)
-	l2 = p2.distance(origin)
-	r1 = Ray(origin, p1)
-	r2 = Ray(origin, p2)
+	l1 = vec1.distance(origin)
+	l2 = vec2.distance(origin)
+	r1 = Ray(origin, vec1)
+	r2 = Ray(origin, vec2)
 	angle = r1.angle_between(r2)
 	return l1 * l2 * sin(angle)
 
