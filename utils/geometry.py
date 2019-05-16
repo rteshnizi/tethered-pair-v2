@@ -1,6 +1,4 @@
-from sympy.geometry.line import Ray, Segment
-from sympy.geometry.point import Point
-from sympy.geometry.polygon import Polygon
+from sympy.geometry import Point, Polygon, Ray, Segment, convex_hull
 from math import sin
 
 from model.model_service import Model
@@ -44,7 +42,15 @@ def cross(p1, p2):
 def getInnerVertices(v1, v2, v3):
 	poly = Polygon(v1.loc, v2.loc, v3.loc)
 	inner = []
+	if (isinstance(poly, Segment)):
+		return inner
 	for v in model.vertices:
 		if (poly.encloses_point(v.loc)):
 			inner.append(v)
 	return inner
+
+def getConvexHull(vertList):
+	if (len(vertList) < 4):
+		return vertList
+	hullVerts = convex_hull(*[(v.loc.x, v.loc.y) for v in vertList]).vertices
+	return [model.getVertexByLocation(v.x, v.y) for v in hullVerts]

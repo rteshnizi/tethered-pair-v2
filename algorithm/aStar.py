@@ -33,15 +33,29 @@ def tightenCable(cable, va, vb):
 	sidesA = [True] + getSides(cable, va, +1) + [True]
 	sidesB = [True] + getSides(cable, vb, -1) + [True]
 	newCable = [va] + cable + [vb]
-	tightened = []
-	for i in range(1, len(newCable) - 1):
+	bound = len(newCable) - 1
+	i = 0
+	while (i < bound):
 		v1 = newCable[i - 1]
 		v2 = newCable[i]
 		v3 = newCable[i + 1]
 		if (sidesA[i]):
 			inner = geometry.getInnerVertices(v1, v2, v3)
-			hull = geometry.getConvexHull(inner, v1, v3)
-			pass
+			hull = geometry.getConvexHull(inner + [v1, v3])
+			newCable = newCable[:i] + hull + newCable[i + 1:]
+			bound = len(newCable) - 1
+		i += 1
+	i = len(newCable) - 2
+	while (i > 0):
+		v1 = newCable[i + 1]
+		v2 = newCable[i]
+		v3 = newCable[i - 1]
+		if (sidesB[i]):
+			inner = geometry.getInnerVertices(v1, v2, v3)
+			hull = geometry.getConvexHull(inner + [v1, v3])
+			newCable = newCable[:i] + hull + newCable[i + 1:]
+			bound = len(newCable) - 1
+		i += 1
 	return newCable
 
 def getSides(cable, v, direction):
@@ -65,4 +79,12 @@ def getSides(cable, v, direction):
 			c = geometry.cross(vert.loc, vert.adjacent[0].loc)
 			sides[i] = True if c * vCross > 0 else False # vert and v are on the same side of the cable
 		i += direction
+	return sides
+
+def getSide(cableVert, robot, dest):
+	if (len(cableVert.adjacent) == 0):
+		sides[i] = True
+	else:
+		c = geometry.cross(cableVert.loc, cableVert.adjacent[0].loc)
+		sides[i] = True if c * vCross > 0 else False # cableVert and v are on the same side of the cable
 	return sides
