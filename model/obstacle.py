@@ -17,7 +17,7 @@ class Obstacle(Entity):
 
 		name: str
 
-		verts: [sympy.geometry.point.Point]
+		pts: [sympy.geometry.point.Point]
 		"""
 		super().__init__(canvas = canvas, color = OBSTACLE_COLOR, name = name)
 		self.vertices = []

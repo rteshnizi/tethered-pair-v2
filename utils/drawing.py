@@ -35,3 +35,20 @@ def CreatePolygon(canvas, pointsList, outline, fill, width):
 	for p in pointsList:
 		coords += [p.x, p.y]
 	return canvas.create_polygon(coords, outline = outline, fill = fill, width = width)
+
+def CreateLine(canvas, pointsList, color, width = 1, dash = ()):
+	"""
+	Returns shape id
+
+	pointList: A list of sympy.geometry.point.Point
+
+	color: color string (empty string for transparent)
+
+	width: number; default is 1
+
+	dash: Dash pattern, given as a list of segment lengths. Only the odd segments are drawn.
+	"""
+	coords = []
+	for p in pointsList:
+		coords += [p.x, p.y]
+	return canvas.create_line(coords, fill = color, width = width, dash = dash)

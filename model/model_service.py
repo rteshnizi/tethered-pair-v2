@@ -8,7 +8,9 @@ class Model:
 			self.obstacles = []
 			self.vertices = [] # This is strictly obstacle vertices
 			self.cable = [] # Initial Cable Config
+			self.visualElements = [] # Holds only visualization elements
 			self._vertexByLocation = {} # This is all vertices including robots and destinations
+			self.canvas = None
 
 	instance = None
 
@@ -18,6 +20,9 @@ class Model:
 
 	def __getattr__(self, name):
 		return getattr(self.instance, name)
+
+	def setCanvas(self, canvas):
+		self.instance.canvas = canvas
 
 	def addVertexByLocation(self, vert):
 		self._vertexByLocation['%d,%d' % (vert.loc.x, vert.loc.y)] = vert

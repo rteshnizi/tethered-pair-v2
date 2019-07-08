@@ -1,29 +1,32 @@
 from sympy.geometry import Polygon
 
 from algorithm.gap import gapDetector
-from algorithm.node import Node
-from model.model_service import Model
 import utils.geometry as geometry
+from model.model_service import Model
+from algorithm.node import Node
 from utils.priorityQ import PriorityQ
+from utils.triangulation import triangulate
 
 model = Model()
 
 def aStar():
-	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
-	root = Node(cable=model.cable)
-	q.enqueue(root)
-	while (not q.isEmpty()):
-		n = q.dequeue()
-		if (isAtDestination(n)):
-			return # For now terminate at first solution
-		V_A = gapDetector(n.cable[0], model.robots[0])
-		V_B = gapDetector(n.cable[-1], model.robots[-1])
-		for va in V_A:
-			for vb in V_B:
-				newCable = tightenCable(n.cable, va.vrt, +1)
-				newCable = tightenCable(newCable, vb.vrt, -1)
-				if (not newCable):
-					continue
+	triangulate([model.cable[0], model.cable[-1], model.robots[-1].destination, model.robots[0].destination])
+	reza = 0
+	# q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
+	# root = Node(cable=model.cable)
+	# q.enqueue(root)
+	# while (not q.isEmpty()):
+	# 	n = q.dequeue()
+	# 	if (isAtDestination(n)):
+	# 		return # For now terminate at first solution
+	# 	V_A = gapDetector(n.cable[0], model.robots[0])
+	# 	V_B = gapDetector(n.cable[-1], model.robots[-1])
+	# 	for va in V_A:
+	# 		for vb in V_B:
+	# 			newCable = tightenCable(n.cable, va.vrt, +1)
+	# 			newCable = tightenCable(newCable, vb.vrt, -1)
+	# 			if (not newCable):
+	# 				continue
 
 
 def isAtDestination(n):

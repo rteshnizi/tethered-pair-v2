@@ -54,3 +54,23 @@ def getConvexHull(vertList):
 		return vertList
 	hullVerts = convex_hull(*[(v.loc.x, v.loc.y) for v in vertList]).vertices
 	return [model.getVertexByLocation(v.x, v.y) for v in hullVerts]
+
+def isInsidePoly(poly1, polyList):
+	"""
+	Given a polygon, decide whether the others are partially or fully intersect
+
+	Params
+	===
+	poly1: the source polygon sympy.geometry.polygon
+
+	polyList: list of polygons to check if they are inside poly1 [sympy.geometry.Polygon]
+	"""
+	n = len(polyList)
+	result = [False] * n
+	for i in range(0, n):
+		poly2 = polyList[i]
+		for pt in poly2.vertices:
+			if (poly1.encloses_point(pt)):
+				result[i] = True
+				break
+	return result

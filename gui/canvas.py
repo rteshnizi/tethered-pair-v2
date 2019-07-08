@@ -16,6 +16,7 @@ class Canvas(object):
 		self.canvas = tk.Canvas(master = master)
 		self.canvas.pack(fill=tk.BOTH, expand=True)
 		self.model = Model()
+		self.model.setCanvas(self.canvas)
 		self.parsedJson = None
 
 	def parseJson(self, jsonPath):
