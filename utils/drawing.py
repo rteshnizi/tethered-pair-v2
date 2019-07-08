@@ -52,3 +52,9 @@ def CreateLine(canvas, pointsList, color, width = 1, dash = ()):
 	for p in pointsList:
 		coords += [p.x, p.y]
 	return canvas.create_line(coords, fill = color, width = width, dash = dash)
+
+def RemoveShape(canvas, shapeId):
+	"""
+	Remove a shape from canvas
+	"""
+	canvas.delete(shapeId)

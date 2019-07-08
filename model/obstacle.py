@@ -31,5 +31,6 @@ class Obstacle(Entity):
 			self.vertices.append(v)
 
 	def createShape(self, pts):
+		if (self.canvasId): return
 		self.canvasId = CreatePolygon(canvas = self.canvas, pointsList = pts, outline = "", fill = self.color, width = 1)
 		self.polygon = Polygon(*pts)

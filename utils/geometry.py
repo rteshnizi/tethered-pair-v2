@@ -49,11 +49,15 @@ def getInnerVertices(v1, v2, v3):
 			inner.append(v)
 	return inner
 
-def getConvexHull(vertList):
-	if (len(vertList) < 4):
-		return vertList
-	hullVerts = convex_hull(*[(v.loc.x, v.loc.y) for v in vertList]).vertices
-	return [model.getVertexByLocation(v.x, v.y) for v in hullVerts]
+def getConvexHullFromVertex(vertList):
+	return getConvexHullFromPoint([v.loc for v in vertList])
+
+def getConvexHullFromPoint(ptList):
+	if (len(ptList) < 4):
+		return (ptList, Polygon(*ptList))
+	hull = convex_hull(*[(v.x, v.y) for v in ptList])
+	hullVerts = hull.vertices
+	return ([model.getVertexByLocation(v.x, v.y) for v in hullVerts], hull)
 
 def isInsidePoly(poly1, polyList):
 	"""

@@ -46,7 +46,7 @@ def tightenCable(cable, dest, direction):
 		v3 = newCable[i + 1]
 		if ((not v2.adjacent) or getSide(v2.adjacent[0], v2, v3)):
 			inner = geometry.getInnerVertices(v1, v2, v3)
-			hull = geometry.getConvexHull(inner + [v1, v3])
+			hull = geometry.getConvexHullFromVertex(inner + [v1, v3])
 			newCable = newCable[:i] + hull + newCable[i + 1:]
 			bound = len(newCable) - 1
 		i += 1

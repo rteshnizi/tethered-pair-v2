@@ -19,6 +19,7 @@ class Vertex(Entity):
 			self.createShape()
 
 	def createShape(self):
+		if (self.canvasId): return
 		self.canvasId = CreateCircle(
 			canvas = self.canvas,
 			center = self.loc,

@@ -12,6 +12,11 @@ mode = Model()
 class TriangulationEdge(Entity):
 	def __init__(self, canvas, name, pts):
 		"""
+		The shape is not created by default.
+
+		params
+		===
+
 		canvas: tk.Canvas
 
 		color: color string
@@ -23,7 +28,9 @@ class TriangulationEdge(Entity):
 		super().__init__(canvas = canvas, color = TRIANGULATION_COLOR, name = name)
 		self.pts = pts
 		self.line = None
-		self.createShape(pts)
+		# Computational Geometry book pp. 52
+		self.helper = None
 
-	def createShape(self, pts):
-		self.canvasId = CreateLine(self.canvas, pointsList = pts, color = TRIANGULATION_COLOR, dash = TRIANGULATION_DASH_PATTERN)
+	def createShape(self):
+		if (self.canvasId): return
+		self.canvasId = CreateLine(self.canvas, pointsList = self.pts, color = TRIANGULATION_COLOR, dash = TRIANGULATION_DASH_PATTERN)
