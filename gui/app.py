@@ -15,14 +15,33 @@ class Application(tk.Frame):
 		self.master.geometry("1100x800")
 		super().__init__(self.master)
 		self.pack()
+		self.chosenPreset = tk.StringVar(master=self.master)
+		self.createDropdown()
 		self.createButtons()
 		self.canvas = Canvas(self.master)
+
+	def createDropdown(self):
+		options = os.listdir(presetsDir)
+		self.chosenPreset.set(options[0])
+		self.presets = tk.OptionMenu(self.master, self.chosenPreset, *options)
+		self.presets.pack(side=tk.TOP)
+
+		self.loadPresetBtn = tk.Button(self)
+		self.loadPresetBtn["text"] = "Load Preset"
+		self.loadPresetBtn["command"] = self.loadPreset
+		self.loadPresetBtn.pack(side = tk.TOP)
+
+	def loadPreset(self):
+		mapPath = self.chosenPreset.get()
+		mapPath = os.path.join(presetsDir, mapPath)
+		mapPath = os.path.abspath(mapPath)
+		self.readMapJson(mapPath)
 
 	def createButtons(self):
 		self.browseBtn = tk.Button(self)
 		self.browseBtn["text"] = "Select Map Json"
-		self.browseBtn["command"] = self.readMapJson
-		self.browseBtn.pack(side = tk.TOP)
+		self.browseBtn["command"] = self.selectMapFile
+		self.browseBtn.pack(side=tk.TOP)
 
 		self.runBtn = tk.Button(self)
 		self.runBtn["state"] = tk.DISABLED
@@ -30,12 +49,17 @@ class Application(tk.Frame):
 		self.runBtn["command"] = self.run
 		self.runBtn.pack(side = tk.TOP)
 
-	def readMapJson(self):
-		mapPath = filedialog.askopenfilename(initialdir = presetsDir, title = "Select Map", filetypes = (("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed
+	def selectMapFile(self):
+		mapPath = filedialog.askopenfilename(initialdir=presetsDir, title="Select Map", filetypes=(("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed
 		if (not mapPath):
 			return
 		mapPath = os.path.abspath(mapPath)
-		self.canvas.parseJson(mapPath)
+		self.readMapJson(mapPath)
+
+	def readMapJson(self, absolutePath):
+		if (not os.path.isfile(absolutePath)):
+			return
+		self.canvas.parseJson(absolutePath)
 		self.runBtn["state"] = tk.NORMAL
 
 	def run(self):

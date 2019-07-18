@@ -8,7 +8,7 @@
 			"name": "Run Main",
 			"type": "python",
 			"request": "launch",
-			"console": "integratedTerminal",
+			"console": "externalTerminal",
 			"windows": {
 				"program": "${workspaceFolder}\\main.py"
 			},
