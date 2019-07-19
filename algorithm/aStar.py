@@ -1,5 +1,3 @@
-from sympy.geometry import Polygon
-
 from algorithm.gap import gapDetector
 from model.model_service import Model
 from algorithm.node import Node

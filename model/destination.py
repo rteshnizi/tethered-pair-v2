@@ -10,19 +10,20 @@ class Destination(Vertex):
 
 		robot: the owner Robot instance
 
-		loc: sympy.geometry.point.Point
+		loc: utils.cgal.types.Point
 		"""
-		super().__init__(canvas = canvas, color = robot.color, name = robot.name.replace('R', 'D'), loc = loc)
+		super().__init__(canvas=canvas, color=robot.color, name=robot.name.replace('R', 'D'), loc=loc)
 		self.robot = robot
 		self.createShape()
 
 	def createShape(self):
 		if (self.canvasId): return
 		self.canvasId = CreateCircle(
-			canvas = self.canvas,
-			center = self.loc,
-			radius = DESTINATION_RADIUS,
-			outline = self.color,
-			fill = "",
-			width = 1
+			canvas=self.canvas,
+			center=self.loc,
+			radius=DESTINATION_RADIUS,
+			outline=self.color,
+			fill="",
+			width=1,
+			tag=self.name
 		)

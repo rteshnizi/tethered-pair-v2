@@ -8,7 +8,7 @@ model = Model()
 
 class Vertex(Entity):
 	def __init__(self, canvas, name, loc, ownerObs=None, color=VERTEX_COLOR, render=False):
-		super().__init__(canvas = canvas, color = color, name = name)
+		super().__init__(canvas=canvas, color=color, name=name)
 		self.loc = loc
 		self.ownerObs = ownerObs
 		self.adjacent = []
@@ -18,12 +18,13 @@ class Vertex(Entity):
 	def createShape(self):
 		if (self.canvasId): return
 		self.canvasId = CreateCircle(
-			canvas = self.canvas,
-			center = self.loc,
-			radius = 2,
-			outline = self.color,
-			fill = "",
-			width = 1
+			canvas=self.canvas,
+			center=self.loc,
+			radius=2,
+			outline=self.color,
+			fill="",
+			width=1,
+			tag=self.name
 		)
 
 	def isVisible(self, other):

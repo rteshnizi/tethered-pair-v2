@@ -11,12 +11,13 @@ from model.destination import Destination
 from utils.cgal.types import Point
 
 class Canvas(object):
-	def __init__(self, master):
+	def __init__(self, master, app):
 		self.window = master
 		self.canvas = tk.Canvas(master = master)
 		self.canvas.pack(fill=tk.BOTH, expand=True)
 		self.model = Model()
 		self.model.setCanvas(self.canvas)
+		self.model.setApp(app)
 		self.parsedJson = None
 
 	def parseJson(self, jsonPath):
@@ -44,7 +45,7 @@ class Canvas(object):
 		self.model.cable.append(self.model.robots[0])
 		for pt in ptList[1:-1]:
 			p = Point(*[float(c) for c in pt.split(',')])
-			self.model.cable.append(self.model.getVertexByLocation(p.x, p.y))
+			self.model.cable.append(self.model.getVertexByLocation(p.x(), p.y()))
 		self.model.cable.append(self.model.robots[-1])
 
 	def createRobots(self, ptList):

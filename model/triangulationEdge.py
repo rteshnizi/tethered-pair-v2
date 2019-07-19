@@ -1,5 +1,3 @@
-from sympy.geometry.polygon import Polygon
-
 from model.entity import Entity
 from model.model_service import Model
 from model.vertex import Vertex
@@ -23,9 +21,9 @@ class TriangulationEdge(Entity):
 
 		name: str
 
-		pts: [sympy.geometry.point.Point]
+		pts: A list of utils.cgal.types.Point
 		"""
-		super().__init__(canvas = canvas, color = TRIANGULATION_COLOR, name = name)
+		super().__init__(canvas=canvas, color=TRIANGULATION_COLOR, name=name)
 		self.pts = pts
 		self.line = None
 		# Computational Geometry book pp. 52
@@ -33,4 +31,4 @@ class TriangulationEdge(Entity):
 
 	def createShape(self):
 		if (self.canvasId): return
-		self.canvasId = CreateLine(self.canvas, pointsList = self.pts, color = TRIANGULATION_COLOR, dash = TRIANGULATION_DASH_PATTERN)
+		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, tag=self.name, color=TRIANGULATION_COLOR, dash=TRIANGULATION_DASH_PATTERN)

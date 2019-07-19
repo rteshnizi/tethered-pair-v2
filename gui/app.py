@@ -16,9 +16,13 @@ class Application(tk.Frame):
 		super().__init__(self.master)
 		self.pack()
 		self.chosenPreset = tk.StringVar(master=self.master)
+		self.dbg = {
+			'printMouseEvents': tk.IntVar(master=self.master)
+		}
 		self.createDropdown()
 		self.createButtons()
-		self.canvas = Canvas(self.master)
+		self.createDebugOptions()
+		self.canvas = Canvas(self.master, self)
 
 	def createDropdown(self):
 		options = os.listdir(presetsDir)
@@ -29,7 +33,7 @@ class Application(tk.Frame):
 		self.loadPresetBtn = tk.Button(self)
 		self.loadPresetBtn["text"] = "Load Preset"
 		self.loadPresetBtn["command"] = self.loadPreset
-		self.loadPresetBtn.pack(side = tk.TOP)
+		self.loadPresetBtn.pack(side=tk.TOP)
 
 	def loadPreset(self):
 		mapPath = self.chosenPreset.get()
@@ -47,7 +51,7 @@ class Application(tk.Frame):
 		self.runBtn["state"] = tk.DISABLED
 		self.runBtn["text"] = "Run"
 		self.runBtn["command"] = self.run
-		self.runBtn.pack(side = tk.TOP)
+		self.runBtn.pack(side=tk.TOP)
 
 	def selectMapFile(self):
 		mapPath = filedialog.askopenfilename(initialdir=presetsDir, title="Select Map", filetypes=(("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed
@@ -61,6 +65,10 @@ class Application(tk.Frame):
 			return
 		self.canvas.parseJson(absolutePath)
 		self.runBtn["state"] = tk.NORMAL
+
+	def createDebugOptions(self):
+		printMouseEventsChk = tk.Checkbutton(master=self.master, text='Print Mouse', variable=self.dbg["printMouseEvents"])
+		printMouseEventsChk.pack(side=tk.TOP)
 
 	def run(self):
 		aStar()

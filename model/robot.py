@@ -13,20 +13,21 @@ class Robot(Vertex):
 
 		name: str
 
-		loc: sympy.geometry.point.Point
+		loc: utils.cgal.types.Point
 		"""
 
-		super().__init__(canvas = canvas, color = color, name = name, loc = loc)
+		super().__init__(canvas=canvas, color=color, name=name, loc=loc)
 		self.destination = None
 		self.createShape()
 
 	def createShape(self):
 		if (self.canvasId): return
 		self.canvasId = CreateCircle(
-			canvas = self.canvas,
-			center = self.loc,
-			radius = ROBOT_RADIUS,
-			outline = "",
-			fill = self.color,
-			width = 1
+			canvas=self.canvas,
+			center=self.loc,
+			radius=ROBOT_RADIUS,
+			outline="",
+			fill=self.color,
+			width=1,
+			tag=self.name
 		)

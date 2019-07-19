@@ -1,5 +1,3 @@
-from sympy.geometry.polygon import Polygon
-
 import utils.cgal.geometry as geometry
 from model.model_service import Model
 from utils.priorityQ import PriorityQ

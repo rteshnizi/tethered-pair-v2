@@ -11,6 +11,7 @@ class Model:
 			self.visualElements = [] # Holds only visualization elements
 			self._vertexByLocation = {} # This is all vertices including robots and destinations
 			self.canvas = None
+			self.app = None # To read GUI attributes
 
 	instance = None
 
@@ -23,6 +24,9 @@ class Model:
 
 	def setCanvas(self, canvas):
 		self.instance.canvas = canvas
+
+	def setApp(self, app):
+		self.instance.app = app
 
 	def addVertexByLocation(self, vert):
 		self._vertexByLocation['%d,%d' % (vert.loc.x(), vert.loc.y())] = vert

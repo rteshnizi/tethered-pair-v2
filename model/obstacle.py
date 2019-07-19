@@ -31,7 +31,7 @@ class Obstacle(Entity):
 
 	def createShape(self, pts):
 		if (self.canvasId): return
-		self.canvasId = CreatePolygon(canvas=self.canvas, pointsList=pts, outline="", fill=self.color, width=1)
+		self.canvasId = CreatePolygon(canvas=self.canvas, pointsList=pts, outline="", fill=self.color, width=1, tag=self.name)
 		self.polygon = Polygon()
 		for pt in pts:
 			self.polygon.push_back(pt)

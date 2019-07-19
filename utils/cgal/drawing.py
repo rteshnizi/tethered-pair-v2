@@ -1,6 +1,9 @@
+from model.model_service import Model
 from utils.cgal.types import Point, Vector
 
-def CreateCircle(canvas, center, radius, outline, fill, width):
+model = Model()
+
+def CreateCircle(canvas, center, radius, outline, fill, width, tag):
 	"""
 	Returns shape id
 
@@ -13,13 +16,17 @@ def CreateCircle(canvas, center, radius, outline, fill, width):
 	fill: color string (empty string for transparent)
 
 	width: number
+
+	tag: a unique identifier (use entity name)
 	"""
 	radius_vect = Vector(radius, radius)
 	topLeft = center - radius_vect
 	bottomRight = center + radius_vect
-	return canvas.create_oval((topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y()), outline=outline, fill=fill, width=width)
+	shape = canvas.create_oval((topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y()), outline=outline, fill=fill, width=width, tag=tag)
+	bindMouseEvent(canvas, shape)
+	return shape
 
-def CreatePolygon(canvas, pointsList, outline, fill, width):
+def CreatePolygon(canvas, pointsList, outline, fill, width, tag):
 	"""
 	Returns shape id
 
@@ -30,13 +37,17 @@ def CreatePolygon(canvas, pointsList, outline, fill, width):
 	fill: color string (empty string for transparent)
 
 	width: number
+
+	tag: a unique identifier (use entity name)
 	"""
 	coords = []
 	for p in pointsList:
 		coords += [p.x(), p.y()]
-	return canvas.create_polygon(coords, outline=outline, fill=fill, width=width)
+	shape = canvas.create_polygon(coords, outline=outline, fill=fill, width=width, tag=tag)
+	bindMouseEvent(canvas, shape)
+	return shape
 
-def CreateLine(canvas, pointsList, color, width=1, dash=()):
+def CreateLine(canvas, pointsList, color, tag, width=1, dash=()):
 	"""
 	Returns shape id
 
@@ -47,11 +58,29 @@ def CreateLine(canvas, pointsList, color, width=1, dash=()):
 	width: number; default is 1
 
 	dash: Dash pattern, given as a list of segment lengths. Only the odd segments are drawn.
+
+	tag: a unique identifier (use entity name)
 	"""
 	coords = []
 	for p in pointsList:
 		coords += [p.x(), p.y()]
-	return canvas.create_line(coords, fill=color, width=width, dash=dash)
+	shape = canvas.create_line(coords, fill=color, width=width, dash=dash, tag=tag)
+	bindMouseEvent(canvas, shape)
+	return shape
+
+def bindMouseEvent(canvas, shape):
+	canvas.tag_bind(shape, '<Enter>', mouseHandler)
+
+def mouseHandler(event):
+	if (model.app.dbg['printMouseEvents'].get() == 0):
+		return
+	shape = event.widget.find_closest(event.x, event.y)
+	tag = model.canvas.gettags(shape)[0]
+	entity = model.entities[tag]
+	if (hasattr(entity, 'loc')):
+		print('%s-%d,%d' % (tag, entity.loc.x(), entity.loc.y()))
+	else:
+		print(tag)
 
 def RemoveShape(canvas, shapeId):
 	"""
