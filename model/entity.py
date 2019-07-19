@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from utils.drawing import RemoveShape
+from utils.cgal.drawing import RemoveShape
 
 class Entity(ABC):
 	def __init__(self, canvas, color, name):

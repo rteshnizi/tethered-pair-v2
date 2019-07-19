@@ -1,5 +1,5 @@
 from model.vertex import Vertex
-from utils.drawing import CreateCircle
+from utils.cgal.drawing import CreateCircle
 
 ROBOT_RADIUS = 5
 ROBOT_WIDTH = 2

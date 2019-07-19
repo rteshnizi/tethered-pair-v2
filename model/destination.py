@@ -1,5 +1,5 @@
 from model.vertex import Vertex
-from utils.drawing import CreateCircle
+from utils.cgal.drawing import CreateCircle
 
 DESTINATION_RADIUS = 5
 

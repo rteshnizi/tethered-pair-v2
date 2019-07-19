@@ -1,9 +1,9 @@
 from sympy.geometry import Polygon
 
 from algorithm.gap import gapDetector
-import utils.geometry as geometry
 from model.model_service import Model
 from algorithm.node import Node
+import utils.cgal.geometry as geometry
 from utils.priorityQ import PriorityQ
 from utils.triangulation import triangulate
 

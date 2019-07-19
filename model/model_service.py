@@ -25,7 +25,7 @@ class Model:
 		self.instance.canvas = canvas
 
 	def addVertexByLocation(self, vert):
-		self._vertexByLocation['%d,%d' % (vert.loc.x, vert.loc.y)] = vert
+		self._vertexByLocation['%d,%d' % (vert.loc.x(), vert.loc.y())] = vert
 
 	def getVertexByLocation(self, x, y):
 		return self._vertexByLocation.get('%d,%d' % (x, y), None)

@@ -3,12 +3,12 @@ import json
 import os
 import tkinter as tk
 import sys
-from sympy.geometry.point import Point
 
 from model.model_service import Model
 from model.robot import Robot
 from model.obstacle import Obstacle
 from model.destination import Destination
+from utils.cgal.types import Point
 
 class Canvas(object):
 	def __init__(self, master):
@@ -52,7 +52,7 @@ class Canvas(object):
 		colors = ['Red', 'Blue']
 		for pt in ptList:
 			coords = [float(c) for c in pt.split(',')]
-			r = Robot(canvas = self.canvas, color = colors[i - 1], name = "R%d" % i, loc = Point(*coords))
+			r = Robot(canvas=self.canvas, color=colors[i - 1], name="R%d" % i, loc=Point(*coords))
 			self.model.entities[r.name] = r
 			self.model.addVertexByLocation(r)
 			self.model.robots.append(r)

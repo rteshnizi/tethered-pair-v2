@@ -3,7 +3,7 @@ from sympy.geometry.polygon import Polygon
 from model.entity import Entity
 from model.model_service import Model
 from model.vertex import Vertex
-from utils.drawing import CreateLine
+from utils.cgal.drawing import CreateLine
 
 TRIANGULATION_COLOR = "Black"
 TRIANGULATION_DASH_PATTERN = (2, 2)

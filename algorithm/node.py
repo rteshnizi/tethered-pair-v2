@@ -1,5 +1,5 @@
 from model.model_service import Model
-from utils.geometry import vertexDistance
+from utils.cgal.geometry import vertexDistance
 
 model = Model()
 

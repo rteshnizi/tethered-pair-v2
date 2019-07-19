@@ -1,5 +1,5 @@
 from model.model_service import Model
-import utils.geometry as geometry
+import utils.cgal.geometry as geometry
 
 model = Model()
 

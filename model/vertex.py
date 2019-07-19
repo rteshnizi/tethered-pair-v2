@@ -1,10 +1,7 @@
-from sympy.geometry.line import Segment
-from sympy.geometry.point import Point
-
 from model.model_service import Model
 from model.entity import Entity
-from utils.drawing import CreateCircle
-import utils.geometry as geometry
+from utils.cgal.drawing import CreateCircle
+import utils.cgal.geometry as geometry
 
 VERTEX_COLOR = "Purple"
 model = Model()

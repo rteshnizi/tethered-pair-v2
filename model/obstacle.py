@@ -1,9 +1,8 @@
-from sympy.geometry.polygon import Polygon
-
 from model.entity import Entity
 from model.model_service import Model
 from model.vertex import Vertex
-from utils.drawing import CreatePolygon
+from utils.cgal.types import Polygon
+from utils.cgal.drawing import CreatePolygon
 
 OBSTACLE_COLOR = "Grey"
 mode = Model()
@@ -17,9 +16,9 @@ class Obstacle(Entity):
 
 		name: str
 
-		pts: [sympy.geometry.point.Point]
+		pts: [utils.cgal.types.Point]
 		"""
-		super().__init__(canvas = canvas, color = OBSTACLE_COLOR, name = name)
+		super().__init__(canvas=canvas, color=OBSTACLE_COLOR, name=name)
 		self.vertices = []
 		self.polygon = None
 		self.createVertices(pts)
@@ -27,10 +26,12 @@ class Obstacle(Entity):
 
 	def createVertices(self, pts):
 		for i in range(0, len(pts)):
-			v = Vertex(canvas = self.canvas, name="%s-%d" % (self.name, i), loc = pts[i], ownerObs=self, render = True)
+			v = Vertex(canvas=self.canvas, name="%s-%d" % (self.name, i), loc=pts[i], ownerObs=self, render=True)
 			self.vertices.append(v)
 
 	def createShape(self, pts):
 		if (self.canvasId): return
-		self.canvasId = CreatePolygon(canvas = self.canvas, pointsList = pts, outline = "", fill = self.color, width = 1)
-		self.polygon = Polygon(*pts)
+		self.canvasId = CreatePolygon(canvas=self.canvas, pointsList=pts, outline="", fill=self.color, width=1)
+		self.polygon = Polygon()
+		for pt in pts:
+			self.polygon.push_back(pt)
