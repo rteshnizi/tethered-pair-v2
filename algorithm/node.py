@@ -27,10 +27,10 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent = None, cost = [0, 0], fractions = [1, 1]):
+	def __init__(self, cable, parent=None, cost=[0, 0], fractions=[1, 1]):
 		self.cable = cable
 		self.parent = parent
-		self.f = Cost(vals = cost)
+		self.f = Cost(vals=cost)
 		self.h = self._calcH()
 		self.g = self._calcG()
 		self.children = []

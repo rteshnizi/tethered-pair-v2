@@ -2,10 +2,11 @@ from model.entity import Entity
 from model.model_service import Model
 from model.vertex import Vertex
 from utils.cgal.drawing import CreateLine
+from utils.cgal.types import Segment
 
 TRIANGULATION_COLOR = "Black"
 TRIANGULATION_DASH_PATTERN = (2, 2)
-mode = Model()
+model = Model()
 
 class TriangulationEdge(Entity):
 	def __init__(self, canvas, name, pts):
@@ -21,14 +22,19 @@ class TriangulationEdge(Entity):
 
 		name: str
 
-		pts: A list of utils.cgal.types.Point
+		pts: A list of 2 utils.cgal.types.Point or a utils.cgal.types.Segment
 		"""
 		super().__init__(canvas=canvas, color=TRIANGULATION_COLOR, name=name)
-		self.pts = pts
-		self.line = None
-		# Computational Geometry book pp. 52
-		self.helper = None
+		if isinstance(pts, list):
+			if len(pts) != 2:
+				raise RuntimeError("2 Points are needed for a Triangulation Edge")
+			self.pts = pts
+			self.line = Segment(pts[0], pts[1])
+		else:
+			self.pts = [pts.source(), pts.target()]
+			self.line = pts
 
 	def createShape(self):
 		if (self.canvasId): return
-		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, tag=self.name, color=TRIANGULATION_COLOR, dash=TRIANGULATION_DASH_PATTERN)
+		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, color=TRIANGULATION_COLOR, tag=self.name, dash=TRIANGULATION_DASH_PATTERN)
+		# model.entities[self.name] = self

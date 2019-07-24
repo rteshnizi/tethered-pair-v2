@@ -1,8 +1,9 @@
+import utils.cgal.geometry as Geom
 from model.entity import Entity
 from model.model_service import Model
 from model.vertex import Vertex
-from utils.cgal.types import Polygon
 from utils.cgal.drawing import CreatePolygon
+from utils.cgal.types import Polygon
 
 OBSTACLE_COLOR = "Grey"
 mode = Model()
@@ -35,3 +36,9 @@ class Obstacle(Entity):
 		self.polygon = Polygon()
 		for pt in pts:
 			self.polygon.push_back(pt)
+
+	def enclosesVertex(self, vrt):
+		return self.enclosesPoint(vrt.loc)
+
+	def enclosesPoint(self, pt):
+		return Geom.isInsidePoly(self.polygon, pt)
