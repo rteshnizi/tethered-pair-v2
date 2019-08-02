@@ -45,18 +45,16 @@ class Triangulation(object):
 		# self.boundaryPts = self.__getConvexHull([vert.loc for vert in boundingBox].extend(self.__findInnerPoints()))
 		self.obstacles = []
 		self.cgalTri = CgalTriangulation()
+		# A dictionary of faces (triangles) -> FaceInfo
 		self.faceInfoMap = {}
-		self.faceInfoMap = self.triangulate()
 		self.canvasEdges = []
+		self.faceInfoMap = self.triangulate()
 		if debug:
-			self.drawEdges(False)
+			self.drawEdges()
 
 	def triangulate(self):
 		"""
-		Populates `self.faceInfoMap`
-
-		`self.faceInfoMap` is a dictionary of faces (triangles) -> FaceInfo
-
+		Construct Triangles
 		"""
 		# Insert exterior
 		self.__insertPointsIntoTriangulation(self.boundaryPts)
@@ -97,9 +95,7 @@ class Triangulation(object):
 
 	def __markInteriorTriangles(self):
 		"""
-		Returns
-		===
-		A dictionary of faces (triangles) -> FaceInfo
+		Populates `self.faceInfoMap`
 
 		Details
 		===
@@ -146,7 +142,7 @@ class Triangulation(object):
 				else:
 					queue.append(neighboringFace)
 
-	def drawEdges(self, drawDomainOnly=True):
+	def drawEdges(self, drawDomainOnly=False):
 		i = 0
 		for edge in self.cgalTri.finite_edges():
 			i += 1
@@ -161,7 +157,7 @@ class Triangulation(object):
 				canvasE.createShape()
 				self.canvasEdges.append(canvasE)
 
-	def eraseDrawing(self):
+	def eraseDrawnEdges(self):
 		for edge in self.canvasEdges:
 			edge.removeShape()
 		self.canvasEdges = []

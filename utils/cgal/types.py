@@ -5,8 +5,8 @@ from CGAL.CGAL_Kernel import Vector_2 as Vector
 from CGAL.CGAL_Triangulation_2 import Constrained_triangulation_2 as CgalTriangulation
 from CGAL.CGAL_Convex_hull_2 import convex_hull_2 as ConvexHull
 
+# More human readable __repr__ for Point_2
 def __fixedRepr(self):
 	return "CgalPt(%d, %d)" % (self.x(), self.y())
-
 
 Point.__repr__ = __fixedRepr

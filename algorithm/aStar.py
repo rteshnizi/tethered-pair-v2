@@ -8,8 +8,6 @@ from algorithm.triangulation import Triangulation
 model = Model()
 
 def aStar():
-	# triangulate([model.cable[0], model.cable[-1], model.robots[-1].destination, model.robots[0].destination], True)
-	# reza = 0
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
 	q.enqueue(root)
@@ -40,5 +38,6 @@ def isAtDestination(n):
 def tightenCable(cable, dest1, dest2):
 	boundingBox = [cable[0], cable[-1], dest2, dest1]
 	tri = Triangulation(boundingBox, debug=True)
+	# tri.eraseDrawnEdges()
 	newCable = []
 	return newCable
