@@ -3,7 +3,7 @@ from model.model_service import Model
 from algorithm.node import Node
 import utils.cgal.geometry as geometry
 from utils.priorityQ import PriorityQ
-from utils.cgal.triangulation import Triangulation
+from algorithm.triangulation import Triangulation
 
 model = Model()
 
