@@ -5,11 +5,12 @@ from utils.cgal.drawing import CreateLine
 from utils.cgal.types import Segment
 
 TRIANGULATION_COLOR = "Black"
-TRIANGULATION_DASH_PATTERN = (2, 2)
+TRIANGULATION_CONSTRAINT_COLOR = "Red"
+TRIANGULATION_DASH_PATTERN = (3, 3)
 model = Model()
 
 class TriangulationEdge(Entity):
-	def __init__(self, canvas, name, pts):
+	def __init__(self, canvas, name, pts, isConstraint=False):
 		"""
 		The shape is not created by default.
 
@@ -24,7 +25,7 @@ class TriangulationEdge(Entity):
 
 		pts: A list of 2 utils.cgal.types.Point or a utils.cgal.types.Segment
 		"""
-		super().__init__(canvas=canvas, color=TRIANGULATION_COLOR, name=name)
+		super().__init__(canvas=canvas, color=TRIANGULATION_CONSTRAINT_COLOR if isConstraint else TRIANGULATION_COLOR, name=name)
 		if isinstance(pts, list):
 			if len(pts) != 2:
 				raise RuntimeError("2 Points are needed for a Triangulation Edge")
@@ -36,5 +37,5 @@ class TriangulationEdge(Entity):
 
 	def createShape(self):
 		if (self.canvasId): return
-		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, color=TRIANGULATION_COLOR, tag=self.name, dash=TRIANGULATION_DASH_PATTERN)
+		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, color=self.color, tag=self.name, dash=TRIANGULATION_DASH_PATTERN)
 		# model.entities[self.name] = self

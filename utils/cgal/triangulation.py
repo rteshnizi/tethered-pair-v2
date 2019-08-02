@@ -7,7 +7,7 @@
 import utils.cgal.geometry as Geom
 from model.model_service import Model
 from model.triangulationEdge import TriangulationEdge
-from utils.cgal.types import Triangulation
+from utils.cgal.types import Triangulation, ConvexHull
 from utils.priorityQ import PriorityQ
 
 model = Model()
@@ -24,27 +24,53 @@ class FaceInfo(object):
 
 def triangulate(boundingBox, debug=False):
 	"""
-	Returns a list of triangulation edges
+	Returns
+	===
+	A tuple: `(tri, faceInfo)`
+
+	`tri` is the CGAL Triangulation object
+
+	`faceInfo` is a dictionary of faces (triangles) -> FaceInfo
+
 	Params
 	===
 
 	boundingBox: List of 4 `Vertex`
 	"""
-	# FIXME: Fix boundingBox according to convex hull
+	# Fix cases where bounding box has repeated vertices
 	if len(boundingBox) != 4:
 		raise RuntimeError("boundingBox must be a list of 4 Vertex")
+	boundingBox = removeRepeatedVerts(boundingBox)
+	if len(boundingBox) < 4:
+		return None # No need to triangulate
+
+	boundingBoxPts = [vert.loc for vert in boundingBox]
+	boundaryPts = boundingBoxPts # Remove this line when the convex hull is fixed (line below)
+	# boundaryPts = getConvexHull(boundingBoxPts.extend(innerPts))
 	tri = Triangulation()
-	innerPts = findInnerPoints(boundingBox)
 	# Insert exterior
-	insertPointsIntoTriangulation(tri, [vert.loc for vert in boundingBox])
-	# Insert interior
-	insertPointsIntoTriangulation(tri, innerPts)
+	insertPointsIntoTriangulation(tri, boundaryPts)
+	# Insert interior (obstacles)
+	insertPointsIntoTriangulation
+	obstacles = Geom.getAllIntersectingObstacles(boundingBox)
+	for obs in obstacles:
+		insertPointsIntoTriangulation(tri, [vert.loc for vert in obs.vertices])
 
 	faceInfo = markInteriorTriangles(tri)
 	if debug:
-		drawEdges(tri, faceInfo)
-	return None
-	# return
+		drawEdges(tri, faceInfo, False)
+	return (tri, faceInfo)
+
+def removeRepeatedVerts(verts):
+	vertDict = {}
+	for vert in verts:
+		vertDict[vert.name] = vert
+	return list(vertDict.values())
+
+def getConvexHull(pts):
+	hull = []
+	ConvexHull(pts, hull)
+	return hull
 
 def findInnerPoints(boundingBox):
 	pts = []
@@ -59,7 +85,7 @@ def insertPointsIntoTriangulation(triangulation, pts):
 		return
 
 	handles = [triangulation.insert(pt) for pt in pts]
-	for i in range(len(pts)-1):
+	for i in range(len(pts) - 1):
 		triangulation.insert_constraint(handles[i], handles[i + 1])
 	triangulation.insert_constraint(handles[-1], handles[0])
 
@@ -116,18 +142,15 @@ def markInteriorTrianglesBFS(triangulation, startFace, nestingLvl, borderEdges, 
 			else:
 				queue.append(neighboringFace)
 
-def drawEdges(triangulation, faceInfo):
+def drawEdges(triangulation, faceInfo, drawDomainOnly=True):
 	i = 0
 	for edge in triangulation.finite_edges():
 		i += 1
-		# if triangulation.is_constrained(edge):
-		# 	continue
-		# 	# plot_edge(edge, 'r-')
-		# if faceInfo[edge[0]].inDomain():
-		# 	segment = triangulation.segment(edge)
-		# 	canvasEdge = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
-		# 	canvasEdge.createShape()
-		# 	# plot_edge(edge, 'b-')
-		segment = triangulation.segment(edge)
-		canvasEdge = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
-		canvasEdge.createShape()
+		if (not drawDomainOnly) and triangulation.is_constrained(edge):
+			segment = triangulation.segment(edge)
+			canvasEdge = TriangulationEdge(model.canvas, "TE-%d" % i, segment, True)
+			canvasEdge.createShape()
+		elif faceInfo[edge[0]].inDomain():
+			segment = triangulation.segment(edge)
+			canvasEdge = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
+			canvasEdge.createShape()
