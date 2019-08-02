@@ -3,7 +3,7 @@ from model.model_service import Model
 from algorithm.node import Node
 import utils.cgal.geometry as geometry
 from utils.priorityQ import PriorityQ
-from utils.cgal.triangulation import triangulate
+from utils.cgal.triangulation import Triangulation
 
 model = Model()
 
@@ -13,17 +13,25 @@ def aStar():
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
 	q.enqueue(root)
-	while (not q.isEmpty()):
-		n = q.dequeue()
-		if (isAtDestination(n)):
-			return # For now terminate at first solution
-		V_A = gapDetector(n.cable[0], model.robots[0])
-		V_B = gapDetector(n.cable[-1], model.robots[-1])
-		for va in V_A:
-			for vb in V_B:
-				newCable = tightenCable(n.cable, va.vrt, vb.vrt)
-				if (not newCable):
-					continue
+	n = q.dequeue()
+	if (isAtDestination(n)):
+		return # For now terminate at first solution
+	VA = gapDetector(n.cable[0], model.robots[0])
+	VB = gapDetector(n.cable[-1], model.robots[-1])
+	va = VA[0]
+	vb = VB[0]
+	newCable = tightenCable(n.cable, va.vrt, vb.vrt)
+	# while (not q.isEmpty()):
+	# 	n = q.dequeue()
+	# 	if (isAtDestination(n)):
+	# 		return # For now terminate at first solution
+	# 	VA = gapDetector(n.cable[0], model.robots[0])
+	# 	VB = gapDetector(n.cable[-1], model.robots[-1])
+	# 	for va in VA:
+	# 		for vb in VB:
+	# 			newCable = tightenCable(n.cable, va.vrt, vb.vrt)
+	# 			if (not newCable):
+	# 				continue
 
 
 def isAtDestination(n):
@@ -31,8 +39,6 @@ def isAtDestination(n):
 
 def tightenCable(cable, dest1, dest2):
 	boundingBox = [cable[0], cable[-1], dest2, dest1]
-	info = triangulate(boundingBox, True)
-	if not info:
-		return []
+	tri = Triangulation(boundingBox, debug=True)
 	newCable = []
 	return newCable
