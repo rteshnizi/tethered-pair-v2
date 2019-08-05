@@ -14,11 +14,12 @@ def aStar():
 	n = q.dequeue()
 	if (isAtDestination(n)):
 		return # For now terminate at first solution
-	VA = gapDetector(n.cable[0], model.robots[0])
-	VB = gapDetector(n.cable[-1], model.robots[-1])
-	va = VA[0]
-	vb = VB[0]
-	newCable = tightenCable(n.cable, va.vrt, vb.vrt)
+	# VA = gapDetector(n.cable[0], model.robots[0])
+	# VB = gapDetector(n.cable[-1], model.robots[-1])
+	# va = VA[0]
+	# vb = VB[0]
+	# newCable = tightenCable(n.cable, va.vrt, vb.vrt)
+	newCable = tightenCable(n.cable, model.robots[0].destination, model.robots[1].destination)
 	# while (not q.isEmpty()):
 	# 	n = q.dequeue()
 	# 	if (isAtDestination(n)):

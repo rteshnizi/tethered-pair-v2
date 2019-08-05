@@ -41,8 +41,10 @@ class Triangulation(object):
 		self.debug = debug
 		# Fix cases where bounding box has repeated vertices
 		self.boundingBox = self.__removeRepeatedVerts(boundingBox)
-		self.boundaryPts = self.__getConvexHull([vert.loc for vert in self.boundingBox])
-		# self.boundaryPts = self.__getConvexHull([vert.loc for vert in boundingBox].extend(self.__findInnerPoints()))
+		self.boundaryPts = [vert.loc for vert in boundingBox]
+		innerPts = self.__findInnerPoints()
+		self.boundaryPts.extend(innerPts)
+		self.boundaryPts = self.__getConvexHull()
 		self.obstacles = []
 		self.cgalTri = CgalTriangulation()
 		# A dictionary of faces (triangles) -> FaceInfo
@@ -70,12 +72,11 @@ class Triangulation(object):
 			vertDict[vert.name] = vert
 		return list(vertDict.values())
 
-	def __getConvexHull(self, pts):
-		return pts
+	def __getConvexHull(self):
 		# FIXME: Code crashes
-		# hull = []
-		# ConvexHull(pts, hull)
-		# return hull
+		hull = []
+		ConvexHull(self.boundaryPts, hull)
+		return hull
 
 	def __findInnerPoints(self):
 		pts = []
