@@ -48,7 +48,7 @@ class Triangulation(object):
 		# A dictionary of faces (triangles) -> FaceInfo
 		self.faceInfoMap = {}
 		self.canvasEdges = []
-		self.faceInfoMap = self.triangulate()
+		self.triangulate()
 		if debug:
 			self.drawEdges()
 
@@ -152,7 +152,7 @@ class Triangulation(object):
 				canvasE.createShape()
 				self.canvasEdges.append(canvasE)
 			elif self.faceInfoMap[edge[0]].inDomain():
-				segment = triangulation.segment(edge)
+				segment = self.cgalTri.segment(edge)
 				canvasE = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
 				canvasE.createShape()
 				self.canvasEdges.append(canvasE)
