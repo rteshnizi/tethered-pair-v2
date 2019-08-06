@@ -73,7 +73,6 @@ class Triangulation(object):
 		return list(vertDict.values())
 
 	def __getConvexHull(self):
-		# FIXME: Code crashes
 		hull = []
 		ConvexHull(self.boundaryPts, hull)
 		return hull
