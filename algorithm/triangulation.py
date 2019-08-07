@@ -7,7 +7,7 @@
 import utils.cgal.geometry as Geom
 from model.model_service import Model
 from model.triangulationEdge import TriangulationEdge
-from utils.cgal.types import CgalTriangulation, ConvexHull
+from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, TriangulationFaceRef
 from utils.priorityQ import PriorityQ
 
 model = Model()
@@ -38,18 +38,22 @@ class Triangulation(object):
 		if len(boundingBox) != 4:
 			raise RuntimeError("boundingBox must be a list of 4 Vertex")
 
-		self.debug = debug
-		# Fix cases where bounding box has repeated vertices
-		self.boundingBox = self.__removeRepeatedVerts(boundingBox)
-		self.boundaryPts = [vert.loc for vert in boundingBox]
-		innerPts = self.__findInnerPoints()
-		self.boundaryPts.extend(innerPts)
-		self.boundaryPts = self.__getConvexHull()
-		self.obstacles = []
-		self.cgalTri = CgalTriangulation()
-		# A dictionary of faces (triangles) -> FaceInfo
+		# A dictionary of facesHandles (triangles) -> FaceInfo
 		self.faceInfoMap = {}
 		self.canvasEdges = []
+		self.obstacles = []
+		self.debug = debug
+		# Maps point location to it's handle
+		# This is used in finding a handle for a vertex
+		self._ptHandles = {}
+
+		# Fix cases where bounding box has repeated vertices
+		self.boundingBox = self._removeRepeatedVerts(boundingBox)
+		self.boundaryPts = [vert.loc for vert in boundingBox]
+		innerPts = self._findInnerPoints()
+		self.boundaryPts.extend(innerPts)
+		self.boundaryPts = self._getConvexHull()
+		self.cgalTri = CgalTriangulation()
 		self.triangulate()
 		if debug:
 			self.drawEdges()
@@ -59,45 +63,66 @@ class Triangulation(object):
 		Construct Triangles
 		"""
 		# Insert exterior
-		self.__insertPointsIntoTriangulation(self.boundaryPts)
+		self._insertPointsIntoTriangulation(self.boundaryPts)
 		# Insert interior (obstacles)
 		self.obstacles = Geom.getAllIntersectingObstacles(self.boundingBox)
 		for obs in self.obstacles:
-			self.__insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
-		self.__markInteriorTriangles()
+			self._insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
+		self._markInteriorTriangles()
 
-	def __removeRepeatedVerts(self, verts):
+	def _ptToStringId(self, pt):
+		"""
+		Use this method internally to obtain a unique Id for each point in this triangulation
+		"""
+		return '%d,%d' % (pt.x(), pt.y())
+
+	def _removeRepeatedVerts(self, verts):
 		vertDict = {}
 		for vert in verts:
 			vertDict[vert.name] = vert
 		return list(vertDict.values())
 
-	def __getConvexHull(self):
+	def _getConvexHull(self):
 		hull = []
 		ConvexHull(self.boundaryPts, hull)
 		return hull
 
-	def __findInnerPoints(self):
+	def _findInnerPoints(self):
 		pts = []
 		obstacles = Geom.getAllIntersectingObstacles(self.boundingBox)
 		for obs in obstacles:
 			pts.extend(obs.polygon.vertices())
 		return pts
 
-	def __insertPointsIntoTriangulation(self, pts):
+	def _insertPointsIntoTriangulation(self, pts):
+		"""
+		Adds points to this triangulation while maintaining the handles in the `_ptHandles` dictionary
+
+		Remarks
+		===
+		This method should be called per entity.
+		That is, all of the points that belong to one hole (obstacle) should be added at once and separately.
+		"""
 		if not pts:
 			return
 
-		handles = [self.cgalTri.insert(pt) for pt in pts]
+		handles = []
+		for pt in pts:
+			handle = self.cgalTri.insert(pt)
+			self._insertHandleIntoDict(pt, handle)
+			handles.append(handle)
 		for i in range(len(pts) - 1):
 			self.cgalTri.insert_constraint(handles[i], handles[i + 1])
 		self.cgalTri.insert_constraint(handles[-1], handles[0])
 
-	def __markInteriorTriangles(self):
+	def _insertHandleIntoDict(self, pt, handle):
+		self._ptHandles[self._ptToStringId(pt)] = handle
+
+	def _markInteriorTriangles(self):
 		"""
 		Populates `self.faceInfoMap`
 
-		Details
+		Remarks
 		===
 		Explore the set of facets connected with non constrained edges,
 		and attribute to each such set a nesting level.
@@ -112,7 +137,7 @@ class Triangulation(object):
 		for face in self.cgalTri.all_faces():
 			self.faceInfoMap[face] = FaceInfo()
 		borders = []
-		self.__markInteriorTrianglesBFS(self.cgalTri.infinite_face(), 0, borders)
+		self._markInteriorTrianglesBFS(self.cgalTri.infinite_face(), 0, borders)
 		while borders != []:
 			edge = borders[0]		# border.front
 			borders = borders[1:]	# border.pop_front
@@ -120,9 +145,9 @@ class Triangulation(object):
 			if self.faceInfoMap[neighboringFace].isMarked():
 				continue
 			lvl = self.faceInfoMap[edge[0]].nestingLevel + 1
-			self.__markInteriorTrianglesBFS(neighboringFace, lvl, borders)
+			self._markInteriorTrianglesBFS(neighboringFace, lvl, borders)
 
-	def __markInteriorTrianglesBFS(self, startFace, nestingLvl, borderEdges):
+	def _markInteriorTrianglesBFS(self, startFace, nestingLvl, borderEdges):
 		if self.faceInfoMap[startFace].isMarked():
 			return
 		queue = [startFace]
@@ -141,6 +166,73 @@ class Triangulation(object):
 					borderEdges.append(edge)
 				else:
 					queue.append(neighboringFace)
+
+	def _convertToPoint(self, vert):
+		"""
+		Utility function that takes a Vertex or Point and returns a Point
+		"""
+		return vert.loc if vert.loc else vert
+
+	def getVertexHandle(self, vertex):
+		"""
+		Returns
+		===
+		The handle to the point representing this vertex in the triangulation
+
+		Params
+		===
+		vertex: model.vertex.Vertex or utils.cgal.types.Point
+		"""
+		pt = self._convertToPoint(vertex)
+		return self._ptHandles.get(self._ptToStringId(pt))
+
+	def getIncidentTriangles(self, vertexSet):
+		"""
+		Finds the edge connecting the two points in vertexSet, if it exists, and returns a set of the two face [handles] incident to the edge
+
+		Params
+		===
+		vertexSet: A set of two vertices
+
+		Remarks
+		===
+		For more details see
+		[this](https://github.com/CGAL/cgal-swig-bindings/blob/7850024f5051eeec492aa3042d0b267c875cd5c5/examples/python/test_t2.py#L49)
+		and
+		[this](http://cgal-discuss.949826.n4.nabble.com/How-to-get-two-faces-incident-to-a-edge-in-Delaunay-Triangulation-td4655759.html)
+		"""
+		# The input can be a vertex or a cgal Point
+		if (len(vertexSet) != 2):
+			raise RuntimeError("vertexSet must have two members")
+		pts = [self.getVertexHandle(v) for v in vertexSet]
+		if (not pts[0] or not pts[1]):
+			return None
+		faceHandleRef = TriangulationFaceRef()
+		vertexIndRef = IntRef()
+		if (not self.cgalTri.is_edge(pts[0], pts[1], faceHandleRef, vertexIndRef)):
+			return None
+		faceHandle = faceHandleRef.object()
+		vertexInd = vertexIndRef.object()
+		faces = [faceHandle, faceHandle.neighbor(vertexInd)]
+		faces = list(filter(lambda f: self.faceInfoMap[f].inDomain(), faces))
+		return frozenset(faces)
+
+	def getIncidentEdges(self, vert, faceHandle):
+		"""
+		Given a vertex and face handle, find the two edges incident to it
+
+		Returns
+		===
+		A set of two sets, each containing a pair of vertices to represent an edge
+		"""
+		vertHandle = self.getVertexHandle(vert)
+		ind = faceHandle.index(vertHandle)
+		indices = {0, 1, 2} - {ind}
+		edges = []
+		for i in indices:
+			pt = faceHandle.vertex(i).point()
+			edges.append(frozenset([vert, model.getVertexByLocation(pt.x(), pt.y())]))
+		return frozenset(edges)
 
 	def drawEdges(self, drawDomainOnly=False):
 		i = 0
