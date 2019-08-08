@@ -39,3 +39,7 @@ class TriangulationEdge(Entity):
 		if (self.canvasId): return
 		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, color=self.color, tag=self.name, dash=TRIANGULATION_DASH_PATTERN)
 		# model.entities[self.name] = self
+
+	def highlightEdge(self):
+		self.removeShape()
+		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, color=self.color, tag=self.name, width=3, dash=TRIANGULATION_DASH_PATTERN)

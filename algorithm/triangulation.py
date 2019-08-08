@@ -40,12 +40,13 @@ class Triangulation(object):
 
 		# A dictionary of facesHandles (triangles) -> FaceInfo
 		self.faceInfoMap = {}
-		self.canvasEdges = []
 		self.obstacles = []
 		self.debug = debug
 		# Maps point location to it's handle
 		# This is used in finding a handle for a vertex
 		self._ptHandles = {}
+		# A dictionary of {Point,Point} -> TriangulationEdge
+		self._canvasEdges = {}
 
 		# Fix cases where bounding box has repeated vertices
 		self.boundingBox = self._removeRepeatedVerts(boundingBox)
@@ -57,18 +58,6 @@ class Triangulation(object):
 		self.triangulate()
 		if debug:
 			self.drawEdges()
-
-	def triangulate(self):
-		"""
-		Construct Triangles
-		"""
-		# Insert exterior
-		self._insertPointsIntoTriangulation(self.boundaryPts)
-		# Insert interior (obstacles)
-		self.obstacles = Geom.getAllIntersectingObstacles(self.boundingBox)
-		for obs in self.obstacles:
-			self._insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
-		self._markInteriorTriangles()
 
 	def _ptToStringId(self, pt):
 		"""
@@ -173,6 +162,51 @@ class Triangulation(object):
 		"""
 		return vert.loc if vert.loc else vert
 
+	def _addCanvasEdge(self, segment, canvasEdge):
+		pts = frozenset([self._ptToStringId(segment.source()), self._ptToStringId(segment.target())])
+		self._canvasEdges[pts] = canvasEdge
+
+	def triangulate(self):
+		"""
+		Construct Triangles
+		"""
+		# Insert exterior
+		self._insertPointsIntoTriangulation(self.boundaryPts)
+		# Insert interior (obstacles)
+		self.obstacles = Geom.getAllIntersectingObstacles(self.boundingBox)
+		for obs in self.obstacles:
+			self._insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
+		self._markInteriorTriangles()
+
+	def getCgalEdge(self, vertexSet):
+		"""
+		Finds the edge connecting the two points in vertexSet, or `None` if ti doesn't exist.
+
+
+		Params
+		===
+		vertexSet: A set of two vertices
+
+		Remarks
+		===
+		An Edge in CGAL TRiangulation is a tuple (faceHandle, vertexIndex)
+
+		[read more](https://doc.cgal.org/latest/Triangulation_2/index.html#title3)
+		"""
+		# The input can be a vertex or a cgal Point
+		if (len(vertexSet) != 2):
+			raise RuntimeError("vertexSet must have two members")
+		pts = [self.getVertexHandle(v) for v in vertexSet]
+		if (not pts[0] or not pts[1]):
+			return None
+		faceHandleRef = TriangulationFaceRef()
+		vertexIndRef = IntRef()
+		if (not self.cgalTri.is_edge(pts[0], pts[1], faceHandleRef, vertexIndRef)):
+			return None
+		faceHandle = faceHandleRef.object()
+		vertexInd = vertexIndRef.object()
+		return (faceHandle, vertexInd)
+
 	def getVertexHandle(self, vertex):
 		"""
 		Returns
@@ -201,18 +235,7 @@ class Triangulation(object):
 		and
 		[this](http://cgal-discuss.949826.n4.nabble.com/How-to-get-two-faces-incident-to-a-edge-in-Delaunay-Triangulation-td4655759.html)
 		"""
-		# The input can be a vertex or a cgal Point
-		if (len(vertexSet) != 2):
-			raise RuntimeError("vertexSet must have two members")
-		pts = [self.getVertexHandle(v) for v in vertexSet]
-		if (not pts[0] or not pts[1]):
-			return None
-		faceHandleRef = TriangulationFaceRef()
-		vertexIndRef = IntRef()
-		if (not self.cgalTri.is_edge(pts[0], pts[1], faceHandleRef, vertexIndRef)):
-			return None
-		faceHandle = faceHandleRef.object()
-		vertexInd = vertexIndRef.object()
+		(faceHandle, vertexInd) = self.getCgalEdge(vertexSet)
 		faces = [faceHandle, faceHandle.neighbor(vertexInd)]
 		faces = list(filter(lambda f: self.faceInfoMap[f].inDomain(), faces))
 		return frozenset(faces)
@@ -242,14 +265,18 @@ class Triangulation(object):
 				segment = self.cgalTri.segment(edge)
 				canvasE = TriangulationEdge(model.canvas, "TE-%d" % i, segment, True)
 				canvasE.createShape()
-				self.canvasEdges.append(canvasE)
+				self._canvasEdges[edge] = canvasE
 			elif self.faceInfoMap[edge[0]].inDomain():
 				segment = self.cgalTri.segment(edge)
 				canvasE = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
 				canvasE.createShape()
-				self.canvasEdges.append(canvasE)
+				self._canvasEdges[edge] = canvasE
+
+	def getCanvasEdge(self, vertexSet):
+		pts = frozenset([self._ptToStringId(vert) for vert in vertexSet])
+		return self._canvasEdges[pts]
 
 	def eraseDrawnEdges(self):
-		for edge in self.canvasEdges:
-			edge.removeShape()
-		self.canvasEdges = []
+		for edge in self._canvasEdges:
+			self._canvasEdges[edge].removeShape()
+		self._canvasEdges = {}

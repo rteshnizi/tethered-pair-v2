@@ -50,6 +50,7 @@ def tightenCable(cable, dest1, dest2):
 		raise RuntimeError("currTri must be incident to exactly 1 triangle for the first segment of the cable")
 	currTri = next(iter(currTri)) # Get the only item in the set
 	for i in range(1, len(longCable) - 1):
+		tri.getCanvasEdge(currE).highlightEdge()
 		e = frozenset([longCable[i], longCable[i + 1]])
 		pivot = e & currE
 		if (len(pivot) != 1):
@@ -67,6 +68,8 @@ def tightenCable(cable, dest1, dest2):
 				raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 			currTri = next(iter(currTri))
 			currE = flipEdge
+			_cgalEdge = tri.getCgalEdge(currE)
+			tri.getCanvasEdge(currE).highlightEdge()
 		currE = e
 	shortCable.append[dest2]
 	return shortCable
