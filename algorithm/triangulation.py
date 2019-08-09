@@ -265,15 +265,15 @@ class Triangulation(object):
 				segment = self.cgalTri.segment(edge)
 				canvasE = TriangulationEdge(model.canvas, "TE-%d" % i, segment, True)
 				canvasE.createShape()
-				self._canvasEdges[edge] = canvasE
+				self._addCanvasEdge(segment, canvasE)
 			elif self.faceInfoMap[edge[0]].inDomain():
 				segment = self.cgalTri.segment(edge)
 				canvasE = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
 				canvasE.createShape()
-				self._canvasEdges[edge] = canvasE
+				self._addCanvasEdge(segment, canvasE)
 
 	def getCanvasEdge(self, vertexSet):
-		pts = frozenset([self._ptToStringId(vert) for vert in vertexSet])
+		pts = frozenset([self._ptToStringId(self._convertToPoint(vert)) for vert in vertexSet])
 		return self._canvasEdges[pts]
 
 	def eraseDrawnEdges(self):
