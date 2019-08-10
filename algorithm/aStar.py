@@ -71,5 +71,5 @@ def tightenCable(cable, dest1, dest2):
 			_cgalEdge = tri.getCgalEdge(currE)
 			tri.getCanvasEdge(currE).highlightEdge()
 		currE = e
-	shortCable.append[dest2]
+	shortCable.append(dest2)
 	return shortCable
