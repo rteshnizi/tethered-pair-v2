@@ -7,7 +7,7 @@
 import utils.cgal.geometry as Geom
 from model.model_service import Model
 from model.triangulationEdge import TriangulationEdge
-from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, TriangulationFaceRef
+from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, TriangulationFaceRef, convertToPoint
 from utils.priorityQ import PriorityQ
 
 model = Model()
@@ -156,12 +156,6 @@ class Triangulation(object):
 				else:
 					queue.append(neighboringFace)
 
-	def _convertToPoint(self, vert):
-		"""
-		Utility function that takes a Vertex or Point and returns a Point
-		"""
-		return vert.loc if vert.loc else vert
-
 	def _addCanvasEdge(self, segment, canvasEdge):
 		pts = frozenset([self._ptToStringId(segment.source()), self._ptToStringId(segment.target())])
 		self._canvasEdges[pts] = canvasEdge
@@ -217,7 +211,7 @@ class Triangulation(object):
 		===
 		vertex: model.vertex.Vertex or utils.cgal.types.Point
 		"""
-		pt = self._convertToPoint(vertex)
+		pt = convertToPoint(vertex)
 		return self._ptHandles.get(self._ptToStringId(pt))
 
 	def getIncidentTriangles(self, vertexSet):
@@ -273,7 +267,7 @@ class Triangulation(object):
 				self._addCanvasEdge(segment, canvasE)
 
 	def getCanvasEdge(self, vertexSet):
-		pts = frozenset([self._ptToStringId(self._convertToPoint(vert)) for vert in vertexSet])
+		pts = frozenset([self._ptToStringId(convertToPoint(vert)) for vert in vertexSet])
 		return self._canvasEdges[pts]
 
 	def eraseDrawnEdges(self):

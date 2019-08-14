@@ -1,3 +1,6 @@
+from typing import List
+from model.vertex import Vertex
+
 from algorithm.gap import gapDetector
 from model.model_service import Model
 from algorithm.node import Node
@@ -6,6 +9,8 @@ from utils.priorityQ import PriorityQ
 from algorithm.triangulation import Triangulation
 
 model = Model()
+
+VertList = List[Vertex]
 
 def aStar():
 	newCable = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination)
@@ -38,9 +43,10 @@ def aStar():
 def isAtDestination(n):
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
 
-def tightenCable(cable, dest1, dest2):
+def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	boundingBox = [cable[0], cable[-1], dest2, dest1]
 	tri = Triangulation(boundingBox, debug=True)
+	funnel = [dest1]
 	longCable = [dest1] + cable + [dest2]
 	shortCable = [dest1]
 	# We represent an edge by a python set to make checks easier
@@ -50,7 +56,6 @@ def tightenCable(cable, dest1, dest2):
 		raise RuntimeError("currTri must be incident to exactly 1 triangle for the first segment of the cable")
 	currTri = next(iter(currTri)) # Get the only item in the set
 	for i in range(1, len(longCable) - 1):
-		tri.getCanvasEdge(currE).highlightEdge()
 		e = frozenset([longCable[i], longCable[i + 1]])
 		pivot = e & currE
 		if (len(pivot) != 1):
@@ -70,6 +75,11 @@ def tightenCable(cable, dest1, dest2):
 			currE = flipEdge
 			_cgalEdge = tri.getCgalEdge(currE)
 			tri.getCanvasEdge(currE).highlightEdge()
+			funnel
 		currE = e
 	shortCable.append(dest2)
 	return shortCable
+
+def addPointsToFunnel(funnel, pts: frozenset, segment):
+	# TODO: CONTINUE HERE
+	pass

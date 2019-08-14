@@ -1,5 +1,4 @@
-# from sympy.geometry import Point, Polygon, Ray, Segment, convex_hull
-from utils.cgal.types import Point, Polygon#, Ray, Segment, convex_hull
+from utils.cgal.types import Line, Point, Polygon, Segment, convertToPoint, crossProduct
 from math import sin, sqrt
 
 from model.model_service import Model
@@ -68,3 +67,27 @@ def getAllIntersectingObstacles(vertices):
 				result.append(obs)
 				break
 	return result
+
+def isColinear(ref1, ref2, target) -> bool:
+	"""
+	Given the two reference points, determine if target is colinear with line segment formed by ref1->ref2
+	"""
+	pt1 = convertToPoint(ref1)
+	pt2 = convertToPoint(ref2)
+	ptTarget = convertToPoint(target)
+
+	line = Line(pt1, pt2)
+	return line.has_on(ptTarget)
+
+def isToTheRight(ref1, ref2, target) -> bool:
+	"""
+	Given the two reference points, determine if target is to the Right of the line segment formed by ref1->ref2
+	"""
+	pt1 = convertToPoint(ref1)
+	pt2 = convertToPoint(ref2)
+	ptTarget = convertToPoint(target)
+
+	vec1 = pt2 - pt1
+	vec2 = ptTarget - pt1
+	cVec3D = crossProduct(vec1, vec2)
+	return cVec3D.z() < 0
