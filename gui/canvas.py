@@ -32,7 +32,7 @@ class Canvas(object):
 			if (e == 'cable'):
 				self.createCableAndRobots(self.parsedJson[e])
 			elif (e == 'cableLength'):
-				self.model.MAX_CABLE = float(self.parsedJson[e])
+				self.model.setMaxCable(float(self.parsedJson[e]))
 			elif (e == 'destinations'):
 				self.createDestinations(self.parsedJson[e])
 			elif (e == 'obstacles'):

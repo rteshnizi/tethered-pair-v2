@@ -36,6 +36,9 @@ class Node(object):
 		self.children = []
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
 
+	def __repr__(self):
+		return str(self.cable)
+
 	def estimate(self):
 		return cost + self.heuristic()
 

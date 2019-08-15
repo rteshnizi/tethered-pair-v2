@@ -28,6 +28,9 @@ class Model:
 	def setApp(self, app):
 		self.instance.app = app
 
+	def setMaxCable(self, l):
+		self.instance.MAX_CABLE = l
+
 	def addVertexByLocation(self, vert):
 		self._vertexByLocation['%d,%d' % (vert.loc.x(), vert.loc.y())] = vert
 

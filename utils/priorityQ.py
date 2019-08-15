@@ -18,6 +18,9 @@ class PriorityQ(object):
 		else:
 			self._data = []
 
+	def __repr__(self):
+		return 'Q(count = %d)' % len(self._data)
+
 	def enqueue(self, item):
 		heapq.heappush(self._data, (self.key(item), item))
 

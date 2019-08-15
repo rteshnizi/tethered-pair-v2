@@ -1,4 +1,4 @@
-from utils.cgal.types import Line, Point, Polygon, Segment, convertToPoint, crossProduct
+from utils.cgal.types import Line, Point, Polygon, Segment, Vector, convertToPoint, crossProduct
 from math import sin, sqrt
 
 from model.model_service import Model
@@ -10,15 +10,19 @@ model = Model()
 EPSILON_MULTIPLIER = 0.000001 # 1e-6
 
 def vertexDistance(v1, v2):
-	vec = v1.loc - v2.loc
+	pt1 = convertToPoint(v1)
+	pt2 = convertToPoint(v2)
+	vec = pt1 - pt2
 	return sqrt(vec.squared_length())
 
-def getEpsilonVector(v1, v2):
+def getEpsilonVector(v1, v2) -> Vector:
 	"""
-	Returns a Vect_2 which represents an epsilon vector
+	Returns a Vector which represents an epsilon vector
 	"""
-	v = v1.loc - v2.loc
-	return v * EPSILON_MULTIPLIER
+	pt1 = convertToPoint(v1)
+	pt2 = convertToPoint(v2)
+	vec = pt1 - pt2
+	return vec * EPSILON_MULTIPLIER
 
 def getInnerVertices(v1, v2, v3):
 	poly = Polygon(v1.loc, v2.loc, v3.loc)
@@ -90,4 +94,22 @@ def isToTheRight(ref1, ref2, target) -> bool:
 	vec1 = pt2 - pt1
 	vec2 = ptTarget - pt1
 	cVec3D = crossProduct(vec1, vec2)
-	return cVec3D.z() < 0
+	# NOTE: In a standard coordinate system, negative indicates being to the right (right-hand rule: https://en.wikipedia.org/wiki/Right-hand_rule)
+	# BUTT in our system (the TkInter Canvas), origin is the top left of the screen and y increases the lower a point is
+	# return cVec3D.z() < 0
+	return cVec3D.z() > 0
+
+def midpoint(vrt1, vrt2) -> Point:
+	pt1 = convertToPoint(vrt1)
+	pt2 = convertToPoint(vrt2)
+	vec = pt2 - pt1
+	return pt1 + (vec / 2)
+
+def lengthOfCurve(pts: list):
+	"""
+	Takes a curve as a list of points and calculates the total length
+	"""
+	l = 0
+	for i in range(len(pts) - 1):
+		l += vertexDistance(pts[i], pts[i + 1])
+	return l

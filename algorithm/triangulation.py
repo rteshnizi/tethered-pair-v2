@@ -5,6 +5,7 @@
 """
 
 import utils.cgal.geometry as Geom
+import utils.listUtils as ListUtils
 from model.model_service import Model
 from model.triangulationEdge import TriangulationEdge
 from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, TriangulationFaceRef, convertToPoint
@@ -49,13 +50,15 @@ class Triangulation(object):
 		self._canvasEdges = {}
 
 		# Fix cases where bounding box has repeated vertices
-		self.boundingBox = self._removeRepeatedVerts(boundingBox)
+		self.boundingBox = ListUtils.removeRepeatedVertsUnordered(boundingBox)
 		self.boundaryPts = [vert.loc for vert in boundingBox]
 		innerPts = self._findInnerPoints()
 		self.boundaryPts.extend(innerPts)
 		self.boundaryPts = self._getConvexHull()
 		self.cgalTri = CgalTriangulation()
-		self.triangulate()
+		self._triangulate()
+		self.triangleCount = 0
+		self._countTriangles()
 		if debug:
 			self.drawEdges()
 
@@ -64,12 +67,6 @@ class Triangulation(object):
 		Use this method internally to obtain a unique Id for each point in this triangulation
 		"""
 		return '%d,%d' % (pt.x(), pt.y())
-
-	def _removeRepeatedVerts(self, verts):
-		vertDict = {}
-		for vert in verts:
-			vertDict[vert.name] = vert
-		return list(vertDict.values())
 
 	def _getConvexHull(self):
 		hull = []
@@ -160,7 +157,7 @@ class Triangulation(object):
 		pts = frozenset([self._ptToStringId(segment.source()), self._ptToStringId(segment.target())])
 		self._canvasEdges[pts] = canvasEdge
 
-	def triangulate(self):
+	def _triangulate(self):
 		"""
 		Construct Triangles
 		"""
@@ -171,6 +168,14 @@ class Triangulation(object):
 		for obs in self.obstacles:
 			self._insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
 		self._markInteriorTriangles()
+
+	def _countTriangles(self):
+		"""
+		Updates self.triangleCount
+		"""
+		self.triangleCount = 0
+		for f in self.cgalTri.finite_faces():
+			self.triangleCount += 1
 
 	def getCgalEdge(self, vertexSet):
 		"""
