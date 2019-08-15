@@ -73,10 +73,10 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 				raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 			currTri = next(iter(currTri))
 			currE = flipEdge
-			_cgalEdge = tri.getCgalEdge(currE)
 			tri.getCanvasEdge(currE).highlightEdge()
 			funnel
 		currE = e
+	tri.getCanvasEdge(currE).highlightEdge()
 	shortCable.append(dest2)
 	return shortCable
 
