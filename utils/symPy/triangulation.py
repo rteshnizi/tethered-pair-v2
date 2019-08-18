@@ -1,4 +1,5 @@
-import utils.cgal.geometry as geometry
+import utils.symPy.geometry as geometry
+from sympy.geometry import Polygon, Segment
 from model.modelService import Model
 from utils.priorityQ import PriorityQ
 from model.triangulationEdge import TriangulationEdge
@@ -19,7 +20,7 @@ def triangulate(boundingBox):
 	for e in hull.sides:
 		edges.append(e)
 	createEdgeList([v.loc for v in hullVerts])
-	pQ = getPriorityQ(pts)
+	# pQ = getPriorityQ(pts)
 	# getMonotoneSubpolygons(edges)
 	return None
 	# return
@@ -50,13 +51,16 @@ def getPriorityQ(pts):
 	return pQ
 
 def getMonotoneSubpolygons(verts):
-	edges = createEdgeList(verts)
+	_edges = createEdgeList(verts)
 	q = PriorityQ(initial = verts, key = pointComparator)
 	for i in range(0, len(verts)):
 		q.enqueue(verts[i])
 	while (not q.isEmpty()):
-		handleVert(q.dequeue)
+		handleVert(q.dequeue())
 	return 0
+
+def handleVert(vert):
+	pass
 
 def createEdgeList(verts):
 	edges = []

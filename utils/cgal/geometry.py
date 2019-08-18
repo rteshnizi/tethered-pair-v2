@@ -24,26 +24,6 @@ def getEpsilonVector(v1, v2) -> Vector:
 	vec = pt1 - pt2
 	return vec * EPSILON_MULTIPLIER
 
-def getInnerVertices(v1, v2, v3):
-	poly = Polygon(v1.loc, v2.loc, v3.loc)
-	inner = []
-	if (isinstance(poly, Segment)):
-		return inner
-	for v in model.vertices:
-		if (poly.encloses_point(v.loc)):
-			inner.append(v)
-	return inner
-
-def getConvexHullFromVertex(vertList):
-	return getConvexHullFromPoint([v.loc for v in vertList])
-
-def getConvexHullFromPoint(ptList):
-	if (len(ptList) < 4):
-		return (ptList, Polygon(*ptList))
-	hull = convex_hull(*[(v.x, v.y) for v in ptList])
-	hullVerts = hull.vertices
-	return ([model.getVertexByLocation(v.x, v.y) for v in hullVerts], hull)
-
 def isInsidePoly(poly, pt):
 	"""
 	Check if point `pt` is inside Polygon `poly`

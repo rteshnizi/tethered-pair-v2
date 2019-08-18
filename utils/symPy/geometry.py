@@ -16,7 +16,7 @@ def createSegmentFromVertices(v1, v2):
 	return Segment(v1.loc, v2.loc)
 
 def createPolygonFromVertices(verts):
-	return Segment([v.loc for v in verts])
+	return Polygon([v.loc for v in verts])
 
 def getEpsilonVector(v1, v2):
 	"""

@@ -39,9 +39,6 @@ class Node(object):
 	def __repr__(self):
 		return str(self.cable)
 
-	def estimate(self):
-		return cost + self.heuristic()
-
 	def _calcH(self):
 		return self._heuristic1()
 

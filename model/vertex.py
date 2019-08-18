@@ -1,7 +1,8 @@
+import utils.cgal.geometry as geometry
 from model.modelService import Model
 from model.entity import Entity
 from utils.cgal.drawing import CreateCircle
-import utils.cgal.geometry as geometry
+from utils.cgal.types import Point
 
 VERTEX_COLOR = "Purple"
 model = Model()
@@ -27,21 +28,21 @@ class Vertex(Entity):
 			tag=self.name
 		)
 
-	def isVisible(self, other):
-		l = geometry.createSegmentFromVertices(self, other)
-		for o in model.obstacles:
-			intersections = o.intersection(l)
-			# if vertices are visible, the intersection is either empty or it is a line segment
-			# whose at least one of the end points is one of the two vertices
-			if (len(intersections) == 0):
-				continue
-			# If obstacles are concave, we might have more than 2 intersections
-			for intersection in intersections:
-				if (isinstance(intersection, Point)):
-					if (not (intersection.equals(self.loc) or intersection.equals(other.loc))):
-						return False
-				else: # intersection is a Segment
-					# Segments show that an edge is tangent to the visibility ray
-					# They don't block visibility
-					pass
-		return True
+	# def isVisible(self, other):
+	# 	l = geometry.createSegmentFromVertices(self, other)
+	# 	for o in model.obstacles:
+	# 		intersections = o.intersection(l)
+	# 		# if vertices are visible, the intersection is either empty or it is a line segment
+	# 		# whose at least one of the end points is one of the two vertices
+	# 		if (len(intersections) == 0):
+	# 			continue
+	# 		# If obstacles are concave, we might have more than 2 intersections
+	# 		for intersection in intersections:
+	# 			if (isinstance(intersection, Point)):
+	# 				if (not (intersection.equals(self.loc) or intersection.equals(other.loc))):
+	# 					return False
+	# 			else: # intersection is a Segment
+	# 				# Segments show that an edge is tangent to the visibility ray
+	# 				# They don't block visibility
+	# 				pass
+	# 	return True

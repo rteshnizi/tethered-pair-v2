@@ -174,7 +174,7 @@ class Triangulation(object):
 		Updates self.triangleCount
 		"""
 		self.triangleCount = 0
-		for f in self.cgalTri.finite_faces():
+		for _f in self.cgalTri.finite_faces():
 			self.triangleCount += 1
 
 	def getCgalEdge(self, vertexSet):
