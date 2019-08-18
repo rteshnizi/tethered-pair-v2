@@ -4,7 +4,7 @@ from model.vertex import Vertex
 import utils.cgal.geometry as Geom
 import utils.listUtils as ListUtils
 from algorithm.gap import gapDetector
-from model.model_service import Model
+from model.modelService import Model
 from algorithm.node import Node
 from utils.priorityQ import PriorityQ
 from algorithm.triangulation import Triangulation

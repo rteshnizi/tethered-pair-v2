@@ -1,6 +1,6 @@
 import utils.cgal.geometry as Geom
 from model.entity import Entity
-from model.model_service import Model
+from model.modelService import Model
 from model.vertex import Vertex
 from utils.cgal.drawing import CreatePolygon
 from utils.cgal.types import Polygon

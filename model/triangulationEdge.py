@@ -1,5 +1,5 @@
 from model.entity import Entity
-from model.model_service import Model
+from model.modelService import Model
 from model.vertex import Vertex
 from utils.cgal.drawing import CreateLine
 from utils.cgal.types import Segment

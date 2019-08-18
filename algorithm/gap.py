@@ -1,4 +1,4 @@
-from model.model_service import Model
+from model.modelService import Model
 import utils.cgal.geometry as geometry
 
 model = Model()

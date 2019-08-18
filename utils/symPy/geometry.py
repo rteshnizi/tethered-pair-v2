@@ -1,7 +1,7 @@
 from sympy.geometry import Point, Polygon, Ray, Segment, convex_hull
 from math import sin
 
-from model.model_service import Model
+from model.modelService import Model
 
 """
 Geometry Helper functions

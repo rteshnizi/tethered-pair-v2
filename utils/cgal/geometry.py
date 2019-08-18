@@ -1,7 +1,7 @@
 from utils.cgal.types import Line, Point, Polygon, Segment, Vector, convertToPoint, crossProduct
 from math import sin, sqrt
 
-from model.model_service import Model
+from model.modelService import Model
 
 """
 Geometry Helper functions

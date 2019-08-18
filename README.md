@@ -21,5 +21,5 @@
 
 1. ~~Construct a DS to access triangles and edges and pts the way we need them in the alg (02/08)~~
 2. Test the current impl for a case where the cable won't get more taut (06/08)
-3. We can now traverse th triangulation, maintain the funnel (06/08)
+3. ~~We can now traverse th triangulation, maintain the funnel (06/08)~~
 4. Add a cable entity whose shape is a line (for debugging)

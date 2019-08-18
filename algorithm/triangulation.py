@@ -6,7 +6,7 @@
 
 import utils.cgal.geometry as Geom
 import utils.listUtils as ListUtils
-from model.model_service import Model
+from model.modelService import Model
 from model.triangulationEdge import TriangulationEdge
 from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, TriangulationFaceRef, convertToPoint
 from utils.priorityQ import PriorityQ

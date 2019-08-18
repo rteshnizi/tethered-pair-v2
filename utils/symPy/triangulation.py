@@ -1,5 +1,5 @@
 import utils.cgal.geometry as geometry
-from model.model_service import Model
+from model.modelService import Model
 from utils.priorityQ import PriorityQ
 from model.triangulationEdge import TriangulationEdge
 

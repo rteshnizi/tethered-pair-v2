@@ -1,4 +1,4 @@
-from model.model_service import Model
+from model.modelService import Model
 from model.entity import Entity
 from utils.cgal.drawing import CreateCircle
 import utils.cgal.geometry as geometry

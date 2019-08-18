@@ -4,7 +4,7 @@ import os
 import tkinter as tk
 import sys
 
-from model.model_service import Model
+from model.modelService import Model
 from model.robot import Robot
 from model.obstacle import Obstacle
 from model.destination import Destination
