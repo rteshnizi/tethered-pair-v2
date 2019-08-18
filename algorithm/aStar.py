@@ -19,9 +19,9 @@ def aStar():
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
 	q.enqueue(root)
-	while (not q.isEmpty()):
+	while not q.isEmpty():
 		n: Node = q.dequeue()
-		if (isAtDestination(n)):
+		if isAtDestination(n):
 			print("At Destination")
 			return # For now terminate at first solution
 		VA = gapDetector(n.cable[0], model.robots[0])
@@ -35,7 +35,7 @@ def aStar():
 					n.children.append(child)
 					q.enqueue(child)
 
-def isAtDestination(n):
+def isAtDestination(n) -> bool:
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
 
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
@@ -55,24 +55,24 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	# We represent an edge by a python set to make checks easier
 	currE = frozenset([longCable[0], longCable[1]])
 	currTri = tri.getIncidentTriangles(currE)
-	if (len(currTri) != 1):
+	if len(currTri) != 1:
 		raise RuntimeError("currTri must be incident to exactly 1 triangle for the first segment of the cable")
 	currTri = next(iter(currTri)) # Get the only item in the set
 	for i in range(1, len(longCable) - 1):
 		e = frozenset([longCable[i], longCable[i + 1]])
 		pivot = e & currE
-		if (len(pivot) != 1):
+		if len(pivot) != 1:
 			raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
-		while (not tries & frozenset([currTri])):
+		while not tries & frozenset([currTri]):
 			edges = tri.getIncidentEdges(pivot, currTri)
 			flipEdge = edges - frozenset([currE])
-			if (len(flipEdge) != 1):
+			if len(flipEdge) != 1:
 				raise RuntimeError("There must only be 1 flipEdge")
 			flipEdge = next(iter(flipEdge))
 			currTri = tri.getIncidentTriangles(flipEdge) - frozenset([currTri])
-			if (len(currTri) != 1):
+			if len(currTri) != 1:
 				raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 			currTri = next(iter(currTri))
 			refPt = addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt)
@@ -94,9 +94,9 @@ def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset
 	flipEdgeVerts = list(flipEdge)
 	flipEdgeMid = Geom.midpoint(flipEdgeVerts[0], flipEdgeVerts[1])
 	for vrt in flipEdge:
-		if (Geom.isColinear(refPt, flipEdgeMid, vrt)):
+		if Geom.isColinear(refPt, flipEdgeMid, vrt):
 			raise RuntimeError("flipEdge shouldn't be colinear")
-		if (Geom.isToTheRight(refPt, flipEdgeMid, vrt)):
+		if Geom.isToTheRight(refPt, flipEdgeMid, vrt):
 			appendIfNotRepeated(rightSideVrt, vrt)
 		else:
 			appendIfNotRepeated(leftSideVrt, vrt)
