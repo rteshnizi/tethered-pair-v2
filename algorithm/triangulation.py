@@ -41,7 +41,8 @@ class Triangulation(object):
 
 		# A dictionary of facesHandles (triangles) -> FaceInfo
 		self.faceInfoMap = {}
-		self.obstacles = []
+		self.fullyEnclosedObstacles = []
+		self.partiallyEnclosedObstacles = []
 		self.debug = debug
 		# Maps point location to it's handle
 		# This is used in finding a handle for a vertex
@@ -52,8 +53,11 @@ class Triangulation(object):
 		# Fix cases where bounding box has repeated vertices
 		self.boundingBox = ListUtils.removeRepeatedVertsUnordered(boundingBox)
 		self.boundaryPts = [vert.loc for vert in boundingBox]
-		innerPts = self._findInnerPoints()
-		self.boundaryPts.extend(innerPts)
+		(self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundingBox)
+		for obs in self.fullyEnclosedObstacles:
+			self.boundaryPts.extend(obs.polygon.vertices())
+		for obs in self.partiallyEnclosedObstacles:
+			self.boundaryPts.extend(obs.polygon.vertices())
 		self.boundaryPts = self._getConvexHull()
 		self.cgalTri = CgalTriangulation()
 		self._triangulate()
@@ -69,16 +73,26 @@ class Triangulation(object):
 		return '%d,%d' % (pt.x(), pt.y())
 
 	def _getConvexHull(self):
+		"""
+		Remarks
+		===
+		Find the convex hull of the points, then extrudes the points on the convex hull by an epsilon vector from its
+		centroid.
+
+		This is done to guarantee that the boundary of the triangulation would not intersect the constraints.
+
+		:return: Convex Hull
+		"""
+		if not self.partiallyEnclosedObstacles:
+			return self.boundaryPts
 		hull = []
 		ConvexHull(self.boundaryPts, hull)
-		return hull
-
-	def _findInnerPoints(self):
-		pts = []
-		obstacles = Geom.getAllIntersectingObstacles(self.boundingBox)
-		for obs in obstacles:
-			pts.extend(obs.polygon.vertices())
-		return pts
+		centroid = Geom.centroid(hull)
+		extruded = []
+		for pt in hull:
+			vec = Geom.getEpsilonVector(centroid, pt)
+			extruded.append(pt + vec)
+		return extruded
 
 	def _insertPointsIntoTriangulation(self, pts):
 		"""
@@ -164,8 +178,9 @@ class Triangulation(object):
 		# Insert exterior
 		self._insertPointsIntoTriangulation(self.boundaryPts)
 		# Insert interior (obstacles)
-		self.obstacles = Geom.getAllIntersectingObstacles(self.boundingBox)
-		for obs in self.obstacles:
+		for obs in self.fullyEnclosedObstacles:
+			self._insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
+		for obs in self.partiallyEnclosedObstacles:
 			self._insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
 		self._markInteriorTriangles()
 

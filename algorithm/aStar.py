@@ -43,7 +43,8 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	This is an altered version of
 	"""
 	boundingBox = [cable[0], cable[-1], dest2, dest1]
-	tri = Triangulation(boundingBox)
+	tri = Triangulation(boundingBox, True)
+	return []
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
 		return [dest1, dest2]

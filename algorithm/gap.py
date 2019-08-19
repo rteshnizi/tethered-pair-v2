@@ -19,6 +19,6 @@ def gapDetector(v, r):
 	for u in model.vertices:
 		# Detecting whether u is a gap for v
 		epsilon = geometry.getEpsilonVector(v, u)
-		if (not u.ownerObs.enclosesPoint(u.loc + epsilon)):
+		if not u.ownerObs.enclosesPoint(u.loc + epsilon):
 			gaps.append(Gap(u, r))
 	return gaps

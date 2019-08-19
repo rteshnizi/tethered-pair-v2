@@ -1,5 +1,6 @@
-from utils.cgal.types import Line, Point, Polygon, Segment, Vector, convertToPoint, crossProduct
-from math import sin, sqrt
+import numpy as np
+from utils.cgal.types import Line, Point, Polygon, Vector, convertToPoint, crossProduct
+from math import sqrt
 
 from model.modelService import Model
 
@@ -15,13 +16,13 @@ def vertexDistance(v1, v2):
 	vec = pt1 - pt2
 	return sqrt(vec.squared_length())
 
-def getEpsilonVector(v1, v2) -> Vector:
+def getEpsilonVector(frm, to) -> Vector:
 	"""
 	Returns a Vector which represents an epsilon vector
 	"""
-	pt1 = convertToPoint(v1)
-	pt2 = convertToPoint(v2)
-	vec = pt1 - pt2
+	toPt = convertToPoint(to)
+	frmPt = convertToPoint(frm)
+	vec = toPt - frmPt
 	return vec * EPSILON_MULTIPLIER
 
 def isInsidePoly(poly, pt):
@@ -40,16 +41,26 @@ def getAllIntersectingObstacles(vertices):
 	Params
 	===
 	vertices: `Vertex[]`
+
+	:returns: A tuple of two arrays, First array are fully inside, second array is partially inside
 	"""
-	result = []
+	result = ([], [])
 	poly = Polygon()
 	for vert in vertices:
 		poly.push_back(vert.loc)
 	for obs in model.obstacles:
+		isIn = False
+		isOut = False
 		for pt in obs.vertices:
-			if (isInsidePoly(poly, pt)):
-				result.append(obs)
-				break
+			if isInsidePoly(poly, pt):
+				isIn = True
+			else:
+				isOut = True
+		if isIn:
+			if not isOut:
+				result[0].append(obs)
+			else:
+				result[1].append(obs)
 	return result
 
 def isColinear(ref1, ref2, target) -> bool:
@@ -93,3 +104,9 @@ def lengthOfCurve(pts: list):
 	for i in range(len(pts) - 1):
 		l += vertexDistance(pts[i], pts[i + 1])
 	return l
+
+def centroid(pts):
+	arr = [convertToPoint(pt) for pt in pts]
+	cx = np.mean([pt.x() for pt in arr])
+	cy = np.mean([pt.y() for pt in arr])
+	return Point(cx, cy)
