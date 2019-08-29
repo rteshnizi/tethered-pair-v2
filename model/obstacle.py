@@ -21,7 +21,7 @@ class Obstacle(Entity):
 		"""
 		super().__init__(canvas=canvas, color=OBSTACLE_COLOR, name=name)
 		self.vertices = []
-		self.polygon = None
+		self.polygon: Polygon = None
 		self.createVertices(pts)
 		self.createShape(pts)
 
@@ -42,3 +42,9 @@ class Obstacle(Entity):
 
 	def enclosesPoint(self, pt):
 		return Geom.isInsidePoly(self.polygon, pt)
+
+	def intersection(self, line):
+		"""
+		Intersect this obstacle with the line segment formed by the two given points
+		"""
+		return Geom.intersectPolygonAndSegment(self.polygon, line)

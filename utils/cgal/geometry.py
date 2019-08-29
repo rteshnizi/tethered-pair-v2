@@ -1,5 +1,6 @@
+from typing import List
 import numpy as np
-from utils.cgal.types import Line, Point, Polygon, Vector, convertToPoint, crossProduct
+from utils.cgal.types import Point, PointOrSegmentNone, Polygon, Segment, Vector, convertToPoint, crossProduct, intersection
 from math import sqrt
 
 from model.modelService import Model
@@ -110,3 +111,21 @@ def centroid(pts):
 	cx = np.mean([pt.x() for pt in arr])
 	cy = np.mean([pt.y() for pt in arr])
 	return Point(cx, cy)
+
+def intersectPolygonAndSegment(poly, segment) -> List[PointOrSegmentNone]:
+	if not isinstance(poly, Polygon):
+		raise TypeError("poly should be a Polygon")
+	if not isinstance(segment, Segment):
+		raise TypeError("line should be a Segment")
+	intersections = []
+	for edge in poly.edges():
+		res = intersection(segment, edge)
+		if res:
+			intersections.append(res)
+	return intersections
+
+def intersectSegmentAndSegment(src1, dest1, src2, dest2) -> List[PointOrSegmentNone]:
+	pts = [convertToPoint(pt) for pt in [src1, dest1, src2, dest2]]
+	seg1 = Segment(pts[0], pts[1])
+	seg2 = Segment(pts[2], pts[3])
+	return intersection(seg1, seg2)

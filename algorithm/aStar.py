@@ -3,11 +3,12 @@ from model.vertex import Vertex
 
 import utils.cgal.geometry as Geom
 import utils.listUtils as ListUtils
-from algorithm.gap import gapDetector
-from model.modelService import Model
+from algorithm.visibility import findGaps
 from algorithm.node import Node
-from utils.priorityQ import PriorityQ
 from algorithm.triangulation import Triangulation
+from model.modelService import Model
+from utils.priorityQ import PriorityQ
+from utils.cgal.types import Point
 
 model = Model()
 
@@ -15,7 +16,7 @@ VertList = List[Vertex]
 
 def aStar():
 	# newCable = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination)
-
+	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
 	q.enqueue(root)
@@ -24,16 +25,30 @@ def aStar():
 		if isAtDestination(n):
 			print("At Destination")
 			return # For now terminate at first solution
-		VA = gapDetector(n.cable[0], model.robots[0])
-		VB = gapDetector(n.cable[-1], model.robots[-1])
+		VA = findGaps(n.cable[0], model.robots[0])
+		VB = findGaps(n.cable[-1], model.robots[-1])
 		for va in VA:
 			for vb in VB:
+				# For now I deliberately avoid cross movement because it crashes the triangulation
+				# In reality we can fix this by mirorring the space (like I did in the previous paper)
+				if isThereCrossMovement(n.cable[0], va.vrt, n.cable[-1], vb.vrt):
+					continue
 				newCable = tightenCable(n.cable, va.vrt, vb.vrt)
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
 					child = Node(cable=newCable, parent=n)
 					n.children.append(child)
 					q.enqueue(child)
+
+def processReducedVisibilityGraph() -> None:
+	pass
+	# for v in model.vertices:
+
+def isThereCrossMovement(src1, dest1, src2, dest2):
+	intersection = Geom.intersectSegmentAndSegment(src1, dest1, src2, dest2)
+	if isinstance(intersection, Point):
+		return True
+	return False
 
 def isAtDestination(n) -> bool:
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
@@ -43,7 +58,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	This is an altered version of
 	"""
 	boundingBox = [cable[0], cable[-1], dest2, dest1]
-	tri = Triangulation(boundingBox, True)
+	tri = Triangulation(boundingBox)
 	return []
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
