@@ -9,7 +9,6 @@ import utils.listUtils as ListUtils
 from model.modelService import Model
 from model.triangulationEdge import TriangulationEdge
 from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, TriangulationFaceRef, convertToPoint
-from utils.priorityQ import PriorityQ
 
 model = Model()
 
@@ -41,6 +40,7 @@ class Triangulation(object):
 
 		# A dictionary of facesHandles (triangles) -> FaceInfo
 		self.faceInfoMap = {}
+		# Will be populated when finding convex hull
 		self.fullyEnclosedObstacles = []
 		self.partiallyEnclosedObstacles = []
 		self.debug = debug
@@ -52,13 +52,8 @@ class Triangulation(object):
 
 		# Fix cases where bounding box has repeated vertices
 		self.boundingBox = ListUtils.removeRepeatedVertsUnordered(boundingBox)
-		self.boundaryPts = [vert.loc for vert in boundingBox]
-		(self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundingBox)
-		for obs in self.fullyEnclosedObstacles:
-			self.boundaryPts.extend(obs.polygon.vertices())
-		for obs in self.partiallyEnclosedObstacles:
-			self.boundaryPts.extend(obs.polygon.vertices())
-		self.boundaryPts = self._getConvexHull()
+		self.boundaryPts = [Geom.convertToPoint(vert) for vert in boundingBox]
+		self._getConvexHull()
 		self.cgalTri = CgalTriangulation()
 		self._triangulate()
 		self.triangleCount = 0
@@ -72,7 +67,7 @@ class Triangulation(object):
 		"""
 		return '%d,%d' % (pt.x(), pt.y())
 
-	def _getConvexHull(self):
+	def _getConvexHull(self) -> None:
 		"""
 		Remarks
 		===
@@ -83,16 +78,30 @@ class Triangulation(object):
 
 		:return: Convex Hull
 		"""
-		if not self.partiallyEnclosedObstacles:
-			return self.boundaryPts
-		hull = []
-		ConvexHull(self.boundaryPts, hull)
-		centroid = Geom.centroid(hull)
-		extruded = []
-		for pt in hull:
-			vec = Geom.getEpsilonVector(centroid, pt)
-			extruded.append(pt + vec)
-		return extruded
+		(self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+		while self.partiallyEnclosedObstacles:
+			for obs in self.partiallyEnclosedObstacles:
+				self.boundaryPts.extend(obs.polygon.vertices())
+			hull = []
+			ConvexHull(self.boundaryPts, hull)
+			centroid = Geom.centroid(hull)
+			extruded = []
+			for pt in hull:
+				vec = Geom.getEpsilonVector(centroid, pt)
+				extruded.append(pt + vec)
+			self.boundaryPts = extruded
+			(self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+
+		# FIXME: See why this crashes
+		# (self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+		# hull = []
+		# while self.partiallyEnclosedObstacles:
+		# 	for obs in self.partiallyEnclosedObstacles:
+		# 		self.boundaryPts.extend(obs.polygon.vertices())
+		# 	ConvexHull(self.boundaryPts, hull)
+		# 	self.boundaryPts = Geom.extrudeVertsWithEpsilonVect(hull)
+		# 	(self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+
 
 	def _insertPointsIntoTriangulation(self, pts):
 		"""

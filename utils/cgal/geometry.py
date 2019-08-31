@@ -1,6 +1,6 @@
 from typing import List
 import numpy as np
-from utils.cgal.types import Point, PointOrSegmentNone, Polygon, Segment, Vector, convertToPoint, crossProduct, intersection
+from utils.cgal.types import Line, Point, PointOrSegmentNone, Polygon, Segment, Vector, convertToPoint, crossProduct, intersection
 from math import sqrt
 
 from model.modelService import Model
@@ -30,10 +30,7 @@ def isInsidePoly(poly, pt):
 	"""
 	Check if point `pt` is inside Polygon `poly`
 	"""
-	if isinstance(pt, Point):
-		return poly.has_on_bounded_side(pt)
-	else:
-		return poly.has_on_bounded_side(pt.loc)
+	return poly.has_on_bounded_side(convertToPoint(pt))
 
 def getAllIntersectingObstacles(vertices):
 	"""
@@ -48,7 +45,7 @@ def getAllIntersectingObstacles(vertices):
 	result = ([], [])
 	poly = Polygon()
 	for vert in vertices:
-		poly.push_back(vert.loc)
+		poly.push_back(convertToPoint(vert))
 	for obs in model.obstacles:
 		isIn = False
 		isOut = False
@@ -129,3 +126,11 @@ def intersectSegmentAndSegment(src1, dest1, src2, dest2) -> List[PointOrSegmentN
 	seg1 = Segment(pts[0], pts[1])
 	seg2 = Segment(pts[2], pts[3])
 	return intersection(seg1, seg2)
+
+def extrudeVertsWithEpsilonVect(verts) -> List[Point]:
+	centroidPt = centroid(verts)
+	extruded = []
+	for v in verts:
+		pt = convertToPoint(v)
+		vec = getEpsilonVector(centroidPt, pt)
+		extruded.append(pt + vec)
