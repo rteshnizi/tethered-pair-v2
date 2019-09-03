@@ -161,3 +161,8 @@ def polygonAndObstacleIntersection(polyVerts, obstacle) -> List[Point]:
 	result = SHGeom.polygonIntersection(polyVerts, obstacle.polygon.vertices())
 	result = VertexUtils.removeRepeatedVertsOrdered(result)
 	return result
+
+def addVectorToPoint(pt, dx, dy):
+	vect = Vector(dx, dy)
+	_pt = convertToPoint(pt)
+	return _pt + vect

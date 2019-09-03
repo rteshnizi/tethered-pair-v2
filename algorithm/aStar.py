@@ -7,6 +7,7 @@ from algorithm.visibility import findGaps
 from algorithm.node import Node
 from algorithm.triangulation import Triangulation
 from model.modelService import Model
+from model.cable import Cable
 from utils.priorityQ import PriorityQ
 from utils.cgal.types import Point
 
@@ -24,6 +25,7 @@ def aStar():
 		n: Node = q.dequeue()
 		if isAtDestination(n):
 			print("At Destination")
+			Cable(model.canvas, "CABLE", n.cable)
 			return # For now terminate at first solution
 		VA = findGaps(n.cable[0], model.robots[0])
 		VB = findGaps(n.cable[-1], model.robots[-1])
