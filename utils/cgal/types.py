@@ -13,7 +13,7 @@ from CGAL.CGAL_Kernel import Vector_3 as Vector3D
 from CGAL.CGAL_Triangulation_2 import Constrained_Delaunay_triangulation_2 as CgalTriangulation
 from CGAL.CGAL_Triangulation_2 import Ref_Constrained_Delaunay_triangulation_2_Face_handle as TriangulationFaceRef
 
-from CGAL.CGAL_Convex_hull_2 import convex_hull_2 as ConvexHull
+from CGAL.CGAL_Convex_hull_2 import ch_graham_andrew as ConvexHull
 
 PointOrSegmentNone = Union[Point, Segment, None]
 

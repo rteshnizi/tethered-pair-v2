@@ -59,7 +59,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	"""
 	boundingBox = [cable[0], cable[-1], dest2, dest1]
 	tri = Triangulation(boundingBox, True)
-	return []
+	# return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
 		return [dest1, dest2]
@@ -69,25 +69,27 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	# We use this to maintain the funnel
 	refPt = longCable[0]
 	# We represent an edge by a python set to make checks easier
-	currE = frozenset([longCable[0], longCable[1]])
+	currE = _makeFrozenSet([longCable[0], longCable[1]])
 	currTri = tri.getIncidentTriangles(currE)
+	# FIXME: This is not the case all the time, i.e. when we find the convex hull
+	# But it will not affect our algorithm for finding the funnel
 	if len(currTri) != 1:
 		raise RuntimeError("currTri must be incident to exactly 1 triangle for the first segment of the cable")
 	currTri = next(iter(currTri)) # Get the only item in the set
 	for i in range(1, len(longCable) - 1):
-		e = frozenset([longCable[i], longCable[i + 1]])
+		e = _makeFrozenSet([longCable[i], longCable[i + 1]])
 		pivot = e & currE
 		if len(pivot) != 1:
 			raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
-		while not tries & frozenset([currTri]):
+		while not tries & _makeFrozenSet(currTri):
 			edges = tri.getIncidentEdges(pivot, currTri)
-			flipEdge = edges - frozenset([currE])
+			flipEdge = edges - _makeFrozenSet(currE)
 			if len(flipEdge) != 1:
 				raise RuntimeError("There must only be 1 flipEdge")
 			flipEdge = next(iter(flipEdge))
-			currTri = tri.getIncidentTriangles(flipEdge) - frozenset([currTri])
+			currTri = tri.getIncidentTriangles(flipEdge) - _makeFrozenSet(currTri)
 			if len(currTri) != 1:
 				raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 			currTri = next(iter(currTri))
@@ -101,7 +103,13 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
 	return ListUtils.removeRepeatedVertsOrdered(shortCable)
 
-
+def _makeFrozenSet(members):
+	try:
+		l = len(members)
+		return frozenset(members)
+	except TypeError:
+		# Assume none-iterable item, therefore it's a single item
+		return frozenset([members])
 
 def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt):
 	"""

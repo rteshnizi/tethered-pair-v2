@@ -1,4 +1,3 @@
-
 class Model:
 	class __PrivateModel:
 		def __init__(self):

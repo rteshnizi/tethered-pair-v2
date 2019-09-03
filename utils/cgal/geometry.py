@@ -9,6 +9,7 @@ from model.modelService import Model
 Geometry Helper functions
 """
 model = Model()
+SMALL_DISTANCE = 0.001 # 1e-3
 EPSILON_MULTIPLIER = 0.000001 # 1e-6
 
 def vertexDistance(v1, v2):
@@ -26,11 +27,17 @@ def getEpsilonVector(frm, to) -> Vector:
 	vec = toPt - frmPt
 	return vec * EPSILON_MULTIPLIER
 
-def isInsidePoly(poly, pt):
+def isInsidePoly(poly, pt) -> bool:
 	"""
 	Check if point `pt` is inside Polygon `poly`
 	"""
 	return poly.has_on_bounded_side(convertToPoint(pt))
+
+def isOnPoly(poly: Polygon, pt) -> bool:
+	"""
+	Check if point `pt` is inside Polygon `poly`
+	"""
+	return poly.has_on_boundary(convertToPoint(pt))
 
 def getAllIntersectingObstacles(vertices):
 	"""
@@ -50,6 +57,7 @@ def getAllIntersectingObstacles(vertices):
 		isIn = False
 		isOut = False
 		for pt in obs.vertices:
+			# if isInsidePoly(poly, pt) or isOnPoly(poly, pt):
 			if isInsidePoly(poly, pt):
 				isIn = True
 			else:
@@ -134,3 +142,21 @@ def extrudeVertsWithEpsilonVect(verts) -> List[Point]:
 		pt = convertToPoint(v)
 		vec = getEpsilonVector(centroidPt, pt)
 		extruded.append(pt + vec)
+	return extruded
+
+def ptToStringId(pt):
+	"""
+	Use this method internally to obtain a unique Id for each point in this triangulation
+	"""
+	return '%d,%d' % (convertToPoint(pt).x(), convertToPoint(pt).y())
+
+def getClosestVertex(pt):
+	for v in model.robots:
+		if vertexDistance(pt, v) < SMALL_DISTANCE:
+			return v
+		if vertexDistance(pt, v.destination) < SMALL_DISTANCE:
+			return v.destination
+
+	for v in model.vertices:
+		if vertexDistance(pt, v) < SMALL_DISTANCE:
+			return v
