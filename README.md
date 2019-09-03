@@ -9,6 +9,8 @@
 	* Ubuntu:
 		* Don't install boost from source. It will mess with the make process somehow.
 		* [Installation instructions for Ubuntu](https://github.com/CGAL/cgal-swig-bindings/wiki/Installation)
+3. [Shapely](https://github.com/Toblerity/Shapely):
+	* On Ubuntu `pip install shapely`
 
 ## Recommended Tools
 

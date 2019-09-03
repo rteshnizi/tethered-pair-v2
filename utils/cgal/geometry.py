@@ -1,6 +1,8 @@
 from typing import List
 import numpy as np
 from utils.cgal.types import Line, Point, PointOrSegmentNone, Polygon, Segment, Vector, convertToPoint, crossProduct, intersection
+import utils.shapely.geometry as SHGeom
+import utils.vertexUtils as VertexUtils
 from math import sqrt
 
 from model.modelService import Model
@@ -144,12 +146,6 @@ def extrudeVertsWithEpsilonVect(verts) -> List[Point]:
 		extruded.append(pt + vec)
 	return extruded
 
-def ptToStringId(pt):
-	"""
-	Use this method internally to obtain a unique Id for each point in this triangulation
-	"""
-	return '%d,%d' % (convertToPoint(pt).x(), convertToPoint(pt).y())
-
 def getClosestVertex(pt):
 	for v in model.robots:
 		if vertexDistance(pt, v) < SMALL_DISTANCE:
@@ -160,3 +156,8 @@ def getClosestVertex(pt):
 	for v in model.vertices:
 		if vertexDistance(pt, v) < SMALL_DISTANCE:
 			return v
+
+def polygonAndObstacleIntersection(polyVerts, obstacle) -> List[Point]:
+	result = SHGeom.polygonIntersection(polyVerts, obstacle.polygon.vertices())
+	result = VertexUtils.removeRepeatedVertsOrdered(result)
+	return result

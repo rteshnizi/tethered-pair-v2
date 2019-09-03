@@ -1,9 +1,15 @@
-import utils.cgal.geometry as Geom
+from utils.cgal.types import convertToPoint
+
+def ptToStringId(pt):
+	"""
+	Use this method internally to obtain a unique Id for each point in this triangulation
+	"""
+	return '%d,%d' % (convertToPoint(pt).x(), convertToPoint(pt).y())
 
 def _convertVertListToDict(verts: list) -> dict:
 	vertDict = {}
 	for vert in verts:
-		vertDict[Geom.ptToStringId(vert)] = vert
+		vertDict[ptToStringId(vert)] = vert
 	return vertDict
 
 def removeRepeatedVertsUnordered(verts: list) -> list:
@@ -20,12 +26,28 @@ def removeRepeatedVertsOrdered(verts: list) -> list:
 	Takes a list (ordered) of Vertex and removes items that are sequentially repeated
 	"""
 	trimmed = []
-	prev = None
+	prev = ptToStringId(verts[-1])
 	for vert in verts:
-		if (not prev) or prev.name != vert.name:
+		idStr = ptToStringId(vert)
+		if prev != idStr:
 			trimmed.append(vert)
-			prev = vert
+			prev = idStr
 	return trimmed
+
+def removeNoNameMembers(verts: list) -> list:
+	trimmed = []
+	for i in range(len(verts)):
+		try:
+			name = verts[i].name
+			trimmed.append(verts[i])
+		except AttributeError:
+			pass
+	return trimmed
+
+def appendIfNotRepeated(vrtList, vrt):
+	l = len(vrtList)
+	if l == 0 or ptToStringId(vrt) != ptToStringId(vrtList[l - 1]):
+		vrtList.append(vrt)
 
 def setSubtractPoints(verts1: list, verts2: list) -> list:
 	d1 = _convertVertListToDict(verts1)

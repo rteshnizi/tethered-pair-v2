@@ -46,6 +46,9 @@ def intersection(obj1, obj2) -> PointOrSegmentNone:
 def __Pt2Repr(self):
 	return "Pt2(%d, %d)" % (self.x(), self.y())
 Point.__repr__ = __Pt2Repr
+def __Pt2Hash(self):
+	return hash("Pt2(%f, %f)" % (self.x(), self.y()))
+Point.__hash__ = __Pt2Hash
 
 # More human readable __repr__ for Vector_2
 def __Vec2Repr(self):

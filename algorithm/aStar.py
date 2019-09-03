@@ -2,7 +2,7 @@ from typing import List
 from model.vertex import Vertex
 
 import utils.cgal.geometry as Geom
-import utils.listUtils as ListUtils
+import utils.vertexUtils as VertexUtils
 from algorithm.visibility import findGaps
 from algorithm.node import Node
 from algorithm.triangulation import Triangulation
@@ -15,30 +15,30 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar():
-	newCable = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination)
-	# processReducedVisibilityGraph()
-	# q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
-	# root = Node(cable=model.cable)
-	# q.enqueue(root)
-	# while not q.isEmpty():
-	# 	n: Node = q.dequeue()
-	# 	if isAtDestination(n):
-	# 		print("At Destination")
-	# 		return # For now terminate at first solution
-	# 	VA = findGaps(n.cable[0], model.robots[0])
-	# 	VB = findGaps(n.cable[-1], model.robots[-1])
-	# 	for va in VA:
-	# 		for vb in VB:
-	# 			# For now I deliberately avoid cross movement because it crashes the triangulation
-	# 			# In reality we can fix this by mirorring the space (like I did in the previous paper)
-	# 			if isThereCrossMovement(n.cable[0], va.vrt, n.cable[-1], vb.vrt):
-	# 				continue
-	# 			newCable = tightenCable(n.cable, va.vrt, vb.vrt)
-	# 			l = Geom.lengthOfCurve(newCable)
-	# 			if l <= model.MAX_CABLE:
-	# 				child = Node(cable=newCable, parent=n)
-	# 				n.children.append(child)
-	# 				q.enqueue(child)
+	# newCable = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination)
+	processReducedVisibilityGraph()
+	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
+	root = Node(cable=model.cable)
+	q.enqueue(root)
+	while not q.isEmpty():
+		n: Node = q.dequeue()
+		if isAtDestination(n):
+			print("At Destination")
+			return # For now terminate at first solution
+		VA = findGaps(n.cable[0], model.robots[0])
+		VB = findGaps(n.cable[-1], model.robots[-1])
+		for va in VA:
+			for vb in VB:
+				# For now I deliberately avoid cross movement because it crashes the triangulation
+				# In reality we can fix this by mirorring the space (like I did in the previous paper)
+				if isThereCrossMovement(n.cable[0], va.vrt, n.cable[-1], vb.vrt):
+					continue
+				newCable = tightenCable(n.cable, va.vrt, vb.vrt)
+				l = Geom.lengthOfCurve(newCable)
+				if l <= model.MAX_CABLE:
+					child = Node(cable=newCable, parent=n)
+					n.children.append(child)
+					q.enqueue(child)
 
 def processReducedVisibilityGraph() -> None:
 	pass
@@ -58,7 +58,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 	This is an altered version of
 	"""
 	boundingBox = [cable[0], cable[-1], dest2, dest1]
-	tri = Triangulation(boundingBox, True)
+	tri = Triangulation(boundingBox)
 	# return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
@@ -101,15 +101,13 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> list:
 		refPt = longCable[i]
 	# tri.getCanvasEdge(currE).highlightEdge()
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
-	return ListUtils.removeRepeatedVertsOrdered(shortCable)
+	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
 def _makeFrozenSet(members):
-	try:
-		l = len(members)
+	if isinstance(members, list):
 		return frozenset(members)
-	except TypeError:
-		# Assume none-iterable item, therefore it's a single item
-		return frozenset([members])
+	# Assume none-iterable item, therefore it's a single item
+	return frozenset([members])
 
 def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt):
 	"""
@@ -121,16 +119,10 @@ def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset
 		if Geom.isColinear(refPt, flipEdgeMid, vrt):
 			raise RuntimeError("flipEdge shouldn't be colinear")
 		if Geom.isToTheRight(refPt, flipEdgeMid, vrt):
-			appendIfNotRepeated(rightSideVrt, vrt)
+			VertexUtils.appendIfNotRepeated(rightSideVrt, vrt)
 		else:
-			appendIfNotRepeated(leftSideVrt, vrt)
+			VertexUtils.appendIfNotRepeated(leftSideVrt, vrt)
 	return flipEdgeMid
-
-def appendIfNotRepeated(vrtList, vrt):
-	l = len(vrtList)
-	if l == 0 or vrt.name != vrtList[l - 1].name:
-		vrtList.append(vrt)
-
 
 def getShorterSideOfFunnel(src, dst, leftSidePts: list, rightSidePts: list) -> list:
 	"""

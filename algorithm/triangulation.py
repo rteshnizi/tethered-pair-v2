@@ -5,10 +5,10 @@
 """
 
 import utils.cgal.geometry as Geom
-import utils.listUtils as ListUtils
+import utils.vertexUtils as VertexUtils
 from model.modelService import Model
 from model.triangulationEdge import TriangulationEdge
-from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, TriangulationFaceRef, convertToPoint
+from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, Polygon, TriangulationFaceRef, convertToPoint
 
 model = Model()
 
@@ -41,7 +41,7 @@ class Triangulation(object):
 		# A dictionary of facesHandles (triangles) -> FaceInfo
 		self.faceInfoMap = {}
 		# Will be populated when finding convex hull
-		self.fullyEnclosedObstacles = []
+		self.fullyEnclosedPolygons = []
 		self.partiallyEnclosedObstacles = []
 		self.debug = debug
 		# Maps point location to it's handle
@@ -51,9 +51,11 @@ class Triangulation(object):
 		self._canvasEdges = {}
 
 		# Fix cases where bounding box has repeated vertices
-		self.boundingBox = ListUtils.removeRepeatedVertsUnordered(boundingBox)
+		self.boundingBox = VertexUtils
+		VertexUtils.removeRepeatedVertsUnordered(boundingBox)
 		self.boundaryPts = [Geom.convertToPoint(vert) for vert in boundingBox]
-		self._getConvexHull()
+		self._dealWithPartialObstacles()
+		# self._getConvexHull()
 		# self._debugConvexHull()
 
 		self.cgalTri = CgalTriangulation()
@@ -62,6 +64,38 @@ class Triangulation(object):
 		self._countTriangles()
 		if debug:
 			self.drawEdges()
+
+	def _dealWithPartialObstacles(self) -> None:
+		"""
+		Remarks
+		===
+		Find the convex hull of the points, then extrudes the points on the convex hull by an epsilon vector from its
+		centroid.
+
+		This is done to guarantee that the boundary of the triangulation would not intersect the constraints.
+
+		:return: Convex Hull
+		"""
+		(self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+		self.fullyEnclosedPolygons = [obs.polygon for obs in self.fullyEnclosedPolygons]
+		for obs in self.partiallyEnclosedObstacles:
+			pts = Geom.polygonAndObstacleIntersection(self.boundaryPts, obs)
+			poly = Polygon()
+			for pt in pts:
+				poly.push_back(pt)
+			self.fullyEnclosedPolygons.append(poly)
+
+		# re = Geom.polygonAndObstacleIntersection(self.boundaryPts, self.partiallyEnclosedObstacles[0])
+		# for i in range(0, len(re) - 1):
+		# 	pt1 = re[i]
+		# 	pt2 = re[i + 1]
+		# 	e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
+		# 	e.createShape()
+		# pt1 = re[0]
+		# pt2 = re[-1]
+		# e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
+		# e.createShape()
+
 
 	def _getConvexHull(self) -> None:
 		"""
@@ -74,7 +108,7 @@ class Triangulation(object):
 
 		:return: Convex Hull
 		"""
-		(self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+		(self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
 		while self.partiallyEnclosedObstacles:
 			for obs in self.partiallyEnclosedObstacles:
 				self.boundaryPts.extend(obs.polygon.vertices())
@@ -86,7 +120,7 @@ class Triangulation(object):
 				vec = Geom.getEpsilonVector(centroid, pt)
 				extruded.append(pt + vec)
 			self.boundaryPts = extruded
-			(self.fullyEnclosedObstacles, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+			(self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
 
 	def _debugConvexHull(self):
 		for i in range(0, len(self.boundaryPts) - 1):
@@ -123,8 +157,10 @@ class Triangulation(object):
 	def _insertHandleIntoDict(self, pt, handle):
 		# We need to do this because for the triangulation we extrude the boundary
 		# because of that the IDs might be off by an epsilon
+		# FIXME: Might be unnecessary now that we have polygon intersection
 		vrt = Geom.getClosestVertex(pt)
-		self._ptHandles[Geom.ptToStringId(vrt)] = handle
+		key = VertexUtils.ptToStringId(vrt) if vrt else VertexUtils.ptToStringId(pt)
+		self._ptHandles[key] = handle
 
 	def _markInteriorTriangles(self):
 		"""
@@ -176,7 +212,7 @@ class Triangulation(object):
 					queue.append(neighboringFace)
 
 	def _addCanvasEdge(self, segment, canvasEdge):
-		pts = frozenset([Geom.ptToStringId(segment.source()), Geom.ptToStringId(segment.target())])
+		pts = frozenset([VertexUtils.ptToStringId(segment.source()), VertexUtils.ptToStringId(segment.target())])
 		self._canvasEdges[pts] = canvasEdge
 
 	def _triangulate(self):
@@ -186,8 +222,8 @@ class Triangulation(object):
 		# Insert exterior
 		self._insertPointsIntoTriangulation(self.boundaryPts)
 		# Insert interior (obstacles)
-		for obs in self.fullyEnclosedObstacles:
-			self._insertPointsIntoTriangulation([vert.loc for vert in obs.vertices])
+		for poly in self.fullyEnclosedPolygons:
+			self._insertPointsIntoTriangulation(list(poly.vertices()))
 		self._markInteriorTriangles()
 
 	def _countTriangles(self):
@@ -239,7 +275,8 @@ class Triangulation(object):
 		"""
 		# See _insertHandleIntoDict()
 		vrt = Geom.getClosestVertex(vertex)
-		return self._ptHandles.get(Geom.ptToStringId(vrt))
+		key = VertexUtils.ptToStringId(vrt) if vrt else VertexUtils.ptToStringId(vertex)
+		return self._ptHandles.get(key)
 
 	def getIncidentTriangles(self, vertexSet):
 		"""
@@ -278,7 +315,9 @@ class Triangulation(object):
 		edges = []
 		for i in indices:
 			pt = faceHandle.vertex(i).point()
-			edges.append(frozenset([vert, model.getVertexByLocation(pt.x(), pt.y())]))
+			ptVert = model.getVertexByLocation(pt.x(), pt.y())
+			edges.append(frozenset([vert, ptVert if ptVert else pt]))
+			# edges.append(frozenset([vert, model.getVertexByLocation(pt.x(), pt.y())]))
 		return frozenset(edges)
 
 	def drawEdges(self, drawDomainOnly=False):
@@ -294,14 +333,14 @@ class Triangulation(object):
 		#  draw triangulation edges on top of constraints
 		for edge in self.cgalTri.finite_edges():
 			i += 1
-			if self.faceInfoMap[edge[0]].inDomain():
+			if not self.cgalTri.is_constrained(edge) and self.faceInfoMap[edge[0]].inDomain():
 				segment = self.cgalTri.segment(edge)
 				canvasE = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
 				canvasE.createShape()
 				self._addCanvasEdge(segment, canvasE)
 
 	def getCanvasEdge(self, vertexSet):
-		pts = frozenset([Geom.ptToStringId(convertToPoint(vert)) for vert in vertexSet])
+		pts = frozenset([VertexUtils.ptToStringId(convertToPoint(vert)) for vert in vertexSet])
 		return self._canvasEdges[pts]
 
 	def eraseDrawnEdges(self):
