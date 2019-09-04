@@ -27,7 +27,6 @@ class FaceInfo(object):
 
 class Triangulation(object):
 	def __init__(self, src1, src2, dest2, dest1, debug=False):
-	# def __init__(self, boundingBox, debug=False):
 		"""
 		Params
 		===
