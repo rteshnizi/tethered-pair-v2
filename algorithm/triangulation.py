@@ -26,7 +26,8 @@ class FaceInfo(object):
 		return (self.nestingLevel % 2) == 1
 
 class Triangulation(object):
-	def __init__(self, boundingBox, debug=False):
+	def __init__(self, src1, src2, dest2, dest1, debug=False):
+	# def __init__(self, boundingBox, debug=False):
 		"""
 		Params
 		===
@@ -35,9 +36,14 @@ class Triangulation(object):
 
 		debug: `True` will add the edges to canvas
 		"""
+		boundingBox = [src1, src2, dest2, dest1]
 		if len(boundingBox) != 4:
 			raise RuntimeError("boundingBox must be a list of 4 Vertex")
 
+		self.src1 = src1
+		self.src2 = src2
+		self.dest1 = dest1
+		self.dest2 = dest2
 		# A dictionary of facesHandles (triangles) -> FaceInfo
 		self.faceInfoMap = {}
 		# Will be populated when finding convex hull
@@ -109,7 +115,7 @@ class Triangulation(object):
 				self.boundaryPts.extend(obs.polygon.vertices())
 			hull = []
 			ConvexHull(self.boundaryPts, hull)
-			centroid = Geom.centroid(hull)
+			# centroid = Geom.centroid(hull)
 			# extruded = []
 			# for pt in hull:
 			# 	vec = Geom.getEpsilonVector(centroid, pt)
@@ -216,6 +222,14 @@ class Triangulation(object):
 		pts = frozenset([VertexUtils.ptToStringId(segment.source()), VertexUtils.ptToStringId(segment.target())])
 		self._canvasEdges[pts] = canvasEdge
 
+	def _insertSrcDestConstraints(self) -> None:
+		h1 = self.getVertexHandle(self.src1)
+		h2 = self.getVertexHandle(self.dest1)
+		self.cgalTri.insert_constraint(h1, h2)
+		h1 = self.getVertexHandle(self.src2)
+		h2 = self.getVertexHandle(self.dest2)
+		self.cgalTri.insert_constraint(h1, h2)
+
 	def _triangulate(self):
 		"""
 		Construct Triangles
@@ -225,6 +239,7 @@ class Triangulation(object):
 		# Insert interior (obstacles)
 		for poly in self.fullyEnclosedPolygons:
 			self._insertPointsIntoTriangulation(list(poly.vertices()))
+		self._insertSrcDestConstraints()
 		self._markInteriorTriangles()
 
 	def _countTriangles(self):

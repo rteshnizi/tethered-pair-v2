@@ -16,31 +16,31 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar():
-	newCable = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True)
+	# newCable = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True)
 	processReducedVisibilityGraph()
-	# q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
-	# root = Node(cable=model.cable)
-	# q.enqueue(root)
-	# while not q.isEmpty():
-	# 	n: Node = q.dequeue()
-	# 	if isAtDestination(n):
-	# 		print("At Destination")
-	# 		Cable(model.canvas, "CABLE", n.cable)
-	# 		return # For now terminate at first solution
-	# 	VA = findGaps(n.cable[0], model.robots[0])
-	# 	VB = findGaps(n.cable[-1], model.robots[-1])
-	# 	for va in VA:
-	# 		for vb in VB:
-	# 			# For now I deliberately avoid cross movement because it crashes the triangulation
-	# 			# In reality we can fix this by mirorring the space (like I did in the previous paper)
-	# 			if isThereCrossMovement(n.cable[0], va.vrt, n.cable[-1], vb.vrt):
-	# 				continue
-	# 			newCable = tightenCable(n.cable, va.vrt, vb.vrt)
-	# 			l = Geom.lengthOfCurve(newCable)
-	# 			if l <= model.MAX_CABLE:
-	# 				child = Node(cable=newCable, parent=n)
-	# 				n.children.append(child)
-	# 				q.enqueue(child)
+	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
+	root = Node(cable=model.cable)
+	q.enqueue(root)
+	while not q.isEmpty():
+		n: Node = q.dequeue()
+		if isAtDestination(n):
+			print("At Destination")
+			Cable(model.canvas, "CABLE", n.cable)
+			return # For now terminate at first solution
+		VA = findGaps(n.cable[0], model.robots[0])
+		VB = findGaps(n.cable[-1], model.robots[-1])
+		for va in VA:
+			for vb in VB:
+				# For now I deliberately avoid cross movement because it crashes the triangulation
+				# In reality we can fix this by mirorring the space (like I did in the previous paper)
+				if isThereCrossMovement(n.cable[0], va.vrt, n.cable[-1], vb.vrt):
+					continue
+				newCable = tightenCable(n.cable, va.vrt, vb.vrt)
+				l = Geom.lengthOfCurve(newCable)
+				if l <= model.MAX_CABLE:
+					child = Node(cable=newCable, parent=n)
+					n.children.append(child)
+					q.enqueue(child)
 
 def processReducedVisibilityGraph() -> None:
 	# TODO: Here I should assign
@@ -60,8 +60,9 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	"""
 	This is an altered version of
 	"""
-	boundingBox = [cable[0], cable[-1], dest2, dest1]
-	tri = Triangulation(boundingBox, debug=debug)
+	# boundingBox = [cable[0], cable[-1], dest2, dest1]
+	# tri = Triangulation(boundingBox, debug=debug)
+	tri = Triangulation(cable[0], cable[-1], dest2, dest1, debug=debug)
 	if not runAlg: return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
@@ -72,7 +73,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	# We use this to maintain the funnel
 	refPt = longCable[0]
 	# We represent an edge by a python set to make checks easier
-	currE = makeFrozenSet([longCable[0], longCable[1]])
+	currE = getEdge(longCable[0], longCable[1])
 	currTries = tri.getIncidentTriangles(currE)
 	# FIXME: This is not the case all the time, i.e. when we find the convex hull
 	# But it will not affect our algorithm for finding the funnel
@@ -80,18 +81,14 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	# 	raise RuntimeError("currTri must be incident to exactly 1 triangle for the first segment of the cable")
 	# currTri = next(iter(currTri)) # Get the only item in the set
 	for i in range(1, len(longCable) - 1):
-		e = makeFrozenSet([longCable[i], longCable[i + 1]])
+		e = getEdge(longCable[i], longCable[i + 1])
 		pivot = e & currE
 		if len(pivot) != 1:
 			raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
 		while not tries & currTries:
-			flipEdge = getFlipEdge(tri, pivot, currE, currTries)
-			incident = tri.getIncidentTriangles(flipEdge)
-			currTries = incident - currTries
-			if len(currTries) != 1:
-				raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
+			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
 			refPt = addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt)
 			currE = flipEdge
 			# Debugging
@@ -103,21 +100,38 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
+def getEdge(vert1, vert2) -> frozenset:
+	# We need to do this because the triangulation only recognizes the vertices that are registered by location in the model
+	# we have repeated vertices and the triangulation might have chosen the other vertex
+	v1 = model.getVertexByLocation(vert1.loc.x(), vert1.loc.y())
+	v2 = model.getVertexByLocation(vert2.loc.x(), vert2.loc.y())
+	# We represent an edge by a python set to make checks easier
+	return makeFrozenSet([v1, v2])
+
+
 def makeFrozenSet(members):
 	if isinstance(members, list):
 		return frozenset(members)
 	# Assume none-iterable item, therefore it's a single item
 	return frozenset([members])
 
-def getFlipEdge(cgalTriangulation, pivot, currE: frozenset, currTries: frozenset):
+def getFlipEdgeAndCurrentTriangle(cgalTriangulation, pivot, currE: frozenset, currTries: frozenset):
 	for tri in currTries:
 		edges = cgalTriangulation.getIncidentEdges(pivot, tri)
 		e = edges - makeFrozenSet(currE)
 		if e:
+			if len(e) != 1:
+				raise RuntimeError("There must only be 1 flipEdge")
+			e = next(iter(e))
+			incident = cgalTriangulation.getIncidentTriangles(e)
+			triangle = incident - currTries
+			if not triangle: continue
 			flipEdge = e
-	if len(flipEdge) != 1:
-		raise RuntimeError("There must only be 1 flipEdge")
-	return next(iter(flipEdge))
+			currTries = triangle
+			break
+	if len(currTries) != 1:
+		raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
+	return (flipEdge, currTries)
 
 
 def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt):

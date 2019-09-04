@@ -20,6 +20,8 @@ def findGaps(v, r: Robot):
 	if _isGap(v, r.destination):
 		verts.append(LabeledVert(r.destination, r))
 	for u in model.vertices:
+		# This is for the edge case in which the destination is on the vertex exactly
+		if u.loc == r.destination.loc: continue
 		if _isGap(v, u):
 			verts.append(LabeledVert(u, r))
 	return verts
