@@ -26,7 +26,7 @@ class FaceInfo(object):
 		return (self.nestingLevel % 2) == 1
 
 class Triangulation(object):
-	def __init__(self, src1, src2, dest2, dest1, debug=False):
+	def __init__(self, cable: list, dest2, dest1, debug=False):
 		"""
 		Params
 		===
@@ -35,12 +35,9 @@ class Triangulation(object):
 
 		debug: `True` will add the edges to canvas
 		"""
-		boundingBox = [src1, src2, dest2, dest1]
-		if len(boundingBox) != 4:
-			raise RuntimeError("boundingBox must be a list of 4 Vertex")
-
-		self.src1 = src1
-		self.src2 = src2
+		self.cable = cable
+		self.src1 = cable[0]
+		self.src2 = cable[-1]
 		self.dest1 = dest1
 		self.dest2 = dest2
 		# A dictionary of facesHandles (triangles) -> FaceInfo
@@ -54,10 +51,11 @@ class Triangulation(object):
 		self._ptHandles = {}
 		# A dictionary of {Point,Point} -> TriangulationEdge
 		self._canvasEdges = {}
-
-		# Fix cases where bounding box has repeated vertices
-		self.boundingBox = VertexUtils.removeRepeatedVertsUnordered(boundingBox)
-		self.boundaryPts = [Geom.convertToPoint(vert) for vert in boundingBox]
+		# The Polygon that define the boundary given by the cable before performing convex hull
+		self.originalPolygon: Polygon = None
+		# List of points that define the boundary of triangulation
+		self.boundaryPts = []
+		self._getOriginalBoundary()
 		# self._dealWithPartialObstacles()
 		self._getConvexHull()
 		# self._debugConvexHull()
@@ -68,6 +66,13 @@ class Triangulation(object):
 		self._countTriangles()
 		if debug:
 			self.drawEdges()
+
+	def _getOriginalBoundary(self) -> None:
+		extendedCable = [self.dest1] + self.cable + [self.dest2]
+		self.boundaryPts = [Geom.convertToPoint(vert) for vert in extendedCable]
+		self.originalPolygon = Polygon()
+		for pt in self.boundaryPts:
+			self.originalPolygon.push_back(pt)
 
 	def _dealWithPartialObstacles(self) -> None:
 		"""
@@ -335,6 +340,13 @@ class Triangulation(object):
 			edges.append(frozenset([vert, ptVert if ptVert else pt]))
 			# edges.append(frozenset([vert, model.getVertexByLocation(pt.x(), pt.y())]))
 		return frozenset(edges)
+
+	def isPointInsideOriginalPolygon(self, vert):
+		"""
+		Check whether the given Vertex/Point falls inside the polygon originally given to triangulation as the boundary
+		(i.e., before getting the convex hull)
+		"""
+		return Geom.isInsidePoly(self.originalPolygon, vert)
 
 	def drawEdges(self, drawDomainOnly=False):
 		i = 0

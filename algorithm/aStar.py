@@ -25,7 +25,8 @@ def aStar():
 		n: Node = q.dequeue()
 		if isAtDestination(n):
 			print("At Destination")
-			Cable(model.canvas, "CABLE", n.cable)
+			c = Cable(model.canvas, "CABLE-D", n.cable)
+			model.entities[c.name] = c
 			return # For now terminate at first solution
 		VA = findGaps(n.cable[0], model.robots[0])
 		VB = findGaps(n.cable[-1], model.robots[-1])
@@ -60,7 +61,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	"""
 	This is an altered version of
 	"""
-	tri = Triangulation(cable[0], cable[-1], dest2, dest1, debug=debug)
+	tri = Triangulation(cable, dest2, dest1, debug=debug)
 	if not runAlg: return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
@@ -81,7 +82,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
 		while not tries & currTries:
-			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries, e)
+			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
 			refPt = addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt)
 			currE = flipEdge
 			# Debugging
@@ -108,13 +109,10 @@ def makeFrozenSet(members):
 	# Assume none-iterable item, therefore it's a single item
 	return frozenset([members])
 
-def getFlipEdgeAndCurrentTriangle(cgalTriangulation, pivot, currE: frozenset, currTries: frozenset, targetE: frozenset):
-	# In case there are multiple currTries
-	# flipEdge is the one that falls between currEdge and targetEdge
-	pivotSet = makeFrozenSet(pivot)
-	otherPointOnTargetE = next(iter(targetE - pivotSet))
-	otherEndOfCrrE = next(iter(currE - pivotSet))
-	targetEdgeIsToTheRight = Geom.isToTheRight(pivot, otherEndOfCrrE, otherPointOnTargetE)
+def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset):
+	# In case there are multiple currTries flipEdge is the one that falls between currEdge and targetEdge.
+	# That is, if we push the pivot epsilon in the direction of the candidate for flipEdge,
+	# that point falls inside the original bounding box.
 	for tri in currTries:
 		edges = cgalTriangulation.getIncidentEdges(pivot, tri)
 		e = edges - makeFrozenSet(currE)
@@ -122,9 +120,11 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation, pivot, currE: frozenset, cu
 			if len(e) != 1:
 				raise RuntimeError("There must only be 1 flipEdge")
 			e = next(iter(e))
-			otherEndOfE = next(iter(e - pivotSet))
+			# Test the epsilon push thing
+			otherEndOfE = next(iter(e - { pivot }))
+			epsilon = Geom.getEpsilonVector(pivot, otherEndOfE)
 			# If e doesn't fall between currE and targetE, then this is not the flip edge
-			if Geom.isToTheRight(pivot, otherEndOfCrrE, otherEndOfE) != targetEdgeIsToTheRight: continue
+			if not cgalTriangulation.isPointInsideOriginalPolygon(pivot.loc + epsilon): continue
 			incident = cgalTriangulation.getIncidentTriangles(e)
 			triangle = incident - currTries
 			if not triangle: continue

@@ -5,9 +5,10 @@ import tkinter as tk
 import sys
 
 from model.modelService import Model
-from model.robot import Robot
-from model.obstacle import Obstacle
+from model.cable import Cable
 from model.destination import Destination
+from model.obstacle import Obstacle
+from model.robot import Robot
 from utils.cgal.types import Point
 
 class Canvas(object):
@@ -47,6 +48,8 @@ class Canvas(object):
 			p = Point(*[float(c) for c in pt.split(',')])
 			self.model.cable.append(self.model.getVertexByLocation(p.x(), p.y()))
 		self.model.cable.append(self.model.robots[-1])
+		c = Cable(canvas=self.canvas, name="CABLE-O", pts=self.model.cable, isOrigin=True)
+		self.model.entities[c.name] = c
 
 	def createRobots(self, ptList):
 		i = 1
