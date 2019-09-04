@@ -12,6 +12,7 @@ from CGAL.CGAL_Kernel import Vector_3 as Vector3D
 
 from CGAL.CGAL_Triangulation_2 import Constrained_Delaunay_triangulation_2 as CgalTriangulation
 from CGAL.CGAL_Triangulation_2 import Ref_Constrained_Delaunay_triangulation_2_Face_handle as TriangulationFaceRef
+from CGAL.CGAL_Triangulation_2 import Constrained_Delaunay_triangulation_2_Face_handle as TriangulationFaceHandle
 
 from CGAL.CGAL_Convex_hull_2 import ch_graham_andrew as ConvexHull
 
@@ -46,9 +47,11 @@ def intersection(obj1, obj2) -> PointOrSegmentNone:
 def __Pt2Repr(self):
 	return "Pt2(%d, %d)" % (self.x(), self.y())
 Point.__repr__ = __Pt2Repr
-def __Pt2Hash(self):
-	return hash("Pt2(%f, %f)" % (self.x(), self.y()))
-Point.__hash__ = __Pt2Hash
+# We don't need the has anymore, I just kept it for reference
+# Make Point_2 hashable
+# def __Pt2Hash(self):
+# 	return hash("Pt2(%f, %f)" % (self.x(), self.y()))
+# Point.__hash__ = __Pt2Hash
 
 # More human readable __repr__ for Vector_2
 def __Vec2Repr(self):
@@ -59,5 +62,14 @@ Vector.__repr__ = __Vec2Repr
 def __Vec3Repr(self):
 	return "Vec3(%d, %d, %d)" % (self.x(), self.y(), self.z())
 Vector3D.__repr__ = __Vec3Repr
+
+# More human readable __repr__ for Triangulation Face Handle
+def __CDTFaceHandleRepr(self: TriangulationFaceHandle):
+	ptsStr = []
+	for i in range(3):
+		pt = self.vertex(i).point()
+		ptsStr.append("(%d, %d)" % (pt.x(), pt.y()))
+	return "Tri[" + ",".join(ptsStr) + "]"
+TriangulationFaceHandle.__repr__ = __CDTFaceHandleRepr
 
 # endregion

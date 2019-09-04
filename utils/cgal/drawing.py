@@ -76,8 +76,8 @@ def mouseHandler(event):
 		return
 	shape = event.widget.find_closest(event.x, event.y)
 	tag = model.canvas.gettags(shape)[0]
-	entity = model.entities[tag]
-	if (hasattr(entity, 'loc')):
+	entity = model.entities.get(tag)
+	if entity and hasattr(entity, 'loc'):
 		print('%s-%d,%d' % (tag, entity.loc.x(), entity.loc.y()))
 	else:
 		print(tag)

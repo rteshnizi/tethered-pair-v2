@@ -51,11 +51,10 @@ class Triangulation(object):
 		self._canvasEdges = {}
 
 		# Fix cases where bounding box has repeated vertices
-		self.boundingBox = VertexUtils
-		VertexUtils.removeRepeatedVertsUnordered(boundingBox)
+		self.boundingBox = VertexUtils.removeRepeatedVertsUnordered(boundingBox)
 		self.boundaryPts = [Geom.convertToPoint(vert) for vert in boundingBox]
-		self._dealWithPartialObstacles()
-		# self._getConvexHull()
+		# self._dealWithPartialObstacles()
+		self._getConvexHull()
 		# self._debugConvexHull()
 
 		self.cgalTri = CgalTriangulation()
@@ -67,14 +66,8 @@ class Triangulation(object):
 
 	def _dealWithPartialObstacles(self) -> None:
 		"""
-		Remarks
-		===
-		Find the convex hull of the points, then extrudes the points on the convex hull by an epsilon vector from its
-		centroid.
-
-		This is done to guarantee that the boundary of the triangulation would not intersect the constraints.
-
-		:return: Convex Hull
+		EXPERIMENTAL CODE: NOT IN USE
+		==
 		"""
 		(self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
 		self.fullyEnclosedPolygons = [obs.polygon for obs in self.fullyEnclosedPolygons]
@@ -96,7 +89,6 @@ class Triangulation(object):
 		# e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
 		# e.createShape()
 
-
 	def _getConvexHull(self) -> None:
 		"""
 		Remarks
@@ -108,19 +100,27 @@ class Triangulation(object):
 
 		:return: Convex Hull
 		"""
-		(self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
-		while self.partiallyEnclosedObstacles:
-			for obs in self.partiallyEnclosedObstacles:
+		self.partiallyEnclosedObstacles = []
+		(self.fullyEnclosedPolygons, partials) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+		# Continue this until we converge
+		# We converge because obstacles whose edges are on the boundary of the convex hull, technically, count as partial still
+		while self.partiallyEnclosedObstacles != partials:
+			for obs in partials:
 				self.boundaryPts.extend(obs.polygon.vertices())
 			hull = []
 			ConvexHull(self.boundaryPts, hull)
 			centroid = Geom.centroid(hull)
-			extruded = []
-			for pt in hull:
-				vec = Geom.getEpsilonVector(centroid, pt)
-				extruded.append(pt + vec)
-			self.boundaryPts = extruded
-			(self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+			# extruded = []
+			# for pt in hull:
+			# 	vec = Geom.getEpsilonVector(centroid, pt)
+			# 	extruded.append(pt + vec)
+			self.boundaryPts = hull
+			self.partiallyEnclosedObstacles = partials
+			# (self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(extruded)
+			(self.fullyEnclosedPolygons, partials) = Geom.getAllIntersectingObstacles(self.boundaryPts)
+		# After we converge, partials are actually fully enclosed
+		self.fullyEnclosedPolygons.extend(self.partiallyEnclosedObstacles)
+		self.fullyEnclosedPolygons = [obs.polygon for obs in self.fullyEnclosedPolygons]
 
 	def _debugConvexHull(self):
 		for i in range(0, len(self.boundaryPts) - 1):
@@ -158,8 +158,9 @@ class Triangulation(object):
 		# We need to do this because for the triangulation we extrude the boundary
 		# because of that the IDs might be off by an epsilon
 		# FIXME: Might be unnecessary now that we have polygon intersection
-		vrt = Geom.getClosestVertex(pt)
-		key = VertexUtils.ptToStringId(vrt) if vrt else VertexUtils.ptToStringId(pt)
+		# vrt = Geom.getClosestVertex(pt)
+		# key = VertexUtils.ptToStringId(vrt) if vrt else VertexUtils.ptToStringId(pt)
+		key = VertexUtils.ptToStringId(pt)
 		self._ptHandles[key] = handle
 
 	def _markInteriorTriangles(self):
@@ -274,8 +275,9 @@ class Triangulation(object):
 		vertex: model.vertex.Vertex or utils.cgal.types.Point
 		"""
 		# See _insertHandleIntoDict()
-		vrt = Geom.getClosestVertex(vertex)
-		key = VertexUtils.ptToStringId(vrt) if vrt else VertexUtils.ptToStringId(vertex)
+		# vrt = Geom.getClosestVertex(vertex)
+		# key = VertexUtils.ptToStringId(vertex) if vrt else VertexUtils.ptToStringId(vertex)
+		key = VertexUtils.ptToStringId(vertex)
 		return self._ptHandles.get(key)
 
 	def getIncidentTriangles(self, vertexSet):
