@@ -25,4 +25,5 @@
 2. Test the current impl for a case where the cable won't get more taut (Aug 6)
 3. ~~We can now traverse th triangulation, maintain the funnel (Aug 6)~~
 4. Change GapDetector to reduced visibility graph calculator (Aug 19)
-5. Add a cable entity whose shape is a line (for debugging)
+5. ~~Add a cable entity whose shape is a line (for debugging)~~
+6. Add a case with initial cable config not being straight (Sep 3)
