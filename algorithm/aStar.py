@@ -61,7 +61,14 @@ def isThereCrossMovement(cable, dest1, dest2):
 def isAtDestination(n) -> bool:
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
 
-def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> list:
+def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False) -> VertList:
+	cable = applyMovement(cable, dest1, -1)
+	return applyMovement(cable, dest2, 0)
+
+def applyMovement(cable: VertList, dest: Vertex, fixedEndIndex: int) -> VertList:
+	pass
+
+def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	"""
 	This is an altered version of
 	"""
