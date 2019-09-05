@@ -9,14 +9,15 @@ from algorithm.triangulation import Triangulation
 from model.modelService import Model
 from model.cable import Cable
 from utils.priorityQ import PriorityQ
-from utils.cgal.types import Point
+from utils.cgal.types import Point, Polygon, convertToPoint
 
 model = Model()
 
 VertList = List[Vertex]
 
-def aStar():
-	# newCable = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True)
+def aStar() -> None:
+	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
+	return
 	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
@@ -34,7 +35,7 @@ def aStar():
 			for vb in VB:
 				# For now I deliberately avoid cross movement because it crashes the triangulation
 				# In reality we can fix this by mirorring the space (like I did in the previous paper)
-				if isThereCrossMovement(n.cable[0], va.vrt, n.cable[-1], vb.vrt):
+				if isThereCrossMovement(n.cable, va.vrt, vb.vrt):
 					continue
 				newCable = tightenCable(n.cable, va.vrt, vb.vrt)
 				l = Geom.lengthOfCurve(newCable)
@@ -48,11 +49,14 @@ def processReducedVisibilityGraph() -> None:
 	pass
 	# for v in model.vertices:
 
-def isThereCrossMovement(src1, dest1, src2, dest2):
-	intersection = Geom.intersectSegmentAndSegment(src1, dest1, src2, dest2)
-	if isinstance(intersection, Point):
-		return True
-	return False
+def isThereCrossMovement(cable, dest1, dest2):
+	# I've also included the case where the polygon is not simple
+	p = Polygon()
+	p.push_back(convertToPoint(dest1))
+	for v in cable:
+		p.push_back(convertToPoint(v))
+	p.push_back(convertToPoint(dest2))
+	return not p.is_simple()
 
 def isAtDestination(n) -> bool:
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
@@ -68,7 +72,8 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		return [dest1, dest2]
 	leftSidePts = []
 	rightSidePts = []
-	longCable = [dest1] + cable + [dest2]
+	changeOrientation = False
+	longCable = getLongCable(cable, dest1, dest2)
 	# We use this to maintain the funnel
 	refPt = longCable[0]
 	# We represent an edge by a python set to make checks easier
@@ -83,8 +88,16 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		tries = tri.getIncidentTriangles(e)
 		while not tries & currTries:
 			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
-			refPt = addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt)
-			currE = flipEdge
+			if flipEdge:
+				refPt = addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt, changeOrientation)
+				currE = flipEdge
+			# FIXME: This happens if the dest1 + cable +dest2 is not a simple polygon
+			else:
+				changeOrientation = True
+				leftSidePts.append(pivot)
+				rightSidePts.append(pivot)
+				currTries = tries
+				flipEdge = e
 			# Debugging
 			# tri.getCanvasEdge(currE).highlightEdge()
 		currTries = tries & currTries
@@ -94,6 +107,25 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
+def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
+	# FIXME: Check for colinearity instead of exact location
+	if cable[1].loc == dest1.loc and cable[-2].loc == dest2.loc:
+		copy = cable[1:-1]
+		copy[0] = dest1
+		copy[-1] = dest2
+		return copy
+	if cable[1].loc == dest1.loc:
+		copy = cable[1:]
+		copy.append(dest2)
+		copy[0] = dest1
+		return copy
+	if cable[-2].loc == dest2.loc:
+		copy = cable[:-1]
+		copy.insert(0, dest1)
+		copy[-1] = dest2
+		return copy
+	return [dest1] + cable + [dest2]
+
 def getEdge(vert1, vert2) -> frozenset:
 	# We need to do this because the triangulation only recognizes the vertices that are registered by location in the model
 	# we have repeated vertices and the triangulation might have chosen the other vertex
@@ -101,7 +133,6 @@ def getEdge(vert1, vert2) -> frozenset:
 	v2 = model.getVertexByLocation(vert2.loc.x(), vert2.loc.y())
 	# We represent an edge by a python set to make checks easier
 	return makeFrozenSet([v1, v2])
-
 
 def makeFrozenSet(members):
 	if isinstance(members, list):
@@ -120,14 +151,16 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 			if len(e) != 1:
 				raise RuntimeError("There must only be 1 flipEdge")
 			e = next(iter(e))
-			# Test the epsilon push thing
-			otherEndOfE = next(iter(e - { pivot }))
-			epsilon = Geom.getEpsilonVector(pivot, otherEndOfE)
-			# If e doesn't fall between currE and targetE, then this is not the flip edge
-			if not cgalTriangulation.isPointInsideOriginalPolygon(pivot.loc + epsilon): continue
+			if len(currTries) > 1:
+				# Test the epsilon push thing
+				otherEndOfE = next(iter(e - { pivot }))
+				epsilon = Geom.getEpsilonVector(pivot, otherEndOfE)
+				# If e doesn't fall between currE and targetE, then this is not the flip edge
+				if not cgalTriangulation.isPointInsideOriginalPolygon(pivot.loc + epsilon): continue
 			incident = cgalTriangulation.getIncidentTriangles(e)
 			triangle = incident - currTries
-			if not triangle: continue
+			# This happens when the polygon formed by the cable and destinations is not simple
+			if not triangle: return (None, None)
 			flipEdge = e
 			currTries = triangle
 			break
@@ -135,10 +168,11 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 		raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 	return (flipEdge, currTries)
 
-
-def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt):
+def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt, changeOrientation: bool):
 	"""
 	Adds the flipEdge verts to the appropriate side list and returns midPoint of the flipEdge
+
+	If change orientation is true, it means the polygon is not simple and thus we have to change the orientation of left and right from that point on.
 	"""
 	flipEdgeVerts = list(flipEdge)
 	flipEdgeMid = Geom.midpoint(flipEdgeVerts[0], flipEdgeVerts[1])
@@ -146,9 +180,19 @@ def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset
 		if Geom.isColinear(refPt, flipEdgeMid, vrt):
 			raise RuntimeError("flipEdge shouldn't be colinear")
 		if Geom.isToTheRight(refPt, flipEdgeMid, vrt):
-			VertexUtils.appendIfNotRepeated(rightSideVrt, vrt)
+			if not changeOrientation:
+				# Do it the normal way
+				VertexUtils.appendIfNotRepeated(rightSideVrt, vrt)
+			else:
+				# Flip orientation
+				VertexUtils.appendIfNotRepeated(leftSideVrt, vrt)
 		else:
-			VertexUtils.appendIfNotRepeated(leftSideVrt, vrt)
+			if not changeOrientation:
+				# Do it the normal way
+				VertexUtils.appendIfNotRepeated(leftSideVrt, vrt)
+			else:
+				# Flip orientation
+				VertexUtils.appendIfNotRepeated(rightSideVrt, vrt)
 	return flipEdgeMid
 
 def getShorterSideOfFunnel(src, dst, leftSidePts: list, rightSidePts: list) -> list:

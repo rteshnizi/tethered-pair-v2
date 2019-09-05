@@ -11,6 +11,7 @@ class PriorityQ(object):
 
 		key: a function to return the key (or the cost) associated with the given item
 		"""
+		self.counter = 0
 		self.key = key
 		if initial:
 			self._data = [self._createTuple(item) for item in initial]
@@ -29,10 +30,12 @@ class PriorityQ(object):
 		* The second is just a sequence id in order to avoid comparison between items if the keys happen to be equal
 		* The third is the item itself
 		"""
-		return (self.key(item), len(self._data), item)
+		self.counter += 1
+		return (self.key(item), self.counter, item)
 
 	def enqueue(self, item):
-		heapq.heappush(self._data, self._createTuple(item))
+		item = self._createTuple(item)
+		heapq.heappush(self._data, item)
 
 	def dequeue(self):
 		# Return the last item of the tuple

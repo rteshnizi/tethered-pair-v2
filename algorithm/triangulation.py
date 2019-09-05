@@ -110,7 +110,10 @@ class Triangulation(object):
 
 		:return: Convex Hull
 		"""
-		self.partiallyEnclosedObstacles = []
+		hull = []
+		if not self.originalPolygon.is_simple():
+			ConvexHull(self.boundaryPts, hull)
+			self.boundaryPts = hull
 		(self.fullyEnclosedPolygons, partials) = Geom.getAllIntersectingObstacles(self.boundaryPts)
 		# Continue this until we converge
 		# We converge because obstacles whose edges are on the boundary of the convex hull, technically, count as partial still
@@ -226,7 +229,11 @@ class Triangulation(object):
 		pts = frozenset([VertexUtils.ptToStringId(segment.source()), VertexUtils.ptToStringId(segment.target())])
 		self._canvasEdges[pts] = canvasEdge
 
-	def _insertSrcDestConstraints(self) -> None:
+	def _insertCableConstraints(self) -> None:
+		for i in range(len(self.cable) - 1):
+			h1 = self.getVertexHandle(self.cable[i])
+			h2 = self.getVertexHandle(self.cable[i + 1])
+			self.cgalTri.insert_constraint(h1, h2)
 		h1 = self.getVertexHandle(self.src1)
 		h2 = self.getVertexHandle(self.dest1)
 		self.cgalTri.insert_constraint(h1, h2)
@@ -243,7 +250,7 @@ class Triangulation(object):
 		# Insert interior (obstacles)
 		for poly in self.fullyEnclosedPolygons:
 			self._insertPointsIntoTriangulation(list(poly.vertices()))
-		self._insertSrcDestConstraints()
+		self._insertCableConstraints()
 		self._markInteriorTriangles()
 
 	def _countTriangles(self):
