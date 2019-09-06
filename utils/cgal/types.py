@@ -6,6 +6,7 @@ from CGAL.CGAL_Kernel import Line_2 as Line
 from CGAL.CGAL_Kernel import Point_2 as Point
 from CGAL.CGAL_Kernel import Polygon_2 as Polygon
 from CGAL.CGAL_Kernel import Ref_int as IntRef
+from CGAL.CGAL_Kernel import Ray_2 as Ray
 from CGAL.CGAL_Kernel import Segment_2 as Segment
 from CGAL.CGAL_Kernel import Vector_2 as Vector
 from CGAL.CGAL_Kernel import Vector_3 as Vector3D
@@ -45,7 +46,7 @@ def intersection(obj1, obj2) -> PointOrSegmentNone:
 
 # More human readable __repr__ for Point_2
 def __Pt2Repr(self):
-	return "Pt2(%d, %d)" % (self.x(), self.y())
+	return "Pt(%d, %d)" % (self.x(), self.y())
 Point.__repr__ = __Pt2Repr
 # We don't need the has anymore, I just kept it for reference
 # Make Point_2 hashable
@@ -55,13 +56,18 @@ Point.__repr__ = __Pt2Repr
 
 # More human readable __repr__ for Vector_2
 def __Vec2Repr(self):
-	return "Vec2(%d, %d)" % (self.x(), self.y())
+	return "Vec(%d, %d)" % (self.x(), self.y())
 Vector.__repr__ = __Vec2Repr
 
 # More human readable __repr__ for Vector_3
 def __Vec3Repr(self):
 	return "Vec3(%d, %d, %d)" % (self.x(), self.y(), self.z())
 Vector3D.__repr__ = __Vec3Repr
+
+# More human readable __repr__ for Ray_2
+def __Ray2Repr(self: Ray):
+	return "Ray(%s)" % (repr(self.source()))
+Ray.__repr__ = __Ray2Repr
 
 # More human readable __repr__ for Triangulation Face Handle
 def __CDTFaceHandleRepr(self: TriangulationFaceHandle):

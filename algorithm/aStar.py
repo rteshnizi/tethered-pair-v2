@@ -3,7 +3,7 @@ from model.vertex import Vertex
 
 import utils.cgal.geometry as Geom
 import utils.vertexUtils as VertexUtils
-from algorithm.visibility import findGaps
+from algorithm.visibility import findGaps, applyMovement
 from algorithm.node import Node
 from algorithm.triangulation import Triangulation
 from model.modelService import Model
@@ -16,6 +16,8 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
+	print(tightenCableClassic(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True))
+	return
 	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
 	return
 	processReducedVisibilityGraph()
@@ -62,11 +64,10 @@ def isAtDestination(n) -> bool:
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
 
 def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False) -> VertList:
-	cable = applyMovement(cable, dest1, -1)
-	return applyMovement(cable, dest2, 0)
+	cable = applyMovement(cable, dest1, True)
+	return applyMovement(cable, dest2, False)
 
-def applyMovement(cable: VertList, dest: Vertex, fixedEndIndex: int) -> VertList:
-	pass
+
 
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	"""
@@ -79,6 +80,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		return [dest1, dest2]
 	leftSidePts = []
 	rightSidePts = []
+	flipEdges = []
 	changeOrientation = False
 	longCable = getLongCable(cable, dest1, dest2)
 	# We use this to maintain the funnel
@@ -105,6 +107,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 				rightSidePts.append(pivot)
 				currTries = tries
 				flipEdge = e
+			flipEdges.append(flipEdge)
 			# Debugging
 			# tri.getCanvasEdge(currE).highlightEdge()
 		currTries = tries & currTries
@@ -112,6 +115,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		refPt = longCable[i]
 	# tri.getCanvasEdge(currE).highlightEdge()
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
+	print(flipEdges)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:

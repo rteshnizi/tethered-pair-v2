@@ -1,6 +1,7 @@
+import utils.cgal.geometry as Geom
 from model.modelService import Model
 from model.robot import Robot
-import utils.cgal.geometry as geometry
+from utils.cgal.types import Ray, Segment, convertToPoint, intersection
 
 model = Model()
 
@@ -30,7 +31,62 @@ def _isGap(src, target) -> bool:
 	if not src.isVisible(target):
 		return False
 	# Detecting whether u is a gap for v
-	epsilon = geometry.getEpsilonVector(src, target)
+	epsilon = Geom.getEpsilonVector(src, target)
 	if target.ownerObs and target.ownerObs.enclosesPoint(target.loc + epsilon):
 		return False
 	return True
+
+
+def applyMovement(cable, dest, isZeroEndMoving: bool):
+	cable = doPops(cable, dest, isZeroEndMoving)
+	cable = doPushes(cable, dest, isZeroEndMoving)
+	return cable
+
+def doPops(cable, dest, isZeroEndMoving):
+	src = cable[0] if isZeroEndMoving else cable[-1]
+	movement = Segment(convertToPoint(src), convertToPoint(dest))
+	stitches = getPoppingStitchLines(cable, isZeroEndMoving)
+	deleteInd = 1 if isZeroEndMoving else -2
+	for stitch in stitches:
+		inter = intersection(movement, stitch)
+		if inter:
+			del cable[deleteInd]
+		else:
+			break
+	return cable
+
+def doPushes(cable, dest, isZeroEndMoving):
+	src = cable[-1] if isZeroEndMoving else cable[0]
+	movement = Segment(convertToPoint(src), convertToPoint(dest))
+	base = cable[0] if isZeroEndMoving else cable[-1]
+	closestBase = None
+	closestDist = 1000000000
+	for v in model.vertices:
+		if _isGap(base, v):
+			basePt = convertToPoint(base)
+			vPt = convertToPoint(v)
+			stitch = Ray(vPt, v - basePt)
+			inter = intersection(movement, stitch)
+			if inter:
+				d = Geom.vertexDistance(src, inter)
+				if d < closestDist:
+					closestDist = d
+					closestBase = v
+	insertionIndex = -1 if isZeroEndMoving else 1
+	while closestDist:
+		cable.insert(insertionIndex, closestBase)
+		#  Continue Here
+
+def getPoppingStitchLines(cable: list, isZeroEndMoving: bool) -> list:
+	rays = []
+	start = len(cable) - 1 if isZeroEndMoving else 0
+	stop = 1 if isZeroEndMoving else len(cable) - 2
+	step = -1 if isZeroEndMoving else 1
+	for i in range(start, stop, step):
+		pt1 = convertToPoint(cable[i])
+		pt2 = convertToPoint(cable[i + step])
+		direction = pt2 - pt1
+		r = Ray(pt2, direction)
+		rays.append(r)
+	rays.reverse()
+	return rays
