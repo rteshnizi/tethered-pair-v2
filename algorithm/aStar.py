@@ -16,8 +16,6 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
-	print(tightenCableClassic(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True))
-	return
 	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
 	return
 	processReducedVisibilityGraph()
@@ -67,8 +65,6 @@ def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=Fal
 	cable = applyMovement(cable, dest1, True)
 	return applyMovement(cable, dest2, False)
 
-
-
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	"""
 	This is an altered version of
@@ -81,6 +77,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	leftSidePts = []
 	rightSidePts = []
 	flipEdges = []
+	allCurrentTries = []
 	changeOrientation = False
 	longCable = getLongCable(cable, dest1, dest2)
 	# We use this to maintain the funnel
@@ -108,14 +105,17 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 				currTries = tries
 				flipEdge = e
 			flipEdges.append(flipEdge)
+			allCurrentTries.append(currTries)
 			# Debugging
 			# tri.getCanvasEdge(currE).highlightEdge()
 		currTries = tries & currTries
 		currE = e
 		refPt = longCable[i]
+		allCurrentTries.append(currTries)
 	# tri.getCanvasEdge(currE).highlightEdge()
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
 	print(flipEdges)
+	print(allCurrentTries)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:

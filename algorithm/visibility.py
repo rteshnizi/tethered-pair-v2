@@ -56,16 +56,17 @@ def doPops(cable, dest, isZeroEndMoving):
 	return cable
 
 def doPushes(cable, dest, isZeroEndMoving):
-	src = cable[-1] if isZeroEndMoving else cable[0]
+	src = cable[0] if isZeroEndMoving else cable[-1]
 	movement = Segment(convertToPoint(src), convertToPoint(dest))
-	base = cable[0] if isZeroEndMoving else cable[-1]
+	base = cable[1] if isZeroEndMoving else cable[-2]
 	closestBase = None
 	closestDist = 1000000000
 	for v in model.vertices:
+		if v.loc == base.loc: continue
 		if _isGap(base, v):
 			basePt = convertToPoint(base)
 			vPt = convertToPoint(v)
-			stitch = Ray(vPt, v - basePt)
+			stitch = Ray(vPt, vPt - basePt)
 			inter = intersection(movement, stitch)
 			if inter:
 				d = Geom.vertexDistance(src, inter)
@@ -73,9 +74,11 @@ def doPushes(cable, dest, isZeroEndMoving):
 					closestDist = d
 					closestBase = v
 	insertionIndex = -1 if isZeroEndMoving else 1
-	while closestDist:
+	if closestDist:
 		cable.insert(insertionIndex, closestBase)
-		#  Continue Here
+		return doPushes(cable, dest, isZeroEndMoving)
+	else:
+		return cable
 
 def getPoppingStitchLines(cable: list, isZeroEndMoving: bool) -> list:
 	rays = []

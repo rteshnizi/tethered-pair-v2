@@ -46,13 +46,24 @@ def intersection(obj1, obj2) -> PointOrSegmentNone:
 
 # More human readable __repr__ for Point_2
 def __Pt2Repr(self):
-	return "Pt(%d, %d)" % (self.x(), self.y())
+	return "P(%d, %d)" % (self.x(), self.y())
 Point.__repr__ = __Pt2Repr
 # We don't need the has anymore, I just kept it for reference
 # Make Point_2 hashable
 # def __Pt2Hash(self):
 # 	return hash("Pt2(%f, %f)" % (self.x(), self.y()))
 # Point.__hash__ = __Pt2Hash
+
+# More human readable __repr__ for Ray_2
+def __Ray2Repr(self: Ray):
+	return "Ray(%s)" % (repr(self.source()))
+Ray.__repr__ = __Ray2Repr
+
+
+# More human readable __repr__ for Ray_2
+def __Seg2Repr(self: Segment):
+	return "Seg(%s, %s)" % (repr(self.source()), repr(self.target()))
+Segment.__repr__ = __Seg2Repr
 
 # More human readable __repr__ for Vector_2
 def __Vec2Repr(self):
@@ -63,11 +74,6 @@ Vector.__repr__ = __Vec2Repr
 def __Vec3Repr(self):
 	return "Vec3(%d, %d, %d)" % (self.x(), self.y(), self.z())
 Vector3D.__repr__ = __Vec3Repr
-
-# More human readable __repr__ for Ray_2
-def __Ray2Repr(self: Ray):
-	return "Ray(%s)" % (repr(self.source()))
-Ray.__repr__ = __Ray2Repr
 
 # More human readable __repr__ for Triangulation Face Handle
 def __CDTFaceHandleRepr(self: TriangulationFaceHandle):
