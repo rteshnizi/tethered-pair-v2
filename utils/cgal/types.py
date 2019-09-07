@@ -1,4 +1,5 @@
 from typing import Union
+from model.modelService import Model
 
 from CGAL.CGAL_Kernel import cross_product as _cross_product
 from CGAL.CGAL_Kernel import intersection as _intersection
@@ -18,6 +19,7 @@ from CGAL.CGAL_Triangulation_2 import Constrained_Delaunay_triangulation_2_Face_
 from CGAL.CGAL_Convex_hull_2 import ch_graham_andrew as ConvexHull
 
 PointOrSegmentNone = Union[Point, Segment, None]
+model = Model()
 
 def convertToPoint(vert) -> Point:
 	"""
@@ -80,7 +82,7 @@ def __CDTFaceHandleRepr(self: TriangulationFaceHandle):
 	ptsStr = []
 	for i in range(3):
 		pt = self.vertex(i).point()
-		ptsStr.append("(%d, %d)" % (pt.x(), pt.y()))
+		ptsStr.append("%s" % repr(model.getVertexByLocation(pt.x(), pt.y())))
 	return "Tri[" + ",".join(ptsStr) + "]"
 TriangulationFaceHandle.__repr__ = __CDTFaceHandleRepr
 

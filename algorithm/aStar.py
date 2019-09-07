@@ -115,7 +115,8 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	# tri.getCanvasEdge(currE).highlightEdge()
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
 	print(flipEdges)
-	print(allCurrentTries)
+	for t in allCurrentTries:
+		print(t)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:

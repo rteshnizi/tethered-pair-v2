@@ -8,7 +8,7 @@ import utils.cgal.geometry as Geom
 import utils.vertexUtils as VertexUtils
 from model.modelService import Model
 from model.triangulationEdge import TriangulationEdge
-from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, Polygon, TriangulationFaceRef, convertToPoint
+from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, Polygon, TriangulationFaceHandle, TriangulationFaceRef, convertToPoint
 
 model = Model()
 
@@ -261,6 +261,26 @@ class Triangulation(object):
 		for _f in self.cgalTri.finite_faces():
 			self.triangleCount += 1
 
+	def _isFaceSurroundedByCable(self, face: TriangulationFaceHandle):
+		for i in range(3):
+			pt = face.vertex(i).point()
+			isOnCable = False
+			for v in [self.dest1] + self.cable +[self.dest2]:
+				if convertToPoint(v) == pt:
+					isOnCable = True
+					break
+			if not isOnCable:
+				return False
+		return True
+
+	def _filterNonDomainTriangle(self, face: TriangulationFaceHandle):
+		if self.faceInfoMap[face].inDomain():
+			return True
+		if self._isFaceSurroundedByCable(face):
+			return True
+		return False
+
+
 	def getCgalEdge(self, vertexSet):
 		"""
 		Finds the edge connecting the two points in vertexSet, or `None` if ti doesn't exist.
@@ -326,7 +346,7 @@ class Triangulation(object):
 			raise RuntimeError("No edge found for the vertex set")
 		(faceHandle, vertexInd) = edge
 		faces = [faceHandle, faceHandle.neighbor(vertexInd)]
-		faces = list(filter(lambda f: self.faceInfoMap[f].inDomain(), faces))
+		faces = list(filter(self._filterNonDomainTriangle, faces))
 		return frozenset(faces)
 
 	def getIncidentEdges(self, vert, faceHandle):
