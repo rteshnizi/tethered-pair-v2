@@ -280,7 +280,6 @@ class Triangulation(object):
 			return True
 		return False
 
-
 	def getCgalEdge(self, vertexSet):
 		"""
 		Finds the edge connecting the two points in vertexSet, or `None` if ti doesn't exist.
@@ -402,3 +401,11 @@ class Triangulation(object):
 		for edge in self._canvasEdges:
 			self._canvasEdges[edge].removeShape()
 		self._canvasEdges = {}
+
+	def areTrianglesNeighbor(self, faceHandle1: TriangulationFaceHandle, faceHandle2: TriangulationFaceHandle):
+		return faceHandle1.has_neighbor(faceHandle2)
+
+	def triangleHasVertex(self, faceHandle: TriangulationFaceHandle, vertex):
+		vertHandle = self.getVertexHandle(vertex)
+		if not vertHandle: return False
+		return faceHandle.has_vertex(vertHandle)

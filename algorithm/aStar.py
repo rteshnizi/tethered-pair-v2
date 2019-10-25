@@ -1,6 +1,5 @@
 from typing import List
 from model.vertex import Vertex
-
 import utils.cgal.geometry as Geom
 import utils.vertexUtils as VertexUtils
 from algorithm.visibility import findGaps, applyMovement
@@ -67,7 +66,9 @@ def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=Fal
 
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	"""
-	This is an altered version of
+	This is an altered version of "Hershberger, J., & Snoeyink, J. (1994). Computing minimum length paths of a given homotopy class."
+
+	https://doi.org/10.1016/0925-7721(94)90010-8
 	"""
 	tri = Triangulation(cable, dest2, dest1, debug=debug)
 	if not runAlg: return [] # For debugging only the triangulation
@@ -85,6 +86,9 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
 	currTries = tri.getIncidentTriangles(currE)
+	if len(currTries) != 1:
+			raise RuntimeError("More than 1 Triangle as the starting point")
+	startTri = next(iter(currTries))
 	for i in range(1, len(longCable) - 1):
 		e = getEdge(longCable[i], longCable[i + 1])
 		pivot = e & currE
@@ -97,7 +101,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 			if flipEdge:
 				refPt = addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt, changeOrientation)
 				currE = flipEdge
-			# FIXME: This happens if the dest1 + cable +dest2 is not a simple polygon
+			# FIXME: This happens if the dest1 + cable + dest2 is not a simple polygon
 			else:
 				changeOrientation = True
 				leftSidePts.append(pivot)
@@ -114,9 +118,10 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		allCurrentTries.append(currTries)
 	# tri.getCanvasEdge(currE).highlightEdge()
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
-	print(flipEdges)
-	for t in allCurrentTries:
-		print(t)
+	graph = buildTriangleGraph(tri, allCurrentTries)
+	sleeve = []
+	isInSleeve(tri, graph, startTri, dest2, set(), sleeve)
+	print(sleeve)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
@@ -220,3 +225,34 @@ def getShorterSideOfFunnel(src, dst, leftSidePts: list, rightSidePts: list) -> l
 	leftL = Geom.lengthOfCurve(lCable)
 	rightL = Geom.lengthOfCurve(rCable)
 	return lCable if leftL < rightL else rCable
+
+def buildTriangleGraph(triangulation: Triangulation, allTries: list):
+	graph = {}
+	for i in range(len(allTries)):
+		this = allTries[i]
+		for j in range(i + 1, len(allTries)):
+			that = allTries[j]
+			for t1 in this:
+				for t2 in that:
+					if triangulation.areTrianglesNeighbor(t1, t2):
+						if t1 in graph:
+							graph[t1].add(t2)
+						else:
+							graph[t1] = {t2}
+						if t2 in graph:
+							graph[t2].add(t1)
+						else:
+							graph[t2] = {t1}
+	return graph
+
+def isInSleeve(triangulation: Triangulation, graph: dict, startTriangle, dest: Vertex, visited: set, sleeve: list):
+	if triangulation.triangleHasVertex(startTriangle, dest):
+		sleeve.insert(0, startTriangle)
+		return True
+	visited.add(startTriangle)
+	for child in graph[startTriangle]:
+		if child in visited: continue
+		if isInSleeve(triangulation, graph, child, dest, visited, sleeve):
+			sleeve.insert(0, startTriangle)
+			return True
+	return False

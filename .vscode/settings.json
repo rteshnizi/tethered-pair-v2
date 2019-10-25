@@ -15,6 +15,7 @@
 		"Vect",
 		"Verts",
 		"cgal",
+		"homotopy",
 		"numpy",
 		"sympy"
 	]
