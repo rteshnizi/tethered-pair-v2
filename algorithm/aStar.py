@@ -120,8 +120,8 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
 	graph = buildTriangleGraph(tri, allCurrentTries)
 	sleeve = []
-	isInSleeve(tri, graph, startTri, dest2, set(), sleeve)
-	print(sleeve)
+	findSleeve(tri, graph, startTri, dest2, set(), sleeve)
+	funnel = getFunnel(tri, sleeve)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
@@ -245,14 +245,17 @@ def buildTriangleGraph(triangulation: Triangulation, allTries: list):
 							graph[t2] = {t1}
 	return graph
 
-def isInSleeve(triangulation: Triangulation, graph: dict, startTriangle, dest: Vertex, visited: set, sleeve: list):
+def findSleeve(triangulation: Triangulation, graph: dict, startTriangle, dest: Vertex, visited: set, sleeve: list):
 	if triangulation.triangleHasVertex(startTriangle, dest):
 		sleeve.insert(0, startTriangle)
 		return True
 	visited.add(startTriangle)
 	for child in graph[startTriangle]:
 		if child in visited: continue
-		if isInSleeve(triangulation, graph, child, dest, visited, sleeve):
+		if findSleeve(triangulation, graph, child, dest, visited, sleeve):
 			sleeve.insert(0, startTriangle)
 			return True
 	return False
+
+def getFunnel(tri: Triangulation, sleeve: list):
+	pass
