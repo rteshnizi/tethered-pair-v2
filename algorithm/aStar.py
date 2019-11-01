@@ -99,7 +99,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		while not tries & currTries:
 			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
 			if flipEdge:
-				refPt = addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt, changeOrientation)
+				refPt = _addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt, changeOrientation)
 				currE = flipEdge
 			# FIXME: This happens if the dest1 + cable + dest2 is not a simple polygon
 			else:
@@ -121,7 +121,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	graph = buildTriangleGraph(tri, allCurrentTries)
 	sleeve = []
 	findSleeve(tri, graph, startTri, dest2, set(), sleeve)
-	funnel = getFunnel(tri, sleeve)
+	funnel = getFunnel(tri, dest1, dest2, sleeve)
 	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
@@ -185,7 +185,7 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 		raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 	return (flipEdge, currTries)
 
-def addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt, changeOrientation: bool):
+def _addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt, changeOrientation: bool):
 	"""
 	Adds the flipEdge verts to the appropriate side list and returns midPoint of the flipEdge
 
@@ -226,7 +226,7 @@ def getShorterSideOfFunnel(src, dst, leftSidePts: list, rightSidePts: list) -> l
 	rightL = Geom.lengthOfCurve(rCable)
 	return lCable if leftL < rightL else rCable
 
-def buildTriangleGraph(triangulation: Triangulation, allTries: list):
+def buildTriangleGraph(tri: Triangulation, allTries: list):
 	graph = {}
 	for i in range(len(allTries)):
 		this = allTries[i]
@@ -234,7 +234,7 @@ def buildTriangleGraph(triangulation: Triangulation, allTries: list):
 			that = allTries[j]
 			for t1 in this:
 				for t2 in that:
-					if triangulation.areTrianglesNeighbor(t1, t2):
+					if tri.areTrianglesNeighbor(t1, t2):
 						if t1 in graph:
 							graph[t1].add(t2)
 						else:
@@ -245,17 +245,21 @@ def buildTriangleGraph(triangulation: Triangulation, allTries: list):
 							graph[t2] = {t1}
 	return graph
 
-def findSleeve(triangulation: Triangulation, graph: dict, startTriangle, dest: Vertex, visited: set, sleeve: list):
-	if triangulation.triangleHasVertex(startTriangle, dest):
+def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, visited: set, sleeve: list):
+	if tri.triangleHasVertex(startTriangle, dest):
 		sleeve.insert(0, startTriangle)
 		return True
 	visited.add(startTriangle)
 	for child in graph[startTriangle]:
 		if child in visited: continue
-		if findSleeve(triangulation, graph, child, dest, visited, sleeve):
+		if findSleeve(tri, graph, child, dest, visited, sleeve):
 			sleeve.insert(0, startTriangle)
 			return True
 	return False
 
-def getFunnel(tri: Triangulation, sleeve: list):
-	pass
+def getFunnel(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
+	funnel = [src]
+	for i in range(0, len(sleeve) - 1):
+		e = tri.getCommonEdge(sleeve[i], sleeve[i + 1])
+
+	return funnel
