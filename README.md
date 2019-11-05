@@ -14,8 +14,7 @@
 		* Use [OSGeo4W](https://trac.osgeo.org/osgeo4w/wiki/WikiStart#QuickStartforOSGeo4WUsers)
 		* Add `C:\OSGeo4W64\bin` to Windows path
 	* Ubuntu: I don't remember needing to do this
-C:\OSGeo4W64\bin*
-1. [Shapely](https://github.com/Toblerity/Shapely):
+4. [Shapely](https://github.com/Toblerity/Shapely):
 	* On Ubuntu `pip install shapely`
 
 ## Recommended Tools
