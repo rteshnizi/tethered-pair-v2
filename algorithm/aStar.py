@@ -259,7 +259,16 @@ def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, vis
 
 def getFunnel(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 	funnel = [src]
+	ref = src
 	for i in range(0, len(sleeve) - 1):
 		e = tri.getCommonEdge(sleeve[i], sleeve[i + 1])
-
+		if not e:
+			raise RuntimeError("Sleeve must have neighboring triangles.")
+		e = list(e)
+		mid = Geom.midpoint(e[0], e[1])
+		if Geom.isToTheRight(ref, mid, e[0]):
+			funnel = [e[1]] + funnel + [e[0]]
+		else:
+			funnel = [e[0]] + funnel + [e[1]]
+		pass
 	return funnel

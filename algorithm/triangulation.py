@@ -413,9 +413,10 @@ class Triangulation(object):
 	def getCommonEdge(self, faceHandle1: TriangulationFaceHandle, faceHandle2: TriangulationFaceHandle):
 		indices = {0, 1, 2}
 		for i in indices:
-			if faceHandle1.has_neighbor(faceHandle2, i):
+			neighbor = faceHandle1.neighbor(i)
+			if neighbor == faceHandle2:
 				ptInds = indices - {i}
 				verts = [faceHandle1.vertex(j).point() for j in ptInds]
-				verts = [Model.getVertexByLocation(pt.x(), pt.y()) for pt in verts]
+				verts = [model.getVertexByLocation(x=pt.x(), y=pt.y()) for pt in verts]
 				return frozenset(verts)
 		return frozenset()
