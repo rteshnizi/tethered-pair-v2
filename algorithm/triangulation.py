@@ -8,7 +8,7 @@ import utils.cgal.geometry as Geom
 import utils.vertexUtils as VertexUtils
 from model.modelService import Model
 from model.triangulationEdge import TriangulationEdge
-from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, Polygon, TriangulationFaceHandle, TriangulationFaceRef, convertToPoint
+from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, Point, Polygon, TriangulationFaceHandle, TriangulationFaceRef, convertToPoint
 
 model = Model()
 
@@ -348,7 +348,7 @@ class Triangulation(object):
 		faces = list(filter(self._filterNonDomainTriangle, faces))
 		return frozenset(faces)
 
-	def getIncidentEdges(self, vert, faceHandle):
+	def getIncidentEdges(self, vert, faceHandle: TriangulationFaceHandle):
 		"""
 		Given a vertex and face handle, find the two edges incident to it
 
@@ -366,6 +366,20 @@ class Triangulation(object):
 			edges.append(frozenset([vert, ptVert if ptVert else pt]))
 			# edges.append(frozenset([vert, model.getVertexByLocation(pt.x(), pt.y())]))
 		return frozenset(edges)
+
+	def pushVertEpsilonInside(self, vert, faceHandle: TriangulationFaceHandle) -> Point:
+		edges = self.getIncidentEdges(vert, faceHandle)
+		if not edges or len(edges) != 2: raise RuntimeError("There must be 2 incident edges")
+		vects = []
+		for e in edges:
+			for v in e:
+				if v.name != vert.name:
+					vects.append(v.loc - vert.loc)
+					break
+		summed = vects[0] + vects[1]
+		epsilon = Geom.getEpsilonVectorFromVect(summed)
+		return vert.loc + epsilon
+
 
 	def isPointInsideOriginalPolygon(self, vert):
 		"""

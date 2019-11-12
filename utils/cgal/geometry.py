@@ -20,6 +20,12 @@ def vertexDistance(v1, v2):
 	vec = pt1 - pt2
 	return sqrt(vec.squared_length())
 
+def getEpsilonVectorFromVect(vect) -> Vector:
+	"""
+	Returns a Vector which represents an epsilon vector
+	"""
+	return vect * EPSILON_MULTIPLIER
+
 def getEpsilonVector(frm, to) -> Vector:
 	"""
 	Returns a Vector which represents an epsilon vector
