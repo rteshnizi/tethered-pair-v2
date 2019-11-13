@@ -172,3 +172,24 @@ def addVectorToPoint(pt, dx, dy):
 	vect = Vector(dx, dy)
 	_pt = convertToPoint(pt)
 	return _pt + vect
+
+def isVisible(v1, v2):
+	pt1 = convertToPoint(v1)
+	pt2 = convertToPoint(v2)
+	l = Segment(pt1, pt2)
+	for o in model.obstacles:
+		intersections = o.intersection(l)
+		# if vertices are visible, the intersection is either empty or it is a line segment
+		# whose at least one of the end points is one of the two vertices
+		if (len(intersections) == 0):
+			continue
+		# If obstacles are concave, we might have more than 2 intersections
+		for intersection in intersections:
+			if isinstance(intersection, Point):
+				if not (intersection == pt1 or intersection == pt2):
+					return False
+			else: # intersection is a Segment
+				# Segments show that an edge is tangent to the visibility ray
+				# They don't block visibility
+				pass
+	return True
