@@ -33,6 +33,14 @@ class Funnel:
 	def _build(self):
 		for i in range(1, len(self.sleeve) - 1):
 			e = self.tri.getCommonEdge(self.sleeve[i], self.sleeve[i + 1])
+			# So we can access with index
+			e = list(e)
+			if Geom.isToTheRight(self.apex, mid, e[0]):
+				self._updateFunnelRight(e[0])
+				self._updateFunnelLeft(e[1])
+			else:
+				self._updateFunnelLeft(e[0])
+				self._updateFunnelRight(e[1])
 
 	def _updateFunnelLeft(self, candidate):
 		pt = convertToPoint(candidate)
@@ -40,3 +48,6 @@ class Funnel:
 		Geom.intersectSegmentAndSegment
 		for i in range(len(self._funnel) - 1):
 			pass
+
+	def _updateFunnelRight(self, candidate):
+		pass
