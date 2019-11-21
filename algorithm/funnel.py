@@ -11,9 +11,11 @@ class Funnel:
 		self.sleeve = sleeve
 		self._funnelLeft = []
 		self._funnelRight = []
-		self._others = []
-		self.apex = src
+		self._others = [src]
 		self._build()
+
+	def apex(self):
+		return self._others[-1]
 
 	def _build(self):
 		ePrev = self.tri.getCommonEdge(self.sleeve[0], self.sleeve[1])
@@ -33,7 +35,7 @@ class Funnel:
 				self._updateFunnelRight(e[1])
 
 	def _addFirstTriangleToFunnel(self, mid, pt1, pt2):
-		if Geom.isToTheRight(self.apex, mid, pt1):
+		if Geom.isToTheRight(self.apex(), mid, pt1):
 			self._funnelRight.append(convertToPoint(pt1))
 			self._funnelLeft.append(convertToPoint(pt2))
 		else:
@@ -43,9 +45,8 @@ class Funnel:
 	def _updateFunnelLeft(self, candidate):
 		pt = convertToPoint(candidate)
 		if self._funnel[0] == pt or self._funnel[-1] == pt: return
-		Geom.intersectSegmentAndSegment
-		for i in range(len(self._funnel) - 1):
-			pass
+		for i in range(len(self._funnel) - 1, -1, -1):
+			
 
 	def _updateFunnelRight(self, candidate):
 		pass
