@@ -104,6 +104,22 @@ def isToTheRight(ref1, ref2, target) -> bool:
 	# return cVec3D.z() < 0
 	return cVec3D.z() > 0
 
+def isToTheLeft(ref1, ref2, target) -> bool:
+	"""
+	Given the two reference points, determine if target is to the Right of the line segment formed by ref1->ref2
+	"""
+	pt1 = convertToPoint(ref1)
+	pt2 = convertToPoint(ref2)
+	ptTarget = convertToPoint(target)
+
+	vec1 = pt2 - pt1
+	vec2 = ptTarget - pt1
+	cVec3D = crossProduct(vec1, vec2)
+	# NOTE: In a standard coordinate system, negative indicates being to the right (right-hand rule: https://en.wikipedia.org/wiki/Right-hand_rule)
+	# BUTT in our system (the TkInter Canvas), origin is the top left of the screen and y increases the lower a point is
+	# return cVec3D.z() < 0
+	return cVec3D.z() < 0
+
 def midpoint(vrt1, vrt2) -> Point:
 	pt1 = convertToPoint(vrt1)
 	pt2 = convertToPoint(vrt2)

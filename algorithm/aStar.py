@@ -5,6 +5,7 @@ import utils.vertexUtils as VertexUtils
 from algorithm.visibility import findGaps, applyMovement
 from algorithm.node import Node
 from algorithm.triangulation import Triangulation
+from algorithm.funnel import Funnel
 from model.modelService import Model
 from model.cable import Cable
 from utils.priorityQ import PriorityQ
@@ -258,10 +259,6 @@ def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, vis
 	return False
 
 def getFunnel(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
-	ref = tri.pushVertEpsilonInside(src, sleeve[0])
-	funnel = [ref]
-	for i in range(0, len(sleeve) - 1):
-		# Special case for adding the first edge to funnel
-		if i == 0: addFirstTriangleToFunnel(tri, ref, e, funnel)
-		pass
+	src = tri.pushVertEpsilonInside(src, sleeve[0])
+	funnel = Funnel(src, dst, tri, sleeve)
 	return funnel

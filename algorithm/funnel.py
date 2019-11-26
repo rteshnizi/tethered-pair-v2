@@ -39,14 +39,85 @@ class Funnel:
 			self._funnelRight.append(convertToPoint(pt1))
 			self._funnelLeft.append(convertToPoint(pt2))
 		else:
-			self._funnelLeft.append(convertToPoint([1]))
-			self._funnelRight.append(convertToPoint([0]))
+			self._funnelLeft.append(convertToPoint(pt1))
+			self._funnelRight.append(convertToPoint(pt2))
 
 	def _updateFunnelLeft(self, candidate):
-		pt = convertToPoint(candidate)
-		if self._funnel[0] == pt or self._funnel[-1] == pt: return
-		for i in range(len(self._funnel) - 1, -1, -1):
-			
+		candidate = convertToPoint(candidate)
+		if self._funnelLeft[0] == candidate or self._funnelLeft[-1] == candidate: return
+		# initial check
+		pt1 = self._others[-1]
+		pt2 = self._funnelLeft[-1]
+		if len(self._funnelLeft) > 1:
+			pt1 = self._funnelLeft[-2]
+		if Geom.isToTheLeft(pt1, pt2, candidate):
+			self._funnelLeft.append(candidate)
+			return
+		for i in reversed(range(len(self._funnelLeft) - 1)):
+			if i == 0: break
+			pt1 = self._funnelLeft[i - 1]
+			pt2 = self._funnelLeft[i]
+			if Geom.isToTheRight(pt1, pt2, candidate):
+				self._funnelLeft = self._funnelLeft[:i]
+				self._funnelLeft.append(candidate)
+				return
+		pt1 = self._funnelLeft[0]
+		pt2 = self._others[-1]
+		if Geom.isToTheRight(pt1, pt2, candidate):
+			self._funnelLeft = [candidate]
+			return
+		# This case should never happen but for the sake of completeness I'll keep it
+		pt1 = self._others[-1]
+		pt2 = self._funnelRight[0]
+		if Geom.isToTheLeft(pt1, pt2, candidate):
+			self._funnelLeft = [candidate]
+			return
+		# At this point we are past the apex, so the apex will have to be changed
+		for i in range(len(self._funnelRight) - 1):
+			pt1 = self._funnelRight[i]
+			pt2 = self._funnelRight[i + 1]
+			if Geom.isToTheLeft(pt1, pt2, candidate):
+				self._funnelLeft = [candidate]
+				self._others = self._others + self._funnelRight[:i]
+				return
+		raise RuntimeError("What??")
 
 	def _updateFunnelRight(self, candidate):
-		pass
+		candidate = convertToPoint(candidate)
+		if self._funnelRight[0] == candidate or self._funnelRight[-1] == candidate: return
+		# initial check
+		pt1 = self._others[-1]
+		pt2 = self._funnelRight[-1]
+		if len(self._funnelRight) > 1:
+			pt1 = self._funnelRight[-2]
+		if Geom.isToTheRight(pt1, pt2, candidate):
+			self._funnelRight.append(candidate)
+			return
+		for i in reversed(range(len(self._funnelRight) - 1)):
+			if i == 0: break
+			pt1 = self._funnelRight[i - 1]
+			pt2 = self._funnelRight[i]
+			if Geom.isToTheLeft(pt1, pt2, candidate):
+				self._funnelRight = self._funnelRight[:i]
+				self._funnelRight.append(candidate)
+				return
+		pt1 = self._funnelRight[0]
+		pt2 = self._others[-1]
+		if Geom.isToTheLeft(pt1, pt2, candidate):
+			self._funnelRight = [candidate]
+			return
+		# This case should never happen but for the sake of completeness I'll keep it
+		pt1 = self._others[-1]
+		pt2 = self._funnelLeft[0]
+		if Geom.isToTheRight(pt1, pt2, candidate):
+			self._funnelLeft = [candidate]
+			return
+		# At this point we are past the apex, so the apex will have to be changed
+		for i in range(len(self._funnelLeft) - 1):
+			pt1 = self._funnelLeft[i]
+			pt2 = self._funnelLeft[i + 1]
+			if Geom.isToTheRight(pt1, pt2, candidate):
+				self._funnelLeft = [candidate]
+				self._others = self._others + self._funnelLeft[:i]
+				return
+		raise RuntimeError("What??")
