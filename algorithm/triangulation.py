@@ -273,12 +273,29 @@ class Triangulation(object):
 				return False
 		return True
 
+	def _isFaceInObstacle(self, face: TriangulationFaceHandle):
+		obs = ""
+		for i in range(3):
+			pt = face.vertex(i).point()
+			vt = model.getVertexByLocation(pt.x(), pt.y())
+			if not vt.ownerObs: return False
+			if obs and vt.ownerObs.name != obs: return False
+			obs = vt.ownerObs.name
+		return True
+
 	def _filterNonDomainTriangle(self, face: TriangulationFaceHandle):
 		if self.faceInfoMap[face].inDomain():
 			return True
 		if self._isFaceSurroundedByCable(face):
 			return True
 		return False
+
+	def _isPointInsideOriginalPolygon(self, vert):
+		"""
+		Check whether the given Vertex/Point falls inside the polygon originally given to triangulation as the boundary
+		(i.e., before getting the convex hull)
+		"""
+		return Geom.isInsidePoly(self.originalPolygon, vert)
 
 	def getCgalEdge(self, vertexSet):
 		"""
@@ -380,14 +397,6 @@ class Triangulation(object):
 		epsilon = Geom.getEpsilonVectorFromVect(summed)
 		return vert.loc + epsilon
 
-
-	def isPointInsideOriginalPolygon(self, vert):
-		"""
-		Check whether the given Vertex/Point falls inside the polygon originally given to triangulation as the boundary
-		(i.e., before getting the convex hull)
-		"""
-		return Geom.isInsidePoly(self.originalPolygon, vert)
-
 	def drawEdges(self, drawDomainOnly=False):
 		i = 0
 		# draw constraints
@@ -434,3 +443,16 @@ class Triangulation(object):
 				verts = [model.getVertexByLocation(x=pt.x(), y=pt.y()) for pt in verts]
 				return frozenset(verts)
 		return frozenset()
+
+	def isPointInsideTriangle(self, faceHandle: TriangulationFaceHandle, pt) -> bool:
+		'''
+		see [this](https://stackoverflow.com/a/2049593/750567)
+		'''
+		sign = lambda p1, p2, p3: (p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y())
+		pt = convertToPoint(pt)
+		d1 = sign(pt, faceHandle.vertex(1).point(), faceHandle.vertex(2).point())
+		d2 = sign(pt, faceHandle.vertex(2).point(), faceHandle.vertex(3).point())
+		d3 = sign(pt, faceHandle.vertex(3).point(), faceHandle.vertex(1).point())
+		has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+		has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+		return not (has_neg and has_pos)

@@ -43,6 +43,7 @@ def aStar() -> None:
 					child = Node(cable=newCable, parent=n)
 					n.children.append(child)
 					q.enqueue(child)
+	print(n)
 
 def processReducedVisibilityGraph() -> None:
 	# TODO: Here I should assign
@@ -72,6 +73,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	https://doi.org/10.1016/0925-7721(94)90010-8
 	"""
 	tri = Triangulation(cable, dest2, dest1, debug=debug)
+	return
 	if not runAlg: return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
@@ -88,7 +90,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	currE = getEdge(longCable[0], longCable[1])
 	currTries = tri.getIncidentTriangles(currE)
 	if len(currTries) != 1:
-			raise RuntimeError("More than 1 Triangle as the starting point")
+		raise RuntimeError("More than 1 Triangle as the starting point")
 	startTri = next(iter(currTries))
 	for i in range(1, len(longCable) - 1):
 		e = getEdge(longCable[i], longCable[i + 1])
@@ -122,8 +124,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	graph = buildTriangleGraph(tri, allCurrentTries)
 	sleeve = []
 	findSleeve(tri, graph, startTri, dest2, set(), sleeve)
-	funnel = getFunnel(tri, dest1, dest2, sleeve)
-	return VertexUtils.removeNoNameMembers(VertexUtils.removeRepeatedVertsOrdered(shortCable))
+	return getShortestPath(tri, dest1, dest2, sleeve)
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
 	# FIXME: Check for colinearity instead of exact location
@@ -258,7 +259,9 @@ def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, vis
 			return True
 	return False
 
-def getFunnel(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
-	src = tri.pushVertEpsilonInside(src, sleeve[0])
-	funnel = Funnel(src, dst, tri, sleeve)
-	return funnel
+def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
+	# We need to do this because the funnel algorithm assumes that the path lies inside the triangulation
+	funnel = Funnel(src, tri, sleeve)
+	path = funnel.getShortestPath(dst)
+	path = [model.getVertexByLocation(pt.x(), pt.y()) for pt in path]
+	return path

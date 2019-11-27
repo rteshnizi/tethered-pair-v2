@@ -4,15 +4,15 @@ import utils.cgal.geometry as Geom
 from collections import deque
 
 class Funnel:
-	def __init__(self, src: Point, dest: Point, triangulation: Triangulation, sleeve: list):
-		self.src = src
-		self.dest = dest
+	def __init__(self, src: Point, triangulation: Triangulation, sleeve: list):
 		self.tri = triangulation
+		self.src = self.tri.pushVertEpsilonInside(src, sleeve[0])
 		self.sleeve = sleeve
 		self._funnelLeft = []
 		self._funnelRight = []
-		self._others = [src]
+		self._others = [self.src]
 		self._build()
+		self._others[0] = convertToPoint(src)
 
 	def apex(self):
 		return self._others[-1]
@@ -61,8 +61,8 @@ class Funnel:
 				self._funnelLeft = self._funnelLeft[:i]
 				self._funnelLeft.append(candidate)
 				return
-		pt1 = self._funnelLeft[0]
-		pt2 = self._others[-1]
+		pt1 = self._others[-1]
+		pt2 = self._funnelLeft[0]
 		if Geom.isToTheRight(pt1, pt2, candidate):
 			self._funnelLeft = [candidate]
 			return
@@ -101,8 +101,8 @@ class Funnel:
 				self._funnelRight = self._funnelRight[:i]
 				self._funnelRight.append(candidate)
 				return
-		pt1 = self._funnelRight[0]
-		pt2 = self._others[-1]
+		pt1 = self._others[-1]
+		pt2 = self._funnelRight[0]
 		if Geom.isToTheLeft(pt1, pt2, candidate):
 			self._funnelRight = [candidate]
 			return
@@ -121,3 +121,9 @@ class Funnel:
 				self._others = self._others + self._funnelLeft[:i]
 				return
 		raise RuntimeError("What??")
+
+	def getShortestPath(self, dest):
+		dest = convertToPoint(dest)
+		if not self.tri.isPointInsideTriangle(self.sleeve[-1], dest):
+			raise RuntimeError("Destination is not inside the final Triangle ion the sleeve")
+		return self._others + [dest]
