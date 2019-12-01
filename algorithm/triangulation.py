@@ -261,6 +261,12 @@ class Triangulation(object):
 		for _f in self.cgalTri.finite_faces():
 			self.triangleCount += 1
 
+	def _isFace(self, faceHandle: TriangulationFaceHandle):
+		v0 = faceHandle.vertex(0)
+		v1 = faceHandle.vertex(1)
+		v2 = faceHandle.vertex(2)
+		return self.cgalTri.is_face(v0, v1, v2)
+
 	def _isFaceSurroundedByCable(self, face: TriangulationFaceHandle):
 		for i in range(3):
 			pt = face.vertex(i).point()
@@ -273,17 +279,9 @@ class Triangulation(object):
 				return False
 		return True
 
-	def _isFaceInObstacle(self, face: TriangulationFaceHandle):
-		obs = ""
-		for i in range(3):
-			pt = face.vertex(i).point()
-			vt = model.getVertexByLocation(pt.x(), pt.y())
-			if not vt.ownerObs: return False
-			if obs and vt.ownerObs.name != obs: return False
-			obs = vt.ownerObs.name
-		return True
-
 	def _filterNonDomainTriangle(self, face: TriangulationFaceHandle):
+		if not self._isFace(face):
+			return False
 		if self.faceInfoMap[face].inDomain():
 			return True
 		if self._isFaceSurroundedByCable(face):

@@ -16,8 +16,8 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
-	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
-	return
+	# print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
+	# return
 	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
@@ -73,7 +73,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	https://doi.org/10.1016/0925-7721(94)90010-8
 	"""
 	tri = Triangulation(cable, dest2, dest1, debug=debug)
-	return
+	# return
 	if not runAlg: return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
