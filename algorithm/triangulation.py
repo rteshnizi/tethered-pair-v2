@@ -268,11 +268,12 @@ class Triangulation(object):
 		return self.cgalTri.is_face(v0, v1, v2)
 
 	def _isFaceSurroundedByCable(self, face: TriangulationFaceHandle):
-		for i in range(3):
-			pt = face.vertex(i).point()
+		pts = [face.vertex(i).point() for i in range(3)]
+		for i in range(-1, 2):
 			isOnCable = False
-			for v in [self.dest1] + self.cable +[self.dest2]:
-				if convertToPoint(v) == pt:
+			longCable = [self.dest1] + self.cable +[self.dest2]
+			for j in range(len(longCable) - 1):
+				if convertToPoint(longCable[j]) == pts[i] and convertToPoint(longCable[j + 1]) == pts[i + 1]:
 					isOnCable = True
 					break
 			if not isOnCable:
@@ -280,8 +281,6 @@ class Triangulation(object):
 		return True
 
 	def _filterNonDomainTriangle(self, face: TriangulationFaceHandle):
-		if not self._isFace(face):
-			return False
 		if self.faceInfoMap[face].inDomain():
 			return True
 		if self._isFaceSurroundedByCable(face):
@@ -409,6 +408,7 @@ class Triangulation(object):
 		for edge in self.cgalTri.finite_edges():
 			i += 1
 			if not self.cgalTri.is_constrained(edge) and self.faceInfoMap[edge[0]].inDomain():
+			# if not self.cgalTri.is_constrained(edge):
 				segment = self.cgalTri.segment(edge)
 				canvasE = TriangulationEdge(model.canvas, "TE-%d" % i, segment)
 				canvasE.createShape()

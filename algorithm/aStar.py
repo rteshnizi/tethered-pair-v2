@@ -120,7 +120,6 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		refPt = longCable[i]
 		allCurrentTries.append(currTries)
 	# tri.getCanvasEdge(currE).highlightEdge()
-	shortCable = getShorterSideOfFunnel(dest1, dest2, leftSidePts, rightSidePts)
 	graph = buildTriangleGraph(tri, allCurrentTries)
 	sleeve = []
 	findSleeve(tri, graph, startTri, dest2, set(), sleeve)
