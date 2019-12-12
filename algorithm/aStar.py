@@ -28,6 +28,7 @@ def aStar() -> None:
 			print("At Destination")
 			c = Cable(model.canvas, "CABLE-D", n.cable)
 			model.entities[c.name] = c
+			print(n)
 			return # For now terminate at first solution
 		VA = findGaps(n.cable[0], model.robots[0])
 		VB = findGaps(n.cable[-1], model.robots[-1])
@@ -43,7 +44,6 @@ def aStar() -> None:
 					child = Node(cable=newCable, parent=n)
 					n.children.append(child)
 					q.enqueue(child)
-	print(n)
 
 def processReducedVisibilityGraph() -> None:
 	# TODO: Here I should assign

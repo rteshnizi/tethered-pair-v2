@@ -33,6 +33,7 @@ class Funnel:
 			else:
 				self._updateFunnelLeft(e[0])
 				self._updateFunnelRight(e[1])
+			midPrev = mid
 
 	def _addFirstTriangleToFunnel(self, mid, pt1, pt2):
 		if Geom.isToTheRight(self.apex(), mid, pt1):
@@ -62,12 +63,6 @@ class Funnel:
 				self._funnelLeft.append(candidate)
 				return
 		pt1 = self._others[-1]
-		pt2 = self._funnelLeft[0]
-		if Geom.isToTheRight(pt1, pt2, candidate):
-			self._funnelLeft = [candidate]
-			return
-		# This case should never happen but for the sake of completeness I'll keep it
-		pt1 = self._others[-1]
 		pt2 = self._funnelRight[0]
 		if Geom.isToTheLeft(pt1, pt2, candidate):
 			self._funnelLeft = [candidate]
@@ -80,7 +75,9 @@ class Funnel:
 				self._funnelLeft = [candidate]
 				self._others = self._others + self._funnelRight[:i]
 				return
-		raise RuntimeError("What??")
+		self._funnelLeft = [candidate]
+		self._others = self._others + self._funnelRight
+		self._funnelRight = [self._others[-1]]
 
 	def _updateFunnelRight(self, candidate):
 		candidate = convertToPoint(candidate)
@@ -102,15 +99,9 @@ class Funnel:
 				self._funnelRight.append(candidate)
 				return
 		pt1 = self._others[-1]
-		pt2 = self._funnelRight[0]
-		if Geom.isToTheLeft(pt1, pt2, candidate):
-			self._funnelRight = [candidate]
-			return
-		# This case should never happen but for the sake of completeness I'll keep it
-		pt1 = self._others[-1]
 		pt2 = self._funnelLeft[0]
 		if Geom.isToTheRight(pt1, pt2, candidate):
-			self._funnelLeft = [candidate]
+			self._funnelRight = [candidate]
 			return
 		# At this point we are past the apex, so the apex will have to be changed
 		for i in range(len(self._funnelLeft) - 1):
@@ -120,10 +111,11 @@ class Funnel:
 				self._funnelLeft = [candidate]
 				self._others = self._others + self._funnelLeft[:i]
 				return
-		raise RuntimeError("What??")
+		self._funnelRight = [candidate]
+		self._others = self._others + self._funnelLeft
+		self._funnelLeft = [self._others[-1]]
 
 	def getShortestPath(self, dest):
-		dest = convertToPoint(dest)
-		if not self.tri.isPointInsideTriangle(self.sleeve[-1], dest):
-			raise RuntimeError("Destination is not inside the final Triangle ion the sleeve")
-		return self._others + [dest]
+		# if not self.tri.isPointInsideTriangle(self.sleeve[-1], self.tri.pushVertEpsilonInside(dest, self.sleeve[-1])):
+		# 	raise RuntimeError("Destination is not inside the final Triangle ion the sleeve")
+		return self._others + [convertToPoint(dest)]

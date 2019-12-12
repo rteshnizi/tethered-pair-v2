@@ -141,7 +141,7 @@ def centroid(pts):
 	cy = np.mean([pt.y() for pt in arr])
 	return Point(cx, cy)
 
-def intersectPolygonAndSegment(poly, segment) -> List[PointOrSegmentNone]:
+def intersectPolygonAndSegment(poly: Polygon, segment: Segment) -> List[PointOrSegmentNone]:
 	if not isinstance(poly, Polygon):
 		raise TypeError("poly should be a Polygon")
 	if not isinstance(segment, Segment):
