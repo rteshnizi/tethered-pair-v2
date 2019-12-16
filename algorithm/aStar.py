@@ -16,8 +16,8 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
-	# print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
-	# return
+	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
+	return
 	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
@@ -90,7 +90,12 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	currE = getEdge(longCable[0], longCable[1])
 	currTries = tri.getIncidentTriangles(currE)
 	if len(currTries) != 1:
-		raise RuntimeError("More than 1 Triangle as the starting point")
+		for t in currTries:
+			currTries = getTrueInitTri(currE, getEdge(longCable[1], longCable[2]), frozenset([t]), tri)
+			if len(currTries) == 1:
+				break
+			else:
+				raise RuntimeError("I don't want to live on this planet anymore.")
 	startTri = next(iter(currTries))
 	for i in range(1, len(longCable) - 1):
 		e = getEdge(longCable[i], longCable[i + 1])
@@ -99,6 +104,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 			raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
+		allCurrentTries.append(currTries)
 		while not tries & currTries:
 			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
 			if flipEdge:
@@ -124,6 +130,16 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	sleeve = []
 	findSleeve(tri, graph, startTri, dest2, set(), sleeve)
 	return getShortestPath(tri, dest1, dest2, sleeve)
+
+def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
+	pivot = currE & targetEdge
+	if len(pivot) != 1:
+		raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
+	pivot = next(iter(pivot))
+	tries = tri.getIncidentTriangles(currE)
+	while not tries & currTri:
+		(flipEdge, currTri) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTri)
+	return tries & currTri
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
 	# FIXME: Check for colinearity instead of exact location
@@ -251,6 +267,8 @@ def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, vis
 		sleeve.insert(0, startTriangle)
 		return True
 	visited.add(startTriangle)
+	if not graph.get(startTriangle):
+		raise RuntimeError("Debug this")
 	for child in graph[startTriangle]:
 		if child in visited: continue
 		if findSleeve(tri, graph, child, dest, visited, sleeve):
@@ -260,6 +278,8 @@ def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, vis
 
 def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 	# We need to do this because the funnel algorithm assumes that the path lies inside the triangulation
+	if len(sleeve) == 0:
+		raise RuntimeError("Here we are.")
 	funnel = Funnel(src, tri, sleeve)
 	path = funnel.getShortestPath(dst)
 	path = [model.getVertexByLocation(pt.x(), pt.y()) for pt in path]
