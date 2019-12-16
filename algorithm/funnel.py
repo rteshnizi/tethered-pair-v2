@@ -75,6 +75,7 @@ class Funnel:
 			if Geom.isToTheLeft(pt1, pt2, candidate):
 				self._funnelLeft = [candidate]
 				self._others = self._others + self._funnelRight[:i]
+				self._funnelRight = self._funnelRight[i:]
 				return
 		self._funnelLeft = [candidate]
 		self._others = self._others + self._funnelRight
@@ -111,6 +112,7 @@ class Funnel:
 			if Geom.isToTheRight(pt1, pt2, candidate):
 				self._funnelLeft = [candidate]
 				self._others = self._others + self._funnelLeft[:i]
+				self._funnelLeft = self._funnelLeft[i:]
 				return
 		self._funnelRight = [candidate]
 		self._others = self._others + self._funnelLeft
