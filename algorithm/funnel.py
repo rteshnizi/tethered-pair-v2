@@ -74,8 +74,8 @@ class Funnel:
 			pt2 = self._funnelRight[i + 1]
 			if Geom.isToTheLeft(pt1, pt2, candidate):
 				self._funnelLeft = [candidate]
-				self._others = self._others + self._funnelRight[:i]
-				self._funnelRight = self._funnelRight[i:]
+				self._others = self._others + self._funnelRight[:i + 1]
+				self._funnelRight = self._funnelRight[i + 1:]
 				return
 		self._funnelLeft = [candidate]
 		self._others = self._others + self._funnelRight
@@ -111,24 +111,26 @@ class Funnel:
 			pt2 = self._funnelLeft[i + 1]
 			if Geom.isToTheRight(pt1, pt2, candidate):
 				self._funnelLeft = [candidate]
-				self._others = self._others + self._funnelLeft[:i]
-				self._funnelLeft = self._funnelLeft[i:]
+				self._others = self._others + self._funnelLeft[:i + 1]
+				self._funnelLeft = self._funnelLeft[i + 1:]
 				return
 		self._funnelRight = [candidate]
 		self._others = self._others + self._funnelLeft
 		self._funnelLeft = [self._others[-1]]
 
 	def _findCandidatePath(self, dest, funnelSide: list):
-		i = 0
-		while i < len(funnelSide):
-			if Geom.isVisible(funnelSide[i], dest):
-				break
-			i += 1
-		if i == len(funnelSide) - 1:
-			subArr = funnelSide
-		else:
-			subArr = funnelSide[:i]
-		return self._others + subArr + [convertToPoint(dest)]
+		# i = len(funnelSide) - 1
+		# while i >= 0:
+		# 	if not Geom.isVisible(funnelSide[i], dest):
+		# 		break
+		# 	i -= 1
+		# i += 1 # change it back to the last point in the funnel that was visible from the dest
+		# if i == len(funnelSide) - 1:
+		# 	subArr = funnelSide
+		# else:
+		# 	subArr = funnelSide[:i]
+		# return self._others + subArr + [convertToPoint(dest)]
+		return self._others + funnelSide + [convertToPoint(dest)]
 
 	def getShortestPath(self, dest):
 		# if not self.tri.isPointInsideTriangle(self.sleeve[-1], self.tri.pushVertEpsilonInside(dest, self.sleeve[-1])):

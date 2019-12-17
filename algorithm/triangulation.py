@@ -287,7 +287,7 @@ class Triangulation(object):
 			return True
 		return False
 
-	def _isPointInsideOriginalPolygon(self, vert):
+	def isPointInsideOriginalPolygon(self, vert):
 		"""
 		Check whether the given Vertex/Point falls inside the polygon originally given to triangulation as the boundary
 		(i.e., before getting the convex hull)
