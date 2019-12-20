@@ -387,12 +387,12 @@ class Triangulation(object):
 		vects = []
 		for e in edges:
 			for v in e:
-				if v.name != vert.name:
-					vects.append(v.loc - vert.loc)
+				if VertexUtils.almostEqual(v, vert):
+					vects.append(VertexUtils.convertToPoint(v) - VertexUtils.convertToPoint(vert))
 					break
 		summed = vects[0] + vects[1]
 		epsilon = Geom.getEpsilonVectorFromVect(summed)
-		return vert.loc + epsilon
+		return VertexUtils.convertToPoint(vert) + epsilon
 
 	def drawEdges(self, drawDomainOnly=False):
 		i = 0

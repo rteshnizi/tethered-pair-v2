@@ -4,6 +4,7 @@ from model.robot import Robot
 from utils.cgal.types import Ray, Segment, intersection
 from utils.vertexUtils import convertToPoint
 
+
 model = Model()
 
 class LabeledVert(object):

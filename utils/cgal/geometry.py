@@ -1,8 +1,8 @@
 from typing import List
 import numpy as np
-from utils.cgal.types import Line, Point, PointOrSegmentNone, Polygon, Segment, Vector, convertToPoint, crossProduct, intersection
+from utils.cgal.types import Line, Point, PointOrSegmentNone, Polygon, Segment, Vector, crossProduct, intersection
 import utils.shapely.geometry as SHGeom
-import utils.vertexUtils as VertexUtils
+from utils.vertexUtils import convertToPoint, removeRepeatedVertsOrdered
 from math import sqrt
 
 from model.modelService import Model
@@ -11,7 +11,6 @@ from model.modelService import Model
 Geometry Helper functions
 """
 model = Model()
-SMALL_DISTANCE = 0.001 # 1e-3
 EPSILON_MULTIPLIER = 0.000001 # 1e-6
 
 def vertexDistance(v1, v2):
@@ -168,20 +167,9 @@ def extrudeVertsWithEpsilonVect(verts) -> List[Point]:
 		extruded.append(pt + vec)
 	return extruded
 
-def getClosestVertex(pt):
-	for v in model.robots:
-		if vertexDistance(pt, v) < SMALL_DISTANCE:
-			return v
-		if vertexDistance(pt, v.destination) < SMALL_DISTANCE:
-			return v.destination
-
-	for v in model.vertices:
-		if vertexDistance(pt, v) < SMALL_DISTANCE:
-			return v
-
 def polygonAndObstacleIntersection(polyVerts, obstacle) -> List[Point]:
 	result = SHGeom.polygonIntersection(polyVerts, obstacle.polygon.vertices())
-	result = VertexUtils.removeRepeatedVertsOrdered(result)
+	result = removeRepeatedVertsOrdered(result)
 	return result
 
 def addVectorToPoint(pt, dx, dy):

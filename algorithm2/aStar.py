@@ -1,11 +1,11 @@
 from typing import List
 from model.vertex import Vertex
 import utils.cgal.geometry as Geom
-from utils.vertexUtils import convertToPoint
-from algorithm.visibility import findGaps, applyMovement
-from algorithm.node import Node
-from algorithm.triangulation import Triangulation
-from algorithm.funnel import Funnel
+from utils.vertexUtils import convertToPoint, getClosestVertex
+from algorithm2.visibility import findGaps, applyMovement
+from algorithm2.node import Node
+from algorithm2.triangulation import Triangulation
+from algorithm2.funnel import Funnel
 from model.modelService import Model
 from model.cable import Cable
 from utils.priorityQ import PriorityQ
@@ -72,7 +72,8 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 
 	https://doi.org/10.1016/0925-7721(94)90010-8
 	"""
-	tri = Triangulation(cable, dest2, dest1, debug=debug)
+	(cable, dest1, dest2) = pushCableAwayFromObstacles(cable, dest1, dest2)
+	tri = Triangulation(cable, dest1, dest2, debug=debug)
 	if not runAlg: return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
@@ -119,6 +120,20 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	findSleeve(tri, graph, startTri, dest2, set(), sleeve)
 	return getShortestPath(tri, dest1, dest2, sleeve)
 
+def pushCableAwayFromObstacles(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
+	transformed = [dest1] + cable + [dest2]
+	for i in range(len(transformed)):
+		c = transformed[i]
+		for o in model.obstacles:
+			for v in o.vertices:
+				if convertToPoint(v) != convertToPoint(c): continue
+				vects = [Geom.getEpsilonVector(n, v) for n in v.adjacent]
+				if len(vects) != 2: raise RuntimeError("There should only be 2 adjacent vertices to any vertex")
+				epsVect = Geom.getEpsilonVectorFromVect(vects[0] + vects[1])
+				pushedC = convertToPoint(c) + epsVect
+				transformed[i] = pushedC
+	return (transformed[1:-1], transformed[0], transformed[-1])
+
 def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
 	"""
 	This modified pivot algorithm. It pivots the triangles until we either meet the target edge or not.
@@ -135,17 +150,17 @@ def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
 	# FIXME: Check for colinearity instead of exact location
-	if cable[1].loc == dest1.loc and cable[-2].loc == dest2.loc:
+	if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
 		copy = cable[1:-1]
 		copy[0] = dest1
 		copy[-1] = dest2
 		return copy
-	if cable[1].loc == dest1.loc:
+	if convertToPoint(cable[1]) == convertToPoint(dest1):
 		copy = cable[1:]
 		copy.append(dest2)
 		copy[0] = dest1
 		return copy
-	if cable[-2].loc == dest2.loc:
+	if convertToPoint(cable[-2]) == convertToPoint(dest2):
 		copy = cable[:-1]
 		copy.insert(0, dest1)
 		copy[-1] = dest2
@@ -153,12 +168,14 @@ def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
 	return [dest1] + cable + [dest2]
 
 def getEdge(vert1, vert2) -> frozenset:
+	# FIXME: This has changed now. We push the cable away from the obstacles
 	# We need to do this because the triangulation only recognizes the vertices that are registered by location in the model
 	# we have repeated vertices and the triangulation might have chosen the other vertex
-	v1 = model.getVertexByLocation(vert1.loc.x(), vert1.loc.y())
-	v2 = model.getVertexByLocation(vert2.loc.x(), vert2.loc.y())
+	# v1 = model.getVertexByLocation(vert1.loc.x(), vert1.loc.y())
+	# v2 = model.getVertexByLocation(vert2.loc.x(), vert2.loc.y())
 	# We represent an edge by a python set to make checks easier
-	return makeFrozenSet([v1, v2])
+	# return makeFrozenSet([v1, v2])
+	return makeFrozenSet([vert1, vert2])
 
 def makeFrozenSet(members):
 	if isinstance(members, list):
@@ -234,5 +251,5 @@ def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 		raise RuntimeError("Here we are.")
 	funnel = Funnel(src, tri, sleeve)
 	path = funnel.getShortestPath(dst)
-	path = [model.getVertexByLocation(pt.x(), pt.y()) for pt in path]
+	path = [getClosestVertex(pt) for pt in path]
 	return path

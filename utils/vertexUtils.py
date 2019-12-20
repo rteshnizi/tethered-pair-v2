@@ -1,4 +1,16 @@
-from utils.cgal.types import convertToPoint
+from model.modelService import Model
+
+model = Model()
+SMALL_DISTANCE = 0.01
+
+
+def convertToPoint(vert):
+	"""
+	Utility function that takes a Vertex or Point and returns a Point
+	"""
+	if hasattr(vert, 'loc'):
+		return vert.loc
+	return vert
 
 def ptToStringId(pt):
 	"""
@@ -54,3 +66,21 @@ def setSubtractPoints(verts1: list, verts2: list) -> list:
 	d2 = _convertVertListToDict(verts2)
 	l = [v for (k, v) in d1.items() if k not in d2]
 	return l
+
+def almostEqual(v1, v2) -> bool:
+	pt1 = convertToPoint(v1)
+	pt2 = convertToPoint(v2)
+	vect = pt1 - pt2
+	return vect.squared_length() < SMALL_DISTANCE
+
+# I have copied this from GEOM because I can't import that file here
+def getClosestVertex(pt):
+	for v in model.robots:
+		if almostEqual(pt, v):
+			return v
+		if almostEqual(pt, v.destination):
+			return v.destination
+
+	for v in model.vertices:
+		if almostEqual(pt, v):
+			return v

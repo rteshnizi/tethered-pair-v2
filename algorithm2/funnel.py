@@ -1,7 +1,7 @@
-from algorithm.triangulation import Triangulation
+from algorithm2.triangulation import Triangulation
 from utils.cgal.types import Point
-from utils.vertexUtils import convertToPoint
 import utils.cgal.geometry as Geom
+from utils.vertexUtils import convertToPoint
 from collections import deque
 
 class Funnel:

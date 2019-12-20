@@ -1,5 +1,6 @@
 from typing import Union
 from model.modelService import Model
+from utils.vertexUtils import almostEqual, getClosestVertex
 
 from CGAL.CGAL_Kernel import cross_product as _cross_product
 from CGAL.CGAL_Kernel import intersection as _intersection
@@ -20,14 +21,6 @@ from CGAL.CGAL_Convex_hull_2 import ch_graham_andrew as ConvexHull
 
 PointOrSegmentNone = Union[Point, Segment, None]
 model = Model()
-
-def convertToPoint(vert) -> Point:
-	"""
-	Utility function that takes a Vertex or Point and returns a Point
-	"""
-	if (isinstance(vert, Point)):
-		return vert
-	return vert.loc
 
 def crossProduct(vec1: Vector, vec2: Vector) -> Vector3D:
 	vec1_3d = Vector3D(vec1.x(), vec1.y(), 0)
@@ -52,9 +45,9 @@ def __Pt2Repr(self):
 Point.__repr__ = __Pt2Repr
 # We don't need the has anymore, I just kept it for reference
 # Make Point_2 hashable
-# def __Pt2Hash(self):
-# 	return hash("Pt2(%f, %f)" % (self.x(), self.y()))
-# Point.__hash__ = __Pt2Hash
+def __Pt2Hash(self):
+	return hash("Pt2(%f, %f)" % (self.x(), self.y()))
+Point.__hash__ = __Pt2Hash
 
 # More human readable __repr__ for Ray_2
 def __Ray2Repr(self: Ray):
@@ -82,7 +75,7 @@ def __CDTFaceHandleRepr(self: TriangulationFaceHandle):
 	ptsStr = []
 	for i in range(3):
 		pt = self.vertex(i).point()
-		ptsStr.append("%s" % repr(model.getVertexByLocation(pt.x(), pt.y())))
+		ptsStr.append("%s" % repr(getClosestVertex(pt)))
 	return "Tri[" + ",".join(ptsStr) + "]"
 TriangulationFaceHandle.__repr__ = __CDTFaceHandleRepr
 

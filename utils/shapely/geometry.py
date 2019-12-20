@@ -1,4 +1,5 @@
-from utils.cgal.types import convertToPoint, Point
+from utils.cgal.types import Point
+from utils.vertexUtils import convertToPoint
 from shapely.geometry import Polygon as SHPolygon
 
 def _getCoordinateList(verts):

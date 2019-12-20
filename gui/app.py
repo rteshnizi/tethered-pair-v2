@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 from gui.canvas import Canvas
-from algorithm.aStar import aStar
+from algorithm2.aStar import aStar
 
 cwd = os.path.dirname(__file__)
 presetsDir = os.path.join(cwd, "..", "presets")
