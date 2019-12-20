@@ -16,7 +16,7 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
-	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=False))
+	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
 	return
 	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
@@ -77,14 +77,9 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
 		return [dest1, dest2]
-	leftSidePts = []
-	rightSidePts = []
 	flipEdges = []
 	allCurrentTries = []
-	changeOrientation = False
 	longCable = getLongCable(cable, dest1, dest2)
-	# We use this to maintain the funnel
-	refPt = longCable[0]
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
 	currTries = tri.getIncidentTriangles(currE)
@@ -107,22 +102,16 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		while not tries & currTries:
 			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
 			if flipEdge:
-				refPt = _addPointsToFunnel(leftSidePts, rightSidePts, flipEdge, refPt, changeOrientation)
 				currE = flipEdge
 			# FIXME: This happens if the dest1 + cable + dest2 is not a simple polygon
 			else:
-				changeOrientation = True
-				leftSidePts.append(pivot)
-				rightSidePts.append(pivot)
-				currTries = tries
-				flipEdge = e
+				raise RuntimeError("Deal with this at some point.")
 			flipEdges.append(flipEdge)
 			allCurrentTries.append(currTries)
 			# Debugging
 			# tri.getCanvasEdge(currE).highlightEdge()
 		currTries = tries & currTries
 		currE = e
-		refPt = longCable[i]
 		allCurrentTries.append(currTries)
 	# tri.getCanvasEdge(currE).highlightEdge()
 	graph = buildTriangleGraph(tri, allCurrentTries)
@@ -131,6 +120,10 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	return getShortestPath(tri, dest1, dest2, sleeve)
 
 def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
+	"""
+	This modified pivot algorithm. It pivots the triangles until we either meet the target edge or not.
+	The one that meets the target edge is the tru initial triangle.
+	"""
 	pivot = currE & targetEdge
 	if len(pivot) != 1:
 		raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
@@ -174,9 +167,6 @@ def makeFrozenSet(members):
 	return frozenset([members])
 
 def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset):
-	# In case there are multiple currTries flipEdge is the one that falls between currEdge and targetEdge.
-	# That is, if we push the pivot epsilon in the direction of the candidate for flipEdge,
-	# that point falls inside the original bounding box.
 	for tri in currTries:
 		edges = cgalTriangulation.getIncidentEdges(pivot, tri)
 		e = edges - makeFrozenSet(currE)
@@ -193,54 +183,17 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 			incident = cgalTriangulation.getIncidentTriangles(e)
 			triangle = incident - currTries
 			# This happens when the polygon formed by the cable and destinations is not simple
-			if not triangle: return (None, None)
+			if not triangle:
+				# We have chosen the wrong flipEdge
+				e = currE
+				incident = cgalTriangulation.getIncidentTriangles(e)
+				triangle = incident - currTries
 			flipEdge = e
 			currTries = triangle
 			break
 	if len(currTries) != 1:
 		raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 	return (flipEdge, currTries)
-
-def _addPointsToFunnel(leftSideVrt: list, rightSideVrt: list, flipEdge: frozenset, refPt, changeOrientation: bool):
-	"""
-	Adds the flipEdge verts to the appropriate side list and returns midPoint of the flipEdge
-
-	If change orientation is true, it means the polygon is not simple and thus we have to change the orientation of left and right from that point on.
-	"""
-	flipEdgeVerts = list(flipEdge)
-	flipEdgeMid = Geom.midpoint(flipEdgeVerts[0], flipEdgeVerts[1])
-	for vrt in flipEdge:
-		if Geom.isColinear(refPt, flipEdgeMid, vrt):
-			raise RuntimeError("flipEdge shouldn't be colinear")
-		if Geom.isToTheRight(refPt, flipEdgeMid, vrt):
-			if not changeOrientation:
-				# Do it the normal way
-				VertexUtils.appendIfNotRepeated(rightSideVrt, vrt)
-			else:
-				# Flip orientation
-				VertexUtils.appendIfNotRepeated(leftSideVrt, vrt)
-		else:
-			if not changeOrientation:
-				# Do it the normal way
-				VertexUtils.appendIfNotRepeated(leftSideVrt, vrt)
-			else:
-				# Flip orientation
-				VertexUtils.appendIfNotRepeated(rightSideVrt, vrt)
-	return flipEdgeMid
-
-def getShorterSideOfFunnel(src, dst, leftSidePts: list, rightSidePts: list) -> list:
-	"""
-	Params
-	===
-	src: Source point of the funnel
-
-	dst: Destination point of the funnel
-	"""
-	lCable = [src] + leftSidePts + [dst]
-	rCable = [src] + rightSidePts + [dst]
-	leftL = Geom.lengthOfCurve(lCable)
-	rightL = Geom.lengthOfCurve(rCable)
-	return lCable if leftL < rightL else rCable
 
 def buildTriangleGraph(tri: Triangulation, allTries: list):
 	graph = {}
