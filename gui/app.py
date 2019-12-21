@@ -25,7 +25,7 @@ class Application(tk.Frame):
 		self.canvas = Canvas(self.master, self)
 
 	def createDropdown(self):
-		options = os.listdir(presetsDir)
+		options = sorted(os.listdir(presetsDir))
 		self.chosenPreset.set(options[0])
 		self.presets = tk.OptionMenu(self.master, self.chosenPreset, *options)
 		self.presets.pack(side=tk.TOP)
