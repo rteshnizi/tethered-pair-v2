@@ -4,17 +4,17 @@
 
 1. tkinter
 	* On Ubuntu `sudo apt-get install python3-tk`
-1. ~~SymPy: `pip install sympy`~~
-2. [CGAL python bindings](https://github.com/CGAL/cgal-swig-bindings)
+2. ~~SymPy: `pip install sympy`~~ (replaced by CGAL)
+3. [CGAL python bindings](https://github.com/CGAL/cgal-swig-bindings)
 	* Ubuntu:
 		* Don't install boost from source. It will mess with the make process somehow.
 		* [Installation instructions for Ubuntu](https://github.com/CGAL/cgal-swig-bindings/wiki/Installation)
-3. [GEOS](https://trac.osgeo.org/geos/)
+4. [GEOS](https://trac.osgeo.org/geos/)
 	* Windows
 		* Use [OSGeo4W](https://trac.osgeo.org/osgeo4w/wiki/WikiStart#QuickStartforOSGeo4WUsers)
 		* Add `C:\OSGeo4W64\bin` to Windows path
 	* Ubuntu: I don't remember needing to do this
-4. [Shapely](https://github.com/Toblerity/Shapely):
+5. [Shapely](https://github.com/Toblerity/Shapely):
 	* On Ubuntu `pip install shapely`
 
 ## Recommended Tools
@@ -31,4 +31,4 @@
 3. ~~We can now traverse th triangulation, maintain the funnel (Aug 6)~~
 4. Change GapDetector to reduced visibility graph calculator (Aug 19)
 5. ~~Add a cable entity whose shape is a line (for debugging)~~
-6. Add a case with initial cable config not being straight (Sep 3)
+6. ~~Add a case with initial cable config not being straight (Sep 3)~~
