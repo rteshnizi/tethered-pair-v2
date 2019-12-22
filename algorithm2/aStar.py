@@ -1,7 +1,7 @@
 from typing import List
 from model.vertex import Vertex
 import utils.cgal.geometry as Geom
-from utils.vertexUtils import convertToPoint, getClosestVertex
+from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual, removeRepeatedVertsOrdered
 from algorithm2.visibility import findGaps, applyMovement
 from algorithm2.node import Node
 from algorithm2.triangulation import Triangulation
@@ -62,10 +62,6 @@ def isThereCrossMovement(cable, dest1, dest2):
 def isAtDestination(n) -> bool:
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
 
-def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False) -> VertList:
-	cable = applyMovement(cable, dest1, True)
-	return applyMovement(cable, dest2, False)
-
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	"""
 	This is an altered version of "Hershberger, J., & Snoeyink, J. (1994). Computing minimum length paths of a given homotopy class."
@@ -74,7 +70,9 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	"""
 	(cable, dest1, dest2) = pushCableAwayFromObstacles(cable, dest1, dest2)
 	tri = Triangulation(cable, dest1, dest2, debug=debug)
-	if not runAlg: return [] # For debugging only the triangulation
+	if not runAlg:
+		print("triangles:", tri.triangleCount)
+		return [] # For debugging only the triangulation
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
 		return [dest1, dest2]
@@ -93,13 +91,13 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 				raise RuntimeError("I don't want to live on this planet anymore.")
 	startTri = next(iter(currTries))
 	for i in range(1, len(longCable) - 1):
+		allCurrentTries.append(currTries)
 		e = getEdge(longCable[i], longCable[i + 1])
 		pivot = e & currE
 		if len(pivot) != 1:
 			raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
-		allCurrentTries.append(currTries)
 		while not tries & currTries:
 			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
 			if flipEdge:
@@ -113,11 +111,11 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 			# tri.getCanvasEdge(currE).highlightEdge()
 		currTries = tries & currTries
 		currE = e
-		allCurrentTries.append(currTries)
 	# tri.getCanvasEdge(currE).highlightEdge()
-	graph = buildTriangleGraph(tri, allCurrentTries)
-	sleeve = []
-	findSleeve(tri, graph, startTri, dest2, set(), sleeve)
+	# graph = buildTriangleGraph(tri, allCurrentTries)
+	# sleeve = []
+	# findSleeve(tri, graph, startTri, dest2, set(), sleeve)
+	sleeve = findSleeve2(allCurrentTries)
 	return getShortestPath(tri, dest1, dest2, sleeve)
 
 def pushCableAwayFromObstacles(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
@@ -245,6 +243,19 @@ def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, vis
 			return True
 	return False
 
+def findSleeve2(allTries: list):
+	"""
+	Simply removes repeated triangles from the list. It relies on CGAL for equality of triangles.
+	"""
+	# First get rid of the frozensets
+	allTries = [next(iter(t)) for t in allTries]
+	prevTri = allTries[0]
+	trimmed = [prevTri]
+	for i in range(1, len(allTries)):
+		if allTries[i] != prevTri: trimmed.append(allTries[i])
+		prevTri = allTries[i]
+	return trimmed
+
 def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 	# We need to do this because the funnel algorithm assumes that the path lies inside the triangulation
 	if len(sleeve) == 0:
@@ -252,4 +263,9 @@ def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 	funnel = Funnel(src, tri, sleeve)
 	path = funnel.getShortestPath(dst)
 	path = [getClosestVertex(pt) for pt in path]
+	path = removeRepeatedVertsOrdered(path)
 	return path
+
+def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
+	cable = applyMovement(cable, dest1, True)
+	return applyMovement(cable, dest2, False)

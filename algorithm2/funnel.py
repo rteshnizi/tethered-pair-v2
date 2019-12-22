@@ -1,7 +1,7 @@
 from algorithm2.triangulation import Triangulation
 from utils.cgal.types import Point
 import utils.cgal.geometry as Geom
-from utils.vertexUtils import convertToPoint
+from utils.vertexUtils import convertToPoint, getClosestVertex
 from collections import deque
 
 class Funnel:
@@ -120,17 +120,6 @@ class Funnel:
 		self._funnelLeft = [self._others[-1]]
 
 	def _findCandidatePath(self, dest, funnelSide: list):
-		# i = len(funnelSide) - 1
-		# while i >= 0:
-		# 	if not Geom.isVisible(funnelSide[i], dest):
-		# 		break
-		# 	i -= 1
-		# i += 1 # change it back to the last point in the funnel that was visible from the dest
-		# if i == len(funnelSide) - 1:
-		# 	subArr = funnelSide
-		# else:
-		# 	subArr = funnelSide[:i]
-		# return self._others + subArr + [convertToPoint(dest)]
 		return self._others + funnelSide + [convertToPoint(dest)]
 
 	def getShortestPath(self, dest):
@@ -138,6 +127,9 @@ class Funnel:
 		# 	raise RuntimeError("Destination is not inside the final Triangle ion the sleeve")
 		# if Geom.isVisible(self.apex(), dest):
 		# 	return self._others + [convertToPoint(dest)]
+		# print("others:", [getClosestVertex(pt) for pt in self._others])
+		# print("left:", [getClosestVertex(pt) for pt in self._funnelLeft])
+		# print("right:", [getClosestVertex(pt) for pt in self._funnelRight])
 		p1 = self._findCandidatePath(dest, self._funnelLeft)
 		p2 = self._findCandidatePath(dest, self._funnelRight)
 		d1 = Geom.lengthOfCurve(p1)

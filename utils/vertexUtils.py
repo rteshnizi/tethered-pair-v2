@@ -1,8 +1,8 @@
+import math
 from model.modelService import Model
 
 model = Model()
 SMALL_DISTANCE = 0.01
-
 
 def convertToPoint(vert):
 	"""
@@ -16,7 +16,7 @@ def ptToStringId(pt):
 	"""
 	Use this method internally to obtain a unique Id for each point in this triangulation
 	"""
-	return '%d,%d' % (convertToPoint(pt).x(), convertToPoint(pt).y())
+	return '%.15f,%.15f' % (convertToPoint(pt).x(), convertToPoint(pt).y())
 
 def _convertVertListToDict(verts: list) -> dict:
 	vertDict = {}
@@ -67,20 +67,59 @@ def setSubtractPoints(verts1: list, verts2: list) -> list:
 	l = [v for (k, v) in d1.items() if k not in d2]
 	return l
 
-def almostEqual(v1, v2) -> bool:
+def almostEqual(v1, v2) -> tuple:
+	"""
+	Checks if 2 points/vertices are equal with a small margin of error.
+
+	Returns
+	=====
+	A Tuple (bool, float) where:
+	* the bool indicates if the 2 points are the margin of error away from each other
+	* the float is the
+	"""
 	pt1 = convertToPoint(v1)
 	pt2 = convertToPoint(v2)
 	vect = pt1 - pt2
-	return vect.squared_length() < SMALL_DISTANCE
+	return (vect.squared_length() < SMALL_DISTANCE, math.sqrt(vect.squared_length()))
 
-# I have copied this from GEOM because I can't import that file here
-def getClosestVertex(pt):
+def _getClosestVertex(pt):
+	candidate = None
+	minDist = 100000000000
 	for v in model.robots:
-		if almostEqual(pt, v):
-			return v
-		if almostEqual(pt, v.destination):
-			return v.destination
+		eq, dist = almostEqual(pt, v)
+		if eq and dist < minDist:
+			candidate = v
+			minDist = dist
+			if dist == 0: return candidate
+		eq, dist = almostEqual(pt, v.destination)
+		if eq and dist < minDist:
+			candidate = v.destination
+			minDist = dist
+			if dist == 0: return candidate
 
 	for v in model.vertices:
-		if almostEqual(pt, v):
-			return v
+		eq, dist = almostEqual(pt, v)
+		if eq and dist < minDist:
+			candidate = v
+			minDist = dist
+			if dist == 0: return candidate
+	return candidate
+
+def getClosestVertex(pt):
+	candidate = None
+	for v in model.robots:
+		eq, dist = almostEqual(pt, v)
+		if eq:
+			candidate = v
+			if dist == 0: return candidate
+		eq, dist = almostEqual(pt, v.destination)
+		if eq:
+			candidate = v.destination
+			if dist == 0: return candidate
+
+	for v in model.vertices:
+		eq, dist = almostEqual(pt, v)
+		if eq:
+			candidate = v
+			if dist == 0: return candidate
+	return candidate

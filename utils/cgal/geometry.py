@@ -12,6 +12,7 @@ Geometry Helper functions
 """
 model = Model()
 EPSILON_MULTIPLIER = 0.000001 # 1e-6
+# EPSILON_MULTIPLIER = 0.7 # 1e-6
 
 def vertexDistance(v1, v2):
 	pt1 = convertToPoint(v1)

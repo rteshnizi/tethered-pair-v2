@@ -103,15 +103,14 @@ class Triangulation(object):
 		"""
 		Remarks
 		===
-		Find the convex hull of the points, then extrudes the points on the convex hull by an epsilon vector from its
-		centroid.
+		Find the convex hull of the points.
 
 		This is done to guarantee that the boundary of the triangulation would not intersect the constraints.
 
 		:return: Convex Hull
 		"""
 		hull = []
-		if not self.originalPolygon.is_simple():
+		if not self.originalPolygon.is_convex():
 			ConvexHull(self.boundaryPts, hull)
 			self.boundaryPts = hull
 		(self.fullyEnclosedPolygons, partials) = Geom.getAllIntersectingObstacles(self.boundaryPts)
@@ -146,7 +145,7 @@ class Triangulation(object):
 		e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
 		e.createShape()
 
-	def _insertPointsIntoTriangulation(self, pts):
+	def _insertPolygonIntoTriangulation(self, pts):
 		"""
 		Adds points to this triangulation while maintaining the handles in the `_ptHandles` dictionary
 
@@ -156,18 +155,23 @@ class Triangulation(object):
 		That is, all of the points that belong to one hole (obstacle) should be added at once and separately.
 		"""
 		if not pts:
-			return
+			raise RuntimeError("Cannot insert None into Triangulation.")
 
 		handles = []
 		for pt in pts:
-			handle = self.cgalTri.insert(pt)
-			self._insertHandleIntoDict(pt, handle)
+			(added, handle) = self._addPtToTriangulation(pt)
 			handles.append(handle)
-		for i in range(len(pts) - 1):
+		for i in range(len(handles) - 1):
 			self.cgalTri.insert_constraint(handles[i], handles[i + 1])
 		self.cgalTri.insert_constraint(handles[-1], handles[0])
 
-	def _insertHandleIntoDict(self, pt, handle):
+	def _addPtToTriangulation(self, pt):
+		if self._isPtHandleInDict(pt): return (False, self.getVertexHandle(pt))
+		handle = self.cgalTri.insert(pt)
+		self._insertPtHandleIntoDict(pt, handle)
+		return (True, handle)
+
+	def _insertPtHandleIntoDict(self, pt, handle):
 		# We need to do this because for the triangulation we extrude the boundary
 		# because of that the IDs might be off by an epsilon
 		# FIXME: Might be unnecessary now that we have polygon intersection
@@ -175,6 +179,10 @@ class Triangulation(object):
 		# key = VertexUtils.ptToStringId(vrt) if vrt else VertexUtils.ptToStringId(pt)
 		key = VertexUtils.ptToStringId(pt)
 		self._ptHandles[key] = handle
+
+	def _isPtHandleInDict(self, pt) -> bool:
+		key = VertexUtils.ptToStringId(pt)
+		return key in self._ptHandles
 
 	def _markInteriorTriangles(self):
 		"""
@@ -231,14 +239,14 @@ class Triangulation(object):
 
 	def _insertCableConstraints(self) -> None:
 		for i in range(len(self.cable) - 1):
-			h1 = self.getVertexHandle(self.cable[i])
-			h2 = self.getVertexHandle(self.cable[i + 1])
+			(_, h1) = self._addPtToTriangulation(self.cable[i])
+			(_, h2) = self._addPtToTriangulation(self.cable[i + 1])
 			self.cgalTri.insert_constraint(h1, h2)
-		h1 = self.getVertexHandle(self.src1)
-		h2 = self.getVertexHandle(self.dest1)
+		(_, h1) = self._addPtToTriangulation(self.src1)
+		(_, h2) = self._addPtToTriangulation(self.dest1)
 		self.cgalTri.insert_constraint(h1, h2)
-		h1 = self.getVertexHandle(self.src2)
-		h2 = self.getVertexHandle(self.dest2)
+		(_, h1) = self._addPtToTriangulation(self.src2)
+		(_, h2) = self._addPtToTriangulation(self.dest2)
 		self.cgalTri.insert_constraint(h1, h2)
 
 	def _triangulate(self):
@@ -246,10 +254,10 @@ class Triangulation(object):
 		Construct Triangles
 		"""
 		# Insert exterior
-		self._insertPointsIntoTriangulation(self.boundaryPts)
+		self._insertPolygonIntoTriangulation(self.boundaryPts)
 		# Insert interior (obstacles)
 		for poly in self.fullyEnclosedPolygons:
-			self._insertPointsIntoTriangulation(list(poly.vertices()))
+			self._insertPolygonIntoTriangulation(list(poly.vertices()))
 		self._insertCableConstraints()
 		self._markInteriorTriangles()
 
@@ -296,8 +304,7 @@ class Triangulation(object):
 
 	def getCgalEdge(self, vertexSet):
 		"""
-		Finds the edge connecting the two points in vertexSet, or `None` if ti doesn't exist.
-
+		Finds the edge connecting the two points in vertexSet, or `None` if it doesn't exist.
 
 		Params
 		===
@@ -334,8 +341,6 @@ class Triangulation(object):
 		vertex: model.vertex.Vertex or utils.cgal.types.Point
 		"""
 		# See _insertHandleIntoDict()
-		# vrt = Geom.getClosestVertex(vertex)
-		# key = VertexUtils.ptToStringId(vertex) if vrt else VertexUtils.ptToStringId(vertex)
 		key = VertexUtils.ptToStringId(vertex)
 		return self._ptHandles.get(key)
 
@@ -376,9 +381,7 @@ class Triangulation(object):
 		edges = []
 		for i in indices:
 			pt = faceHandle.vertex(i).point()
-			ptVert = model.getVertexByLocation(pt.x(), pt.y())
-			edges.append(frozenset([vert, ptVert if ptVert else pt]))
-			# edges.append(frozenset([vert, model.getVertexByLocation(pt.x(), pt.y())]))
+			edges.append(frozenset([vert, pt]))
 		return frozenset(edges)
 
 	def pushVertEpsilonInside(self, vert, faceHandle: TriangulationFaceHandle) -> Point:
@@ -387,7 +390,8 @@ class Triangulation(object):
 		vects = []
 		for e in edges:
 			for v in e:
-				if VertexUtils.almostEqual(v, vert):
+				eq, dist = VertexUtils.almostEqual(v, vert)
+				if eq:
 					vects.append(VertexUtils.convertToPoint(v) - VertexUtils.convertToPoint(vert))
 					break
 		summed = vects[0] + vects[1]
@@ -438,7 +442,6 @@ class Triangulation(object):
 			if neighbor == faceHandle2:
 				ptInds = indices - {i}
 				verts = [faceHandle1.vertex(j).point() for j in ptInds]
-				verts = [model.getVertexByLocation(x=pt.x(), y=pt.y()) for pt in verts]
 				return frozenset(verts)
 		return frozenset()
 

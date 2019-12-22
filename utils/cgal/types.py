@@ -1,6 +1,6 @@
 from typing import Union
 from model.modelService import Model
-from utils.vertexUtils import almostEqual, getClosestVertex
+from utils.vertexUtils import getClosestVertex, ptToStringId
 
 from CGAL.CGAL_Kernel import cross_product as _cross_product
 from CGAL.CGAL_Kernel import intersection as _intersection
@@ -46,7 +46,7 @@ Point.__repr__ = __Pt2Repr
 # We don't need the has anymore, I just kept it for reference
 # Make Point_2 hashable
 def __Pt2Hash(self):
-	return hash("Pt2(%f, %f)" % (self.x(), self.y()))
+	return hash(ptToStringId(self))
 Point.__hash__ = __Pt2Hash
 
 # More human readable __repr__ for Ray_2
