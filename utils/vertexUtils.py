@@ -1,5 +1,5 @@
 import math
-from model.modelService import Model
+from model.modelService import Model, ptToStringId as _ptToStringId
 
 model = Model()
 SMALL_DISTANCE = 0.01
@@ -12,11 +12,8 @@ def convertToPoint(vert):
 		return vert.loc
 	return vert
 
-def ptToStringId(pt):
-	"""
-	Use this method internally to obtain a unique Id for each point in this triangulation
-	"""
-	return '%.15f,%.15f' % (convertToPoint(pt).x(), convertToPoint(pt).y())
+def ptToStringId(vert):
+	return _ptToStringId(convertToPoint(vert))
 
 def _convertVertListToDict(verts: list) -> dict:
 	vertDict = {}

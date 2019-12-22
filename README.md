@@ -1,5 +1,7 @@
 # tethered-pair-v2
 
+Work in progress.
+
 ## Dependencies
 
 1. tkinter

@@ -16,7 +16,14 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
-	print(tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True))
+	tightened = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=False, runAlg=True)
+	if not tightened: return
+	c1: Cable = model.entities["CABLE-O"]
+	c1.removeShape()
+	c1.createShape()
+	c2 = Cable(model.canvas, "CABLE-D", tightened)
+	model.entities[c2.name] = c2
+	print(tightened)
 	return
 	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
@@ -182,6 +189,8 @@ def makeFrozenSet(members):
 	return frozenset([members])
 
 def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset):
+	if len(currTries) > 1:
+		raise RuntimeError("There must only be 1 currTries")
 	for tri in currTries:
 		edges = cgalTriangulation.getIncidentEdges(pivot, tri)
 		e = edges - makeFrozenSet(currE)
@@ -189,12 +198,13 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 			if len(e) != 1:
 				raise RuntimeError("There must only be 1 flipEdge")
 			e = next(iter(e))
-			if len(currTries) > 1:
+			# I don't think currTries will ever be greater than 1, so I commented the above code and replaced it with an exception at the top
+			# if len(currTries) > 1:
 				# Test the epsilon push thing
-				otherEndOfE = next(iter(e - { pivot }))
-				epsilon = Geom.getEpsilonVector(pivot, otherEndOfE)
-				# If e doesn't fall between currE and targetE, then this is not the flip edge
-				if not cgalTriangulation.isPointInsideOriginalPolygon(pivot.loc + epsilon): continue
+				# otherEndOfE = next(iter(e - { pivot }))
+				# epsilon = Geom.getEpsilonVector(pivot, otherEndOfE)
+				# # If e doesn't fall between currE and targetE, then this is not the flip edge
+				# if not cgalTriangulation.isPointInsideOriginalPolygon(pivot.loc + epsilon): continue
 			incident = cgalTriangulation.getIncidentTriangles(e)
 			triangle = incident - currTries
 			# This happens when the polygon formed by the cable and destinations is not simple

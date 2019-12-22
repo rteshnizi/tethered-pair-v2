@@ -31,7 +31,19 @@ class Model:
 		self.instance.MAX_CABLE = l
 
 	def addVertexByLocation(self, vert):
-		self._vertexByLocation['%d,%d' % (vert.loc.x(), vert.loc.y())] = vert
+		self._vertexByLocation[ptToStringId(vert.loc)] = vert
 
 	def getVertexByLocation(self, x, y):
-		return self._vertexByLocation.get('%d,%d' % (x, y), None)
+		return self._vertexByLocation.get(xyToStringId(x, y), None)
+
+def ptToStringId(pt):
+	"""
+	Use this method internally to obtain a unique Id for each point in this triangulation
+	"""
+	return xyToStringId(pt.x(), pt.y())
+
+def xyToStringId(x, y):
+	"""
+	Use this method internally to obtain a unique Id for each point in this triangulation
+	"""
+	return '%.15f,%.15f' % (x, y)

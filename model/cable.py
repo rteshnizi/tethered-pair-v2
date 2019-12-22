@@ -1,13 +1,14 @@
 from model.entity import Entity
 from model.modelService import Model
 from model.vertex import Vertex
-from utils.cgal.drawing import CreatePolygon
+from utils.cgal.drawing import CreateLine
 import utils.cgal.geometry as Geom
 from utils.cgal.types import Point
 import utils.vertexUtils as VertexUtils
 
+WIDTH = 3
 CABLE_ORIGIN_COLOR = "Green"
-CABLE_FINAL_COLOR = "Orange"
+CABLE_FINAL_COLOR = "DarkRed"
 model = Model()
 
 class Cable(Entity):
@@ -37,4 +38,4 @@ class Cable(Entity):
 
 	def createShape(self):
 		if (self.canvasId): return
-		self.canvasId = CreatePolygon(self.canvas, pointsList=self.pts, outline="", fill=self.color, width=5, tag=self.name)
+		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, color=self.color, tag=self.name, width=WIDTH)

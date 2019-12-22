@@ -381,7 +381,9 @@ class Triangulation(object):
 		edges = []
 		for i in indices:
 			pt = faceHandle.vertex(i).point()
-			edges.append(frozenset([vert, pt]))
+			ptVert = model.getVertexByLocation(pt.x(), pt.y())
+			edges.append(frozenset([vert, ptVert if ptVert else pt]))
+			# edges.append(frozenset([vert, pt]))
 		return frozenset(edges)
 
 	def pushVertEpsilonInside(self, vert, faceHandle: TriangulationFaceHandle) -> Point:
