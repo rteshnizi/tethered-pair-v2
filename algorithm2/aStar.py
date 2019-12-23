@@ -113,33 +113,37 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	longCable = getLongCable(cable, dest1, dest2)
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
-	currTries = tri.getIncidentTriangles(currE)
-	if len(currTries) != 1:
-		for t in currTries:
-			currTries = getTrueInitTri(currE, getEdge(longCable[1], longCable[2]), frozenset([t]), tri)
-			if len(currTries) == 1:
-				break
-			else:
-				raise RuntimeError("I don't want to live on this planet anymore.")
+	currTri = tri.getIncidentTriangles(currE)
+	if len(currTri) != 1:
+		# randomly pick one. If this is the wrong triangle, the pivot algorithm will fix itself.
+		# However, the resulting sleeve will have repeated triangles. This will be taken care of in findSleeve()
+		# FIXME: Needs testing
+		currTri = frozenset([next(iter(currTri))])
+		# for t in currTries:
+		# 	currTries = getTrueInitTri(currE, getEdge(longCable[1], longCable[2]), frozenset([t]), tri)
+		# 	if len(currTries) == 1:
+		# 		break
+		# 	else:
+		# 		raise RuntimeError("I don't want to live on this planet anymore.")
 	for i in range(1, len(longCable) - 1):
-		allCurrentTries.append(currTries)
+		allCurrentTries.append(currTri)
 		e = getEdge(longCable[i], longCable[i + 1])
 		pivot = e & currE
 		if len(pivot) != 1:
 			raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
-		while not tries & currTries:
-			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries, tries)
+		while not tries & currTri:
+			(flipEdge, currTri) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTri, tries)
 			if flipEdge:
 				currE = flipEdge
 			# FIXME: This happens if the dest1 + cable + dest2 is not a simple polygon
 			else:
 				raise RuntimeError("Deal with this at some point.")
-			allCurrentTries.append(currTries)
+			allCurrentTries.append(currTri)
 			# Debugging
 			# tri.getCanvasEdge(currE).highlightEdge()
-		currTries = tries & currTries
+		currTri = tries & currTri
 		currE = e
 	sleeve = findSleeve(allCurrentTries)
 	return getShortestPath(tri, dest1, dest2, sleeve)
@@ -257,12 +261,22 @@ def findSleeve(allTries: list):
 	"""
 	# First get rid of the frozensets
 	allTries = [next(iter(t)) for t in allTries]
-	prevTri = allTries[0]
-	trimmed = [prevTri]
-	for i in range(1, len(allTries)):
-		if allTries[i] != prevTri: trimmed.append(allTries[i])
-		prevTri = allTries[i]
+	triIndices = {}
+	trimmed = []
+	for i in range(len(allTries)):
+		if allTries[i] not in triIndices:
+			triIndices[allTries[i]] = i
+			trimmed.append(allTries[i])
+		else:
+			trimmed = trimmed[:triIndices[allTries[i]] + 1]
 	return trimmed
+
+	# prevTri = allTries[0]
+	# trimmed = [prevTri]
+	# for i in range(1, len(allTries)):
+	# 	if allTries[i] != prevTri: trimmed.append(allTries[i])
+	# 	prevTri = allTries[i]
+	# return trimmed
 
 def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 	# We need to do this because the funnel algorithm assumes that the path lies inside the triangulation
