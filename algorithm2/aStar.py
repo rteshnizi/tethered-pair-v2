@@ -16,7 +16,7 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
-	tightened = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=False, runAlg=True)
+	tightened = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True)
 	if not tightened: return
 	c1: Cable = model.entities["CABLE-O"]
 	c1.removeShape()
@@ -68,6 +68,32 @@ def isThereCrossMovement(cable, dest1, dest2):
 
 def isAtDestination(n) -> bool:
 	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
+
+def tightenCableSafe(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
+	solutionCounts = {}
+	solutions = {}
+	exceptions = {}
+	numExperiments = 10
+	for i in range(numExperiments):
+		try:
+			c = tightenCable(cable, dest1, dest2, debug, runAlg)
+			cId = repr(c)
+			if cId in solutions:
+				count = solutionCounts[cId]
+				count += 1
+				if count > (numExperiments / 2): return c
+				solutionCounts[cId] = count
+			else:
+				solutionCounts[cId] = 1
+				solutions[cId] = c
+		except Exception as e:
+			# This is just for debug purposes
+			exceptions[i] = e
+	numExceptions = len(exceptions)
+	if numExceptions == numExperiments: raise RuntimeError("Exception occurred in tightenCable()")
+	if numExceptions > 0: print("## REZA: Warning -- %d exceptions in tightenCable() ignored")
+	cId = max(solutionCounts, key=solutionCounts.get)
+	return solutions[cId]
 
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	"""
@@ -271,10 +297,10 @@ def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 	if len(sleeve) == 0:
 		raise RuntimeError("Here we are.")
 	funnel = Funnel(src, tri, sleeve)
-	path = funnel.getShortestPath(dst)
-	path = [getClosestVertex(pt) for pt in path]
-	path = removeRepeatedVertsOrdered(path)
-	return path
+	pathPt = funnel.getShortestPath(dst)
+	pathVt = [getClosestVertex(pt) for pt in pathPt]
+	pathVt = removeRepeatedVertsOrdered(pathVt)
+	return pathVt
 
 def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	cable = applyMovement(cable, dest1, True)

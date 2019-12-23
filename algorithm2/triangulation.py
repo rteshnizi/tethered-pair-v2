@@ -388,13 +388,14 @@ class Triangulation(object):
 
 	def pushVertEpsilonInside(self, vert, faceHandle: TriangulationFaceHandle) -> Point:
 		edges = self.getIncidentEdges(vert, faceHandle)
+		toBePushedPt = VertexUtils.convertToPoint(vert)
 		if not edges or len(edges) != 2: raise RuntimeError("There must be 2 incident edges")
 		vects = []
 		for e in edges:
 			for v in e:
-				eq, dist = VertexUtils.almostEqual(v, vert)
-				if eq:
-					vects.append(VertexUtils.convertToPoint(v) - VertexUtils.convertToPoint(vert))
+				pt = VertexUtils.convertToPoint(v)
+				if pt != toBePushedPt:
+					vects.append(pt - toBePushedPt)
 					break
 		summed = vects[0] + vects[1]
 		epsilon = Geom.getEpsilonVectorFromVect(summed)
