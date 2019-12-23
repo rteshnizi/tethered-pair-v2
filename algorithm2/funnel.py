@@ -145,11 +145,6 @@ class Funnel:
 		return self._others + funnelSide + [convertToPoint(dest)]
 
 	def getShortestPath(self, dest):
-		# p1 = self._findCandidatePath(dest, self._funnelLeft, True)
-		# p2 = self._findCandidatePath(dest, self._funnelRight, False)
-		# d1 = Geom.lengthOfCurve(p1)
-		# d2 = Geom.lengthOfCurve(p2)
-		# return p1 if d1 < d2 else p2
 		mid = Geom.midpoint(self._funnelLeft[0], self._funnelRight[0])
 		shouldGoLeft = Geom.isToTheLeft(self.apex(), mid, dest)
 		if shouldGoLeft: return self._findCandidatePath(dest, self._funnelLeft, True)

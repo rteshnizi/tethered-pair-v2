@@ -16,7 +16,7 @@ model = Model()
 VertList = List[Vertex]
 
 def aStar() -> None:
-	tightened = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True, runAlg=True)
+	tightened = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=False, runAlg=True)
 	if not tightened: return
 	c1: Cable = model.entities["CABLE-O"]
 	c1.removeShape()
@@ -109,7 +109,6 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
 		return [dest1, dest2]
-	flipEdges = []
 	allCurrentTries = []
 	longCable = getLongCable(cable, dest1, dest2)
 	# We represent an edge by a python set to make checks easier
@@ -122,7 +121,6 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 				break
 			else:
 				raise RuntimeError("I don't want to live on this planet anymore.")
-	startTri = next(iter(currTries))
 	for i in range(1, len(longCable) - 1):
 		allCurrentTries.append(currTries)
 		e = getEdge(longCable[i], longCable[i + 1])
@@ -132,23 +130,18 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, run
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
 		while not tries & currTries:
-			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries)
+			(flipEdge, currTries) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTries, tries)
 			if flipEdge:
 				currE = flipEdge
 			# FIXME: This happens if the dest1 + cable + dest2 is not a simple polygon
 			else:
 				raise RuntimeError("Deal with this at some point.")
-			flipEdges.append(flipEdge)
 			allCurrentTries.append(currTries)
 			# Debugging
 			# tri.getCanvasEdge(currE).highlightEdge()
 		currTries = tries & currTries
 		currE = e
-	# tri.getCanvasEdge(currE).highlightEdge()
-	# graph = buildTriangleGraph(tri, allCurrentTries)
-	# sleeve = []
-	# findSleeve(tri, graph, startTri, dest2, set(), sleeve)
-	sleeve = findSleeve2(allCurrentTries)
+	sleeve = findSleeve(allCurrentTries)
 	return getShortestPath(tri, dest1, dest2, sleeve)
 
 def pushCableAwayFromObstacles(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
@@ -208,78 +201,57 @@ def getEdge(vert1, vert2) -> frozenset:
 	# return makeFrozenSet([v1, v2])
 	return makeFrozenSet([vert1, vert2])
 
+def areEdgesEqual(e1 ,e2) -> bool:
+	e1 = [convertToPoint(pt) for pt in e1]
+	e2 = [convertToPoint(pt) for pt in e2]
+	e1 = frozenset(e1)
+	e2 = frozenset(e2)
+	return e1 == e2
+
 def makeFrozenSet(members):
 	if isinstance(members, list):
 		return frozenset(members)
 	# Assume none-iterable item, therefore it's a single item
 	return frozenset([members])
 
-def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset):
+def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset, candidates: frozenset):
 	if len(currTries) > 1:
 		raise RuntimeError("There must only be 1 currTries")
-	for tri in currTries:
-		edges = cgalTriangulation.getIncidentEdges(pivot, tri)
-		e = edges - makeFrozenSet(currE)
-		if e:
-			if len(e) != 1:
-				raise RuntimeError("There must only be 1 flipEdge")
-			e = next(iter(e))
-			# I don't think currTries will ever be greater than 1, so I commented the above code and replaced it with an exception at the top
-			# if len(currTries) > 1:
-				# Test the epsilon push thing
-				# otherEndOfE = next(iter(e - { pivot }))
-				# epsilon = Geom.getEpsilonVector(pivot, otherEndOfE)
-				# # If e doesn't fall between currE and targetE, then this is not the flip edge
-				# if not cgalTriangulation.isPointInsideOriginalPolygon(pivot.loc + epsilon): continue
+	# Check if the currentEdge is actually the flip edge.
+	# That would be the case if the target triangle and currentTriangle have an edge in common which is currE
+	tri = next(iter(currTries))
+	for candidate in candidates:
+		e = cgalTriangulation.getCommonEdge(tri, candidate)
+		if areEdgesEqual(e, currE): return (currE, makeFrozenSet(candidate))
+	# FlipEdge wasn't the currentEdge, so we move on
+	edges = cgalTriangulation.getIncidentEdges(pivot, tri)
+	e = edges - makeFrozenSet(currE)
+	if e:
+		if len(e) != 1:
+			raise RuntimeError("There must only be 1 flipEdge")
+		e = next(iter(e))
+		# I don't think currTries will ever be greater than 1, so I commented the above code and replaced it with an exception at the top
+		# if len(currTries) > 1:
+			# Test the epsilon push thing
+			# otherEndOfE = next(iter(e - { pivot }))
+			# epsilon = Geom.getEpsilonVector(pivot, otherEndOfE)
+			# # If e doesn't fall between currE and targetE, then this is not the flip edge
+			# if not cgalTriangulation.isPointInsideOriginalPolygon(pivot.loc + epsilon): continue
+		incident = cgalTriangulation.getIncidentTriangles(e)
+		triangle = incident - currTries
+		# This happens when the polygon formed by the cable and destinations is not simple
+		if not triangle:
+			# We have chosen the wrong flipEdge
+			e = currE
 			incident = cgalTriangulation.getIncidentTriangles(e)
 			triangle = incident - currTries
-			# This happens when the polygon formed by the cable and destinations is not simple
-			if not triangle:
-				# We have chosen the wrong flipEdge
-				e = currE
-				incident = cgalTriangulation.getIncidentTriangles(e)
-				triangle = incident - currTries
-			flipEdge = e
-			currTries = triangle
-			break
+		flipEdge = e
+		currTries = triangle
 	if len(currTries) != 1:
 		raise RuntimeError("flipEdge must be incident to exactly 2 triangles one of which is currTri")
 	return (flipEdge, currTries)
 
-def buildTriangleGraph(tri: Triangulation, allTries: list):
-	graph = {}
-	for i in range(len(allTries)):
-		this = allTries[i]
-		for j in range(i + 1, len(allTries)):
-			that = allTries[j]
-			for t1 in this:
-				for t2 in that:
-					if tri.areTrianglesNeighbor(t1, t2):
-						if t1 in graph:
-							graph[t1].add(t2)
-						else:
-							graph[t1] = {t2}
-						if t2 in graph:
-							graph[t2].add(t1)
-						else:
-							graph[t2] = {t1}
-	return graph
-
-def findSleeve(tri: Triangulation, graph: dict, startTriangle, dest: Vertex, visited: set, sleeve: list):
-	if tri.triangleHasVertex(startTriangle, dest):
-		sleeve.insert(0, startTriangle)
-		return True
-	visited.add(startTriangle)
-	if not graph.get(startTriangle):
-		raise RuntimeError("Debug this")
-	for child in graph[startTriangle]:
-		if child in visited: continue
-		if findSleeve(tri, graph, child, dest, visited, sleeve):
-			sleeve.insert(0, startTriangle)
-			return True
-	return False
-
-def findSleeve2(allTries: list):
+def findSleeve(allTries: list):
 	"""
 	Simply removes repeated triangles from the list. It relies on CGAL for equality of triangles.
 	"""
