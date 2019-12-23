@@ -2,7 +2,7 @@ import math
 from model.modelService import Model, ptToStringId as _ptToStringId
 
 model = Model()
-SMALL_DISTANCE = 5 # in pixels
+SMALL_DISTANCE = 2 # in pixels
 
 def convertToPoint(vert):
 	"""

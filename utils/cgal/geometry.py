@@ -11,7 +11,7 @@ from model.modelService import Model
 Geometry Helper functions
 """
 model = Model()
-EPSILON_MULTIPLIER = SMALL_DISTANCE // 2 # in pixels
+EPSILON_MULTIPLIER = SMALL_DISTANCE / 2 # in pixels
 
 def vertexDistance(v1, v2):
 	pt1 = convertToPoint(v1)
