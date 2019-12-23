@@ -2,7 +2,7 @@ import math
 from model.modelService import Model, ptToStringId as _ptToStringId
 
 model = Model()
-SMALL_DISTANCE = 0.01
+SMALL_DISTANCE = 5 # in pixels
 
 def convertToPoint(vert):
 	"""
@@ -77,7 +77,8 @@ def almostEqual(v1, v2) -> tuple:
 	pt1 = convertToPoint(v1)
 	pt2 = convertToPoint(v2)
 	vect = pt1 - pt2
-	return (vect.squared_length() < SMALL_DISTANCE, math.sqrt(vect.squared_length()))
+	l = math.sqrt(vect.squared_length())
+	return (l < SMALL_DISTANCE, l)
 
 def _getClosestVertex(pt):
 	candidate = None

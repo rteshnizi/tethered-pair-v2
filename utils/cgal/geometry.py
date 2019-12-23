@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 from utils.cgal.types import Line, Point, PointOrSegmentNone, Polygon, Segment, Vector, crossProduct, intersection
 import utils.shapely.geometry as SHGeom
-from utils.vertexUtils import convertToPoint, removeRepeatedVertsOrdered
+from utils.vertexUtils import convertToPoint, removeRepeatedVertsOrdered, SMALL_DISTANCE
 from math import sqrt
 
 from model.modelService import Model
@@ -11,8 +11,7 @@ from model.modelService import Model
 Geometry Helper functions
 """
 model = Model()
-EPSILON_MULTIPLIER = 0.000001 # 1e-6
-# EPSILON_MULTIPLIER = 0.7 # 1e-6
+EPSILON_MULTIPLIER = SMALL_DISTANCE // 2 # in pixels
 
 def vertexDistance(v1, v2):
 	pt1 = convertToPoint(v1)
@@ -24,7 +23,9 @@ def getEpsilonVectorFromVect(vect) -> Vector:
 	"""
 	Returns a Vector which represents an epsilon vector
 	"""
-	return vect * EPSILON_MULTIPLIER
+	l = sqrt(vect.squared_length())
+	vect = (vect / l) * EPSILON_MULTIPLIER
+	return vect
 
 def getEpsilonVector(frm, to) -> Vector:
 	"""
@@ -32,8 +33,7 @@ def getEpsilonVector(frm, to) -> Vector:
 	"""
 	toPt = convertToPoint(to)
 	frmPt = convertToPoint(frm)
-	vec = toPt - frmPt
-	return vec * EPSILON_MULTIPLIER
+	return getEpsilonVectorFromVect(toPt - frmPt)
 
 def isInsidePoly(poly, pt) -> bool:
 	"""
