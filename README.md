@@ -49,4 +49,4 @@ Work in progress.
 4. Change GapDetector to reduced visibility graph calculator (Aug 19, 2019)
 5. ~~Add a cable entity whose shape is a line (for debugging)~~
 6. ~~Add a case with initial cable config not being straight (Sep 3, 2019)~~
-7. **Crashes on Windows** (Dec 22, 2019)
+7. ~~Crashes on Windows (Dec 22, 2019)~~
