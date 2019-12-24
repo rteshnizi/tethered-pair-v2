@@ -6,7 +6,7 @@ from tests.unitTest import UnitTest
 
 # None indicates expected failed test that needs debugging
 tests = {
-	"1.json": "[O1-1, R1, O0-0, O0-1, O3-2]",
+	"1.json": None,
 	"10.json": "[D1, D2]",
 	"11.json": "[D1, O1-1, O0-1, O0-0]",
 	"12.json": "[D1, O1-1]",
@@ -20,6 +20,7 @@ tests = {
 	"2.json": "[O0-0, O0-1, O1-1]",
 	"20.json": "[O1-1, O2-0, O2-2, D2]",
 	"21.json": "[O2-2, R1, O2-0, O2-2, D2]",
+	"22.json": "[O1-1, R1, O0-0, O0-1, O3-2]",
 	"3.json": "[D1, O0-0, O0-1, D2]",
 	"4.json": "[O1-2, O0-0, O0-1, O2-1, O3-1]",
 	"5.json": "[O1-2, O0-0, O0-1, O2-0]",
