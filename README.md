@@ -18,6 +18,9 @@ Work in progress.
 	* Ubuntu: I don't remember needing to do this
 5. [Shapely](https://github.com/Toblerity/Shapely):
 	* On Ubuntu `pip install shapely`
+6. [termcolor](https://pypi.org/project/termcolor/):
+	* For unit test print statements
+	* `pip install termcolor`
 
 ## Recommended Tools
 
