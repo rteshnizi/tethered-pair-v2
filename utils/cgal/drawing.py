@@ -72,12 +72,12 @@ def bindMouseEvent(canvas, shape):
 	canvas.tag_bind(shape, '<Enter>', mouseHandler)
 
 def mouseHandler(event):
-	if (model.app.dbg['printMouseEvents'].get() == 0):
-		return
+	if not model.app.shouldPrintMouse: return
 	shape = event.widget.find_closest(event.x, event.y)
 	tag = model.canvas.gettags(shape)[0]
 	entity = model.entities.get(tag)
-	if entity and hasattr(entity, 'loc'):
+	if not entity: return
+	if hasattr(entity, 'loc'):
 		print('%s-%d,%d' % (tag, entity.loc.x(), entity.loc.y()))
 	else:
 		print(tag)

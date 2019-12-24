@@ -1,7 +1,7 @@
 from algorithm.triangulation import Triangulation
 from utils.cgal.types import Point
-from utils.vertexUtils import convertToPoint
 import utils.cgal.geometry as Geom
+from utils.vertexUtils import convertToPoint, getClosestVertex
 from collections import deque
 
 class Funnel:
@@ -45,6 +45,7 @@ class Funnel:
 			self._funnelLeft.append(convertToPoint(pt1))
 			self._funnelRight.append(convertToPoint(pt2))
 
+	# TODO: Use self._walkFunnelSide
 	def _updateFunnelLeft(self, candidate):
 		candidate = convertToPoint(candidate)
 		if self._funnelLeft[0] == candidate or self._funnelLeft[-1] == candidate: return
@@ -82,6 +83,7 @@ class Funnel:
 		self._others = self._others + self._funnelRight
 		self._funnelRight = [self._others[-1]]
 
+	# TODO: Use self._walkFunnelSide
 	def _updateFunnelRight(self, candidate):
 		candidate = convertToPoint(candidate)
 		if self._funnelRight[0] == candidate or self._funnelRight[-1] == candidate: return
@@ -111,7 +113,7 @@ class Funnel:
 			pt1 = self._funnelLeft[i]
 			pt2 = self._funnelLeft[i + 1]
 			if Geom.isToTheRight(pt1, pt2, candidate):
-				self._funnelLeft = [candidate]
+				self._funnelRight = [candidate]
 				self._others = self._others + self._funnelLeft[:i + 1]
 				self._funnelLeft = self._funnelLeft[i + 1:]
 				return
@@ -119,27 +121,31 @@ class Funnel:
 		self._others = self._others + self._funnelLeft
 		self._funnelLeft = [self._others[-1]]
 
-	def _findCandidatePath(self, dest, funnelSide: list):
-		# i = len(funnelSide) - 1
-		# while i >= 0:
-		# 	if not Geom.isVisible(funnelSide[i], dest):
-		# 		break
-		# 	i -= 1
-		# i += 1 # change it back to the last point in the funnel that was visible from the dest
-		# if i == len(funnelSide) - 1:
-		# 	subArr = funnelSide
-		# else:
-		# 	subArr = funnelSide[:i]
-		# return self._others + subArr + [convertToPoint(dest)]
+	def _walkFunnelSide(self, target, funnelSide: list, isCheckingLeft: bool) -> int:
+		isInsideFunnel = Geom.isToTheRight if isCheckingLeft else Geom.isToTheLeft
+		isOutsideFunnel = Geom.isToTheLeft if isCheckingLeft else Geom.isToTheRight
+		# initial check
+		pt1 = self._others[-1]
+		pt2 = funnelSide[-1]
+		if len(funnelSide) > 1:
+			pt1 = funnelSide[-2]
+		if isOutsideFunnel(pt1, pt2, target):
+			return len(funnelSide)
+		for i in reversed(range(len(funnelSide) - 1)):
+			if i == 0: break
+			pt1 = funnelSide[i - 1]
+			pt2 = funnelSide[i]
+			if isInsideFunnel(pt1, pt2, candidate):
+				return i
+		return 0
+
+	def _findCandidatePath(self, dest, funnelSide: list, isCheckingLeft: bool):
+		index = self._walkFunnelSide(dest, funnelSide, isCheckingLeft)
+		funnelSide = funnelSide[:index]
 		return self._others + funnelSide + [convertToPoint(dest)]
 
 	def getShortestPath(self, dest):
-		# if not self.tri.isPointInsideTriangle(self.sleeve[-1], self.tri.pushVertEpsilonInside(dest, self.sleeve[-1])):
-		# 	raise RuntimeError("Destination is not inside the final Triangle ion the sleeve")
-		# if Geom.isVisible(self.apex(), dest):
-		# 	return self._others + [convertToPoint(dest)]
-		p1 = self._findCandidatePath(dest, self._funnelLeft)
-		p2 = self._findCandidatePath(dest, self._funnelRight)
-		d1 = Geom.lengthOfCurve(p1)
-		d2 = Geom.lengthOfCurve(p2)
-		return p1 if d1 < d2 else p2
+		mid = Geom.midpoint(self._funnelLeft[0], self._funnelRight[0])
+		shouldGoLeft = Geom.isToTheLeft(self.apex(), mid, dest)
+		if shouldGoLeft: return self._findCandidatePath(dest, self._funnelLeft, True)
+		return self._findCandidatePath(dest, self._funnelRight, False)

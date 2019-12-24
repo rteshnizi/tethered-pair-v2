@@ -1,6 +1,6 @@
 import os
 
-from algorithm2.aStar import aStar
+from algorithm.aStar import aStar
 from model.preset import Preset
 from tests.test import Test
 # None indicates expected failed test that needs debugging

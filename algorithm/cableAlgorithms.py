@@ -2,103 +2,27 @@ from typing import List
 from model.vertex import Vertex
 import utils.cgal.geometry as Geom
 from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual, removeRepeatedVertsOrdered
-from algorithm2.visibility import findGaps, applyMovement
-from algorithm2.node import Node
-from algorithm2.triangulation import Triangulation
-from algorithm2.funnel import Funnel
+from algorithm.visibility import findGaps, applyMovement
+from algorithm.triangulation import Triangulation
+from algorithm.funnel import Funnel
 from model.modelService import Model
-from model.cable import Cable
-from utils.priorityQ import PriorityQ
-from utils.cgal.types import Point, Polygon
 
 model = Model()
 
 VertList = List[Vertex]
 
-def aStar() -> None:
-	tightened = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=False, runAlg=True)
-	return tightened
-	processReducedVisibilityGraph()
-	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
-	root = Node(cable=model.cable)
-	q.enqueue(root)
-	while not q.isEmpty():
-		n: Node = q.dequeue()
-		if isAtDestination(n):
-			print("At Destination")
-			c = Cable(model.canvas, "CABLE-D", n.cable)
-			model.entities[c.name] = c
-			print(n)
-			return # For now terminate at first solution
-		VA = findGaps(n.cable[0], model.robots[0])
-		VB = findGaps(n.cable[-1], model.robots[-1])
-		for va in VA:
-			for vb in VB:
-				# For now I deliberately avoid cross movement because it crashes the triangulation
-				# In reality we can fix this by mirorring the space (like I did in the previous paper)
-				if isThereCrossMovement(n.cable, va.vrt, vb.vrt):
-					continue
-				newCable = tightenCable(n.cable, va.vrt, vb.vrt)
-				l = Geom.lengthOfCurve(newCable)
-				if l <= model.MAX_CABLE:
-					child = Node(cable=newCable, parent=n)
-					n.children.append(child)
-					q.enqueue(child)
+def testTightenCable(debugTri=False):
+	return tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debugTri)
 
-def processReducedVisibilityGraph() -> None:
-	# TODO: Here I should assign
-	pass
-	# for v in model.vertices:
 
-def isThereCrossMovement(cable, dest1, dest2):
-	# I've also included the case where the polygon is not simple
-	p = Polygon()
-	p.push_back(convertToPoint(dest1))
-	for v in cable:
-		p.push_back(convertToPoint(v))
-	p.push_back(convertToPoint(dest2))
-	return not p.is_simple()
-
-def isAtDestination(n) -> bool:
-	return n.cable[0].name == model.robots[0].destination.name and n.cable[-1].name == model.robots[-1].destination.name
-
-def tightenCableSafe(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
-	solutionCounts = {}
-	solutions = {}
-	exceptions = {}
-	numExperiments = 10
-	for i in range(numExperiments):
-		try:
-			c = tightenCable(cable, dest1, dest2, debug, runAlg)
-			cId = repr(c)
-			if cId in solutions:
-				count = solutionCounts[cId]
-				count += 1
-				if count > (numExperiments / 2): return c
-				solutionCounts[cId] = count
-			else:
-				solutionCounts[cId] = 1
-				solutions[cId] = c
-		except Exception as e:
-			# This is just for debug purposes
-			exceptions[i] = e
-	numExceptions = len(exceptions)
-	if numExceptions == numExperiments: raise RuntimeError("Exception occurred in tightenCable()")
-	if numExceptions > 0: print("## REZA: Warning -- %d exceptions in tightenCable() ignored")
-	cId = max(solutionCounts, key=solutionCounts.get)
-	return solutions[cId]
-
-def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
+def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) -> VertList:
 	"""
 	This is an altered version of "Hershberger, J., & Snoeyink, J. (1994). Computing minimum length paths of a given homotopy class."
 
 	https://doi.org/10.1016/0925-7721(94)90010-8
 	"""
 	(cable, dest1, dest2) = pushCableAwayFromObstacles(cable, dest1, dest2)
-	tri = Triangulation(cable, dest1, dest2, debug=debug)
-	if not runAlg:
-		print("triangles:", tri.triangleCount)
-		return [] # For debugging only the triangulation
+	tri = Triangulation(cable, dest1, dest2, debug=debugTri)
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
 		return [dest1, dest2]

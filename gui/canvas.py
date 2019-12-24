@@ -22,7 +22,7 @@ class Canvas(object):
 		self._reset()
 		self.preset = Preset(jsonPath)
 		self.model = self.preset.model
-		self.model.setCanvas(self.tkCanvas)
+		self.model.setCanvas(self)
 		self.model.setApp(self.app)
 		self._renderPreset()
 
