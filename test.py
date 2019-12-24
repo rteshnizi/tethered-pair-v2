@@ -1,7 +1,7 @@
-from tests.aStar import TestAStar
+from tests.tighten import TestTighten
 
 def main():
-	TestAStar().run()
+	TestTighten().run()
 
 if __name__ == '__main__':
 	main()

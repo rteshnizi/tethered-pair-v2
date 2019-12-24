@@ -1,8 +1,9 @@
 import os
 
-from algorithm.aStar import aStar
+from algorithm.cableAlgorithms import testTightenCable
 from model.preset import Preset
-from tests.test import Test
+from tests.unitTest import UnitTest
+
 # None indicates expected failed test that needs debugging
 tests = {
 	"1.json": "[O1-1, R1, O0-0, O0-1, O3-2]",
@@ -33,7 +34,7 @@ tests = {
 cwd = os.path.dirname(__file__)
 presetsDir = os.path.join(cwd, "..", "presets")
 
-class TestAStar(Test):
+class TestTighten(UnitTest):
 	def __init__(self):
 		super().__init__(name="AStar")
 
@@ -48,7 +49,7 @@ class TestAStar(Test):
 				mapPath = os.path.join(presetsDir, presetName)
 				mapPath = os.path.abspath(mapPath)
 				preset = Preset(mapPath)
-				finalCable = aStar()
+				finalCable = testTightenCable()
 				finalCableStr = repr(finalCable)
 				if finalCableStr == tests[presetName]:
 					if verbose: print("Passed %s" % presetName)

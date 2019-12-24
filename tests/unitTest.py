@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class Test(ABC):
+class UnitTest(ABC):
 	def __init__(self, name):
 		self.name = name
 
