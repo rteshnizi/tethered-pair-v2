@@ -5,7 +5,7 @@ ROBOT_RADIUS = 5
 ROBOT_WIDTH = 2
 
 class Robot(Vertex):
-	def __init__(self, canvas, color, name, loc):
+	def __init__(self, color, name, loc):
 		"""
 		canvas: tk.Canvas
 
@@ -16,13 +16,14 @@ class Robot(Vertex):
 		loc: utils.cgal.types.Point
 		"""
 
-		super().__init__(canvas=canvas, color=color, name=name, loc=loc)
+		super().__init__(color=color, name=name, loc=loc)
 		self.destination = None
 
-	def createShape(self):
+	def createShape(self, canvas):
 		if (self.canvasId): return
+		self.canvas = canvas
 		self.canvasId = CreateCircle(
-			canvas=self.canvas,
+			canvas=self.canvas.tkCanvas,
 			center=self.loc,
 			radius=ROBOT_RADIUS,
 			outline="",

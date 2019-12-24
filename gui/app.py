@@ -63,7 +63,7 @@ class Application(tk.Frame):
 	def readMapJson(self, absolutePath):
 		if (not os.path.isfile(absolutePath)):
 			return
-		self.canvas.parseJson(absolutePath)
+		self.canvas.buildPreset(absolutePath)
 		self.runBtn["state"] = tk.NORMAL
 
 	def createDebugOptions(self):
@@ -71,4 +71,5 @@ class Application(tk.Frame):
 		printMouseEventsChk.pack(side=tk.TOP)
 
 	def run(self):
-		aStar()
+		finalCable = aStar()
+		self.canvas.renderSolution(finalCable)

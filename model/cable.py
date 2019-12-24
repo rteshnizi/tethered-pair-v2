@@ -12,12 +12,10 @@ CABLE_FINAL_COLOR = "DarkRed"
 model = Model()
 
 class Cable(Entity):
-	def __init__(self, canvas, name, pts: list, isOrigin=False):
+	def __init__(self, name, pts: list, isOrigin=False):
 		"""
 		params
 		===
-
-		canvas: tk.Canvas
 
 		color: color string
 
@@ -25,7 +23,7 @@ class Cable(Entity):
 
 		pts: A list of at least 2 utils.cgal.types.Point
 		"""
-		super().__init__(canvas=canvas, color=CABLE_ORIGIN_COLOR if isOrigin else CABLE_FINAL_COLOR, name=name)
+		super().__init__(color=CABLE_ORIGIN_COLOR if isOrigin else CABLE_FINAL_COLOR, name=name)
 		if isinstance(pts, list):
 			if len(pts) < 2:
 				raise RuntimeError("at least 2 Points are needed for a Cable")
@@ -35,6 +33,7 @@ class Cable(Entity):
 			pt = VertexUtils.convertToPoint(v)
 			self.pts.append(Geom.addVectorToPoint(pt, 2, 2))
 
-	def createShape(self):
+	def createShape(self, canvas):
 		if (self.canvasId): return
-		self.canvasId = CreateLine(self.canvas, pointsList=self.pts, color=self.color, tag=self.name, width=WIDTH)
+		self.canvas = canvas
+		self.canvasId = CreateLine(self.canvas.tkCanvas, pointsList=self.pts, color=self.color, tag=self.name, width=WIDTH)

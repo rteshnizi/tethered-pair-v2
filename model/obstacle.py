@@ -9,7 +9,7 @@ OBSTACLE_COLOR = "Grey"
 mode = Model()
 
 class Obstacle(Entity):
-	def __init__(self, canvas, name, pts):
+	def __init__(self, name, pts):
 		"""
 		canvas: tk.Canvas
 
@@ -19,7 +19,7 @@ class Obstacle(Entity):
 
 		pts: [utils.cgal.types.Point]
 		"""
-		super().__init__(canvas=canvas, color=OBSTACLE_COLOR, name=name)
+		super().__init__(color=OBSTACLE_COLOR, name=name)
 		self.vertices = []
 		self._pts = pts
 		self.polygon: Polygon = None
@@ -27,12 +27,13 @@ class Obstacle(Entity):
 
 	def createVertices(self, pts):
 		for i in range(0, len(pts)):
-			v = Vertex(canvas=self.canvas, name="%s-%d" % (self.name, i), loc=pts[i], ownerObs=self)
+			v = Vertex(name="%s-%d" % (self.name, i), loc=pts[i], ownerObs=self)
 			self.vertices.append(v)
 
-	def createShape(self):
+	def createShape(self, canvas):
 		if self.canvasId: return
-		self.canvasId = CreatePolygon(canvas=self.canvas, pointsList=self._pts, outline="", fill=self.color, width=1, tag=self.name)
+		self.canvas = canvas
+		self.canvasId = CreatePolygon(canvas=self.canvas.tkCanvas, pointsList=self._pts, outline="", fill=self.color, width=1, tag=self.name)
 		self.polygon = Polygon()
 		for pt in self._pts:
 			self.polygon.push_back(pt)

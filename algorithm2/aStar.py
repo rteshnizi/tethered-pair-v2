@@ -17,14 +17,7 @@ VertList = List[Vertex]
 
 def aStar() -> None:
 	tightened = tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debug=False, runAlg=True)
-	if not tightened: return
-	c1: Cable = model.entities["CABLE-O"]
-	c1.removeShape()
-	c1.createShape()
-	c2 = Cable(model.canvas, "CABLE-D", tightened)
-	model.entities[c2.name] = c2
-	print(tightened)
-	return
+	return tightened
 	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
