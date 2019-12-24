@@ -1,7 +1,7 @@
 from algorithm.triangulation import Triangulation
 from utils.cgal.types import Point
 import utils.cgal.geometry as Geom
-from utils.vertexUtils import convertToPoint, getClosestVertex
+from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual
 from collections import deque
 
 class Funnel:
@@ -122,20 +122,20 @@ class Funnel:
 		self._funnelLeft = [self._others[-1]]
 
 	def _walkFunnelSide(self, target, funnelSide: list, isCheckingLeft: bool) -> int:
-		isInsideFunnel = Geom.isToTheRight if isCheckingLeft else Geom.isToTheLeft
-		isOutsideFunnel = Geom.isToTheLeft if isCheckingLeft else Geom.isToTheRight
+		isStrictlyInsideFunnel = Geom.isToTheRight if isCheckingLeft else Geom.isToTheLeft
+		isStrictlyOutsideFunnel = Geom.isToTheLeft if isCheckingLeft else Geom.isToTheRight
 		# initial check
 		pt1 = self._others[-1]
 		pt2 = funnelSide[-1]
 		if len(funnelSide) > 1:
 			pt1 = funnelSide[-2]
-		if isOutsideFunnel(pt1, pt2, target):
+		if isStrictlyOutsideFunnel(pt1, pt2, target):
 			return len(funnelSide)
-		for i in reversed(range(len(funnelSide) - 1)):
-			if i == 0: break
+		for i in reversed(range(1, len(funnelSide))):
 			pt1 = funnelSide[i - 1]
 			pt2 = funnelSide[i]
-			if isInsideFunnel(pt1, pt2, candidate):
+			(eq, dist) = almostEqual(pt2, target) # used to say pt2 == target
+			if eq or isStrictlyInsideFunnel(pt1, pt2, target):
 				return i
 		return 0
 

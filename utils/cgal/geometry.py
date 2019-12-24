@@ -77,16 +77,17 @@ def getAllIntersectingObstacles(vertices):
 				result[1].append(obs)
 	return result
 
-def isColinear(ref1, ref2, target) -> bool:
-	"""
-	Given the two reference points, determine if target is colinear with line segment formed by ref1->ref2
-	"""
-	pt1 = convertToPoint(ref1)
-	pt2 = convertToPoint(ref2)
-	ptTarget = convertToPoint(target)
+# FIXME: This method is buggy. I have seen a case where line.has_on(pt2) == False
+# def isColinear(ref1, ref2, target) -> bool:
+# 	"""
+# 	Given the two reference points, determine if target is colinear with line segment formed by ref1->ref2
+# 	"""
+# 	pt1 = convertToPoint(ref1)
+# 	pt2 = convertToPoint(ref2)
+# 	ptTarget = convertToPoint(target)
 
-	line = Line(pt1, pt2)
-	return line.has_on(ptTarget)
+# 	line = Line(pt1, pt2)
+# 	return line.has_on(ptTarget)
 
 def isToTheRight(ref1, ref2, target) -> bool:
 	"""
