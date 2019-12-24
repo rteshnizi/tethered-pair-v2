@@ -26,6 +26,13 @@ class Canvas(object):
 		self.model.setApp(self.app)
 		self._renderPreset()
 
+	def _reset(self):
+		if not self.model: return
+		for entity in self.model.entities.values():
+			entity.removeShape()
+		self.model = None
+		self.preset = None
+
 	def _renderPreset(self):
 		for entity in self.model.entities.values():
 			entity.createShape(self)
@@ -38,10 +45,3 @@ class Canvas(object):
 		self.model.entities[c2.name] = c2
 		c2.createShape(self)
 		print(finalCable)
-
-	def _reset(self):
-		if not self.model: return
-		for entity in self.model.entities.values():
-			entity.removeShape()
-		self.model = None
-		self.preset = None

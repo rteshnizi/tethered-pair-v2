@@ -22,7 +22,9 @@ class Obstacle(Entity):
 		super().__init__(color=OBSTACLE_COLOR, name=name)
 		self.vertices = []
 		self._pts = pts
-		self.polygon: Polygon = None
+		self.polygon = Polygon()
+		for pt in self._pts:
+			self.polygon.push_back(pt)
 		self.createVertices(pts)
 
 	def createVertices(self, pts):
@@ -34,9 +36,6 @@ class Obstacle(Entity):
 		if self.canvasId: return
 		self.canvas = canvas
 		self.canvasId = CreatePolygon(canvas=self.canvas.tkCanvas, pointsList=self._pts, outline="", fill=self.color, width=1, tag=self.name)
-		self.polygon = Polygon()
-		for pt in self._pts:
-			self.polygon.push_back(pt)
 
 	def enclosesVertex(self, vrt):
 		return self.enclosesPoint(vrt.loc)

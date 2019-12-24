@@ -5,7 +5,7 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Run Main",
+			"name": "Run GUI",
 			"type": "python",
 			"request": "launch",
 			"console": "integratedTerminal",
@@ -14,6 +14,18 @@
 			},
 			"linux": {
 				"program": "${workspaceFolder}/main.py"
+			}
+		},
+		{
+			"name": "Run Tests",
+			"type": "python",
+			"request": "launch",
+			"console": "integratedTerminal",
+			"windows": {
+				"program": "${workspaceFolder}\\test.py"
+			},
+			"linux": {
+				"program": "${workspaceFolder}/test.py"
 			}
 		}
 	]
