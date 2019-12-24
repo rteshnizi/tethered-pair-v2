@@ -20,14 +20,12 @@ class Vertex(Entity):
 
 	gaps: list of the vertices adjacent to this vertex on the reduced visibility graph
 	"""
-	def __init__(self, canvas, name, loc, ownerObs=None, color=VERTEX_COLOR, render=False):
+	def __init__(self, canvas, name, loc, ownerObs=None, color=VERTEX_COLOR):
 		super().__init__(canvas=canvas, color=color, name=name)
 		self.loc = loc
 		self.ownerObs = ownerObs
 		self.adjacent = []
 		self.gaps = []
-		if (render):
-			self.createShape()
 
 	def createShape(self):
 		if (self.canvasId): return

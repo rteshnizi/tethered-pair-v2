@@ -34,7 +34,6 @@ class Cable(Entity):
 		for v in reversed(pts):
 			pt = VertexUtils.convertToPoint(v)
 			self.pts.append(Geom.addVectorToPoint(pt, 2, 2))
-		self.createShape()
 
 	def createShape(self):
 		if (self.canvasId): return

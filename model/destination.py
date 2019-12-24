@@ -14,7 +14,6 @@ class Destination(Vertex):
 		"""
 		super().__init__(canvas=canvas, color=robot.color, name=robot.name.replace('R', 'D'), loc=loc)
 		self.robot = robot
-		self.createShape()
 
 	def createShape(self):
 		if (self.canvasId): return

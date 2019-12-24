@@ -14,8 +14,14 @@ class Model:
 
 	instance = None
 
-	def __init__(self):
-		if not Model.instance:
+	def __init__(self, forceCreation=False):
+		"""
+		Use `forceCreation` for reseting the model.
+		It should only be used carefully and between sessions.
+
+		FIXME: Check what happens to canvas and whether the memory is cleared when this happens
+		"""
+		if forceCreation or not Model.instance:
 			Model.instance = Model.__PrivateModel()
 
 	def __getattr__(self, name):

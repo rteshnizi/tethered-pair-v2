@@ -18,7 +18,6 @@ class Robot(Vertex):
 
 		super().__init__(canvas=canvas, color=color, name=name, loc=loc)
 		self.destination = None
-		self.createShape()
 
 	def createShape(self):
 		if (self.canvasId): return
