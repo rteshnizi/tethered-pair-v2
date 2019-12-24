@@ -2,6 +2,16 @@
 
 Work in progress.
 
+## Running the GUI
+
+* Without VS Code: `python main.py`
+* With VS Code: `Run GUI` task
+
+## Running Unit Tests
+
+* Without VS Code: `python test.py`
+* With VS Code: `Run Tests` task
+
 ## Dependencies
 
 1. tkinter
