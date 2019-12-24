@@ -34,9 +34,11 @@ Work in progress.
 
 ## Recommended Tools
 
-1. `PyLint` for linting
+1. VS Code
+	* This whole project was developed in VS Code so it's setup to work with it.
+2. `PyLint` for linting
 	* on Ubuntu `sudo apt install pylint`
-2. `AutoPep8` for formatting
+3. `AutoPep8` for formatting
 	* on Ubuntu `sudo apt install python-autopep8`
 
 ## TODO:
