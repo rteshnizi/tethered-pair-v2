@@ -2,7 +2,6 @@ from algorithm.triangulation import Triangulation
 from utils.cgal.types import Point
 import utils.cgal.geometry as Geom
 from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual
-from collections import deque
 
 class Funnel:
 	def __init__(self, src: Point, triangulation: Triangulation, sleeve: list):
@@ -30,11 +29,11 @@ class Funnel:
 			e = list(e)
 			mid = Geom.midpoint(e[0], e[1])
 			if Geom.isToTheRight(midPrev, mid, e[0]):
-				self._updateFunnelRight(e[0])
-				self._updateFunnelLeft(e[1])
+				self._updateFunnelRight2(e[0])
+				self._updateFunnelLeft2(e[1])
 			else:
-				self._updateFunnelLeft(e[0])
-				self._updateFunnelRight(e[1])
+				self._updateFunnelLeft2(e[0])
+				self._updateFunnelRight2(e[1])
 			midPrev = mid
 
 	def _addFirstTriangleToFunnel(self, mid, pt1, pt2):
@@ -45,86 +44,51 @@ class Funnel:
 			self._funnelLeft.append(convertToPoint(pt1))
 			self._funnelRight.append(convertToPoint(pt2))
 
-	# TODO: Use self._walkFunnelSide
-	def _updateFunnelLeft(self, candidate):
-		candidate = convertToPoint(candidate)
-		if self._funnelLeft[0] == candidate or self._funnelLeft[-1] == candidate: return
-		# initial check
-		pt1 = self._others[-1]
-		pt2 = self._funnelLeft[-1]
-		if len(self._funnelLeft) > 1:
-			pt1 = self._funnelLeft[-2]
-		if Geom.isToTheLeft(pt1, pt2, candidate):
-			self._funnelLeft.append(candidate)
-			return
-		for i in reversed(range(len(self._funnelLeft) - 1)):
-			if i == 0: break
-			pt1 = self._funnelLeft[i - 1]
-			pt2 = self._funnelLeft[i]
-			if Geom.isToTheRight(pt1, pt2, candidate):
-				self._funnelLeft = self._funnelLeft[:i]
-				self._funnelLeft.append(candidate)
-				return
-		pt1 = self._others[-1]
-		pt2 = self._funnelRight[0]
-		if Geom.isToTheLeft(pt1, pt2, candidate):
-			self._funnelLeft = [candidate]
-			return
-		# At this point we are past the apex, so the apex will have to be changed
-		for i in range(len(self._funnelRight) - 1):
-			pt1 = self._funnelRight[i]
-			pt2 = self._funnelRight[i + 1]
-			if Geom.isToTheLeft(pt1, pt2, candidate):
-				self._funnelLeft = [candidate]
-				self._others = self._others + self._funnelRight[:i + 1]
-				self._funnelRight = self._funnelRight[i + 1:]
-				return
-		self._funnelLeft = [candidate]
-		self._others = self._others + self._funnelRight
-		self._funnelRight = [self._others[-1]]
+	def _updateFunnelLeft2(self, candidate) -> None:
+		(self._funnelLeft, self._funnelRight) = self._updateFunnelSide(candidate, True)
 
-	# TODO: Use self._walkFunnelSide
-	def _updateFunnelRight(self, candidate):
+	def _updateFunnelRight2(self, candidate):
+		(self._funnelRight, self._funnelLeft) = self._updateFunnelSide(candidate, False)
+
+	# TODO: Reuse _walkFunnelSide() for when we are past apex as well
+	def _updateFunnelSide(self, candidate, isUpdatingLeft: bool):
+		# The terminology in this function is weird because this function is agnostic to which side of the funnel it is updating
 		candidate = convertToPoint(candidate)
-		if self._funnelRight[0] == candidate or self._funnelRight[-1] == candidate: return
-		# initial check
+		mySideOfFunnel = self._funnelLeft if isUpdatingLeft else self._funnelRight
+		otherSideOfFunnel = self._funnelRight if isUpdatingLeft else self._funnelLeft
+		# If the point is already on the funnel side then skip it
+		if mySideOfFunnel[0] == candidate or mySideOfFunnel[-1] == candidate: return (mySideOfFunnel, otherSideOfFunnel)
+		index = self._walkFunnelSide(candidate, mySideOfFunnel, isUpdatingLeft)
+		if index > 0:
+			mySideOfFunnel = mySideOfFunnel[:index]
+			mySideOfFunnel.append(candidate)
+			return (mySideOfFunnel, otherSideOfFunnel)
+		# At this point we are starting to walk the other side of the funnel
+		# check if the candidate should be placed at index 0
+		isStrictlyOutsideFunnel = Geom.isToTheRight if isUpdatingLeft else Geom.isToTheLeft
+		isStrictlyInsideFunnel = Geom.isToTheLeft if isUpdatingLeft else Geom.isToTheRight
 		pt1 = self._others[-1]
-		pt2 = self._funnelRight[-1]
-		if len(self._funnelRight) > 1:
-			pt1 = self._funnelRight[-2]
-		if Geom.isToTheRight(pt1, pt2, candidate):
-			self._funnelRight.append(candidate)
-			return
-		for i in reversed(range(len(self._funnelRight) - 1)):
-			if i == 0: break
-			pt1 = self._funnelRight[i - 1]
-			pt2 = self._funnelRight[i]
-			if Geom.isToTheLeft(pt1, pt2, candidate):
-				self._funnelRight = self._funnelRight[:i]
-				self._funnelRight.append(candidate)
-				return
-		pt1 = self._others[-1]
-		pt2 = self._funnelLeft[0]
-		if Geom.isToTheRight(pt1, pt2, candidate):
-			self._funnelRight = [candidate]
-			return
+		pt2 = otherSideOfFunnel[0]
+		if isStrictlyInsideFunnel(pt1, pt2, candidate):
+			return ([candidate], otherSideOfFunnel)
 		# At this point we are past the apex, so the apex will have to be changed
-		for i in range(len(self._funnelLeft) - 1):
-			pt1 = self._funnelLeft[i]
-			pt2 = self._funnelLeft[i + 1]
-			if Geom.isToTheRight(pt1, pt2, candidate):
-				self._funnelRight = [candidate]
-				self._others = self._others + self._funnelLeft[:i + 1]
-				self._funnelLeft = self._funnelLeft[i + 1:]
-				return
-		self._funnelRight = [candidate]
-		self._others = self._others + self._funnelLeft
-		self._funnelLeft = [self._others[-1]]
+		for i in range(len(otherSideOfFunnel) - 1):
+			pt1 = otherSideOfFunnel[i]
+			pt2 = otherSideOfFunnel[i + 1]
+			if isStrictlyInsideFunnel(pt1, pt2, candidate):
+				mySideOfFunnel = [candidate]
+				self._others = self._others + otherSideOfFunnel[:i + 1]
+				otherSideOfFunnel = otherSideOfFunnel[i + 1:]
+				return (mySideOfFunnel, otherSideOfFunnel)
+		mySideOfFunnel = [candidate]
+		self._others = self._others + otherSideOfFunnel
+		otherSideOfFunnel = [self._others[-1]]
+		return (mySideOfFunnel, otherSideOfFunnel)
 
 	def _walkFunnelSide(self, target, funnelSide: list, isCheckingLeft: bool) -> int:
 		isStrictlyInsideFunnel = Geom.isToTheRight if isCheckingLeft else Geom.isToTheLeft
 		isStrictlyOutsideFunnel = Geom.isToTheLeft if isCheckingLeft else Geom.isToTheRight
-		# initial check
+		# initial check: whether the candidate is beyond the funnel
 		pt1 = self._others[-1]
 		pt2 = funnelSide[-1]
 		if len(funnelSide) > 1:

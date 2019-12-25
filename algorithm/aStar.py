@@ -18,11 +18,7 @@ def aStar() -> None:
 		n: Node = q.dequeue()
 		if isAtDestination(n):
 			print("At Destination")
-			# TODO: Move to app.py
-			# c = Cable(model.canvas, "CABLE-D", n.cable)
-			# model.entities[c.name] = c
-			print(n)
-			return # For now terminate at first solution
+			return n.cable # For now terminate at first solution
 		VA = findGaps(n.cable[0], model.robots[0])
 		VB = findGaps(n.cable[-1], model.robots[-1])
 		for va in VA:
