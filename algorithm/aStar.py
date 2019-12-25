@@ -9,7 +9,7 @@ from utils.cgal.types import Polygon
 
 model = Model()
 
-def aStar() -> None:
+def aStar() -> Node:
 	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
@@ -18,7 +18,7 @@ def aStar() -> None:
 		n: Node = q.dequeue()
 		if isAtDestination(n):
 			print("At Destination")
-			return n.cable # For now terminate at first solution
+			return n # For now terminate at first solution
 		VA = findGaps(n.cable[0], model.robots[0])
 		VB = findGaps(n.cable[-1], model.robots[-1])
 		for va in VA:
@@ -33,6 +33,7 @@ def aStar() -> None:
 					child = Node(cable=newCable, parent=n)
 					n.children.append(child)
 					q.enqueue(child)
+	return None
 
 def processReducedVisibilityGraph() -> None:
 	# TODO: Here I should assign

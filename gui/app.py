@@ -38,7 +38,7 @@ class TetheredPairApp(tk.Frame):
 	def shouldDebugTighten(self) -> bool:
 		return self._dbg['runTighten'].get() == 1
 
-	def _getFiles(self):
+	def _getJsonPresets(self):
 		isJson = lambda f: f.lower().endswith(".json")
 		isNumbered = lambda f: f[:-5].isdigit()
 		isStr = lambda f: not f[:-5].isdigit()
@@ -61,7 +61,7 @@ class TetheredPairApp(tk.Frame):
 		return stringFiles + numberedFiles
 
 	def createDropdown(self):
-		options = self._getFiles()
+		options = self._getJsonPresets()
 		self.chosenPreset.set(options[0])
 		self.presets = tk.OptionMenu(self.master, self.chosenPreset, *options)
 		self.presets.pack(side=tk.TOP)
@@ -115,10 +115,10 @@ class TetheredPairApp(tk.Frame):
 			tri = testTriangulation()
 			print("triangles:", tri.triangleCount)
 		elif self.shouldDebugTighten:
-			finalCable = testTightenCable(self.shouldDebugTriangulation)
-			self.canvas.renderSolution(finalCable)
+			cable = testTightenCable(self.shouldDebugTriangulation)
+			self.canvas._renderCable(cable)
 		else:
-			finalCable = aStar()
-			self.canvas.renderSolution(finalCable)
+			solutionNode = aStar()
+			self.canvas.renderSolution(solutionNode)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED

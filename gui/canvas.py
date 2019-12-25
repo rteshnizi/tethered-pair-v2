@@ -1,6 +1,7 @@
 """ TP Canvas """
 import tkinter as tk
 
+from algorithm.node import Node
 from model.modelService import Model
 from model.cable import Cable
 from model.destination import Destination
@@ -37,11 +38,17 @@ class Canvas(object):
 		for entity in self.model.entities.values():
 			entity.createShape(self)
 
-	def renderSolution(self, finalCable):
+	def _renderCable(self, cable):
+		""" Used in testing Tighten algorithm. """
+		# Bring original cable to the top
 		c1: Cable = self.model.entities["CABLE-O"]
 		c1.removeShape()
-		c1.createShape(self) # Bring original cable to the top
-		c2 = Cable("CABLE-D", finalCable)
+		c1.createShape(self)
+		# Create final cable configuration
+		c2 = Cable("CABLE-D", cable)
 		self.model.entities[c2.name] = c2
 		c2.createShape(self)
-		print(finalCable)
+		print(cable)
+
+	def renderSolution(self, solutionNode: Node):
+		print(solutionNode)
