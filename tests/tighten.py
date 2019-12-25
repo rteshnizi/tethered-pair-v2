@@ -2,7 +2,7 @@ import os
 
 from algorithm.cableAlgorithms import testTightenCable
 from model.preset import Preset
-from tests.unitTest import UnitTest
+from tests.unitTest import UnitTest, TestResults, Verbosity
 
 class TestTighten(UnitTest):
 	def __init__(self):
@@ -37,12 +37,12 @@ class TestTighten(UnitTest):
 
 		super().__init__(name="Tighten", numTests=len(self._tests))
 
-	def run(self, verbose=False):
-		failedAny = False
-		print("Testing Tighten Algorithm: %d test cases" % self.numTests)
+	def run(self, verbosity=Verbosity.NONE) -> TestResults:
+		results = TestResults(self.name)
 		for presetName in self._tests:
 			if not self._tests[presetName]:
-				if verbose: print("Skipping %s as it is known to fail" % presetName)
+				if verbosity > Verbosity.MEDIUM: print("Skipping %s as it is known to fail" % presetName)
+				results.skipped += 1
 				continue
 			try:
 				mapPath = os.path.join(self._presetsDir, presetName)
@@ -51,13 +51,17 @@ class TestTighten(UnitTest):
 				finalCable = testTightenCable()
 				finalCableStr = repr(finalCable)
 				if finalCableStr == self._tests[presetName]:
-					if verbose: print("Passed %s" % presetName)
+					if verbosity > Verbosity.MEDIUM: print("Passed %s" % presetName)
+					results.passed += 1
 				else:
-					failedAny = True
-					print("Failed %s" % presetName)
-					print("Expected\t%s" % self._tests[presetName])
-					print("Received\t%s" % finalCableStr)
+					results.failed += 1
+					if verbosity > Verbosity.LEAST:
+						print("Failed %s" % presetName)
+						print("Expected\t%s" % self._tests[presetName])
+						print("Received\t%s" % finalCableStr)
 			except Exception as e:
-				print("Exception in %s" % presetName)
-				print(e)
-		print("Passed all tests.")
+				results.exception += 1
+				if verbosity > Verbosity.NONE:
+					print("Exception in %s" % presetName)
+					print(e)
+		return results
