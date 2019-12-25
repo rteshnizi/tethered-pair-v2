@@ -3,9 +3,17 @@ from utils.cgal.geometry import vertexDistance
 
 model = Model()
 
+# TODO: Add a + and - operators to cost class so the code would be cleaner
 class Cost(object):
-	def __init__(self, vals = [0, 0]):
+	def __init__(self, vals=[0, 0]):
+		"""
+		vals: is a list of 2 numbers, the first is the cost for robot[0] and second is for robot[1]
+		"""
 		self.vals = vals
+
+	def __getitem__(self, index):
+		if index != 0 and index != 1: raise IndexError("Cost has index 0 or 1 only.")
+		return self.vals[index]
 
 	def min(self):
 		"""
@@ -27,10 +35,15 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent=None, cost=[0, 0], fractions=[1, 1]):
+	def __init__(self, cable, parent=None, fractions=[1, 1]):
+		"""
+
+		"""
 		self.cable = cable
 		self.parent = parent
-		self.f = Cost(vals=cost)
+		self.f = Cost()
+		if parent:
+			self.f = Cost([parent.f[0] + vertexDistance(parent.cable[0], cable[0]), parent.f[1] + vertexDistance(parent.cable[1], cable[1])])
 		self.h = self._calcH()
 		self.g = self._calcG()
 		self.children = []
@@ -45,10 +58,10 @@ class Node(object):
 	def _heuristic1(self):
 		h1 = vertexDistance(self.cable[0], model.robots[0].destination)
 		h2 = vertexDistance(self.cable[-1], model.robots[-1].destination)
-		return Cost(vals = [h1, h2])
+		return Cost([h1, h2])
 
 	def _calcG(self):
-		return Cost(vals = [self.f.vals[0] + self.h.vals[0], self.f.vals[1] + self.h.vals[1]])
+		return Cost([self.f[0] + self.h[0], self.f[1] + self.h[1]])
 
 	@staticmethod
 	def pQGetCost(n):
