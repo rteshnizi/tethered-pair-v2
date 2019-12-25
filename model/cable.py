@@ -22,7 +22,6 @@ class Cable(Entity):
 		if isinstance(pts, list):
 			if len(pts) < 2:
 				raise RuntimeError("at least 2 Points are needed for a Cable")
-		# for cable we draw a polygon just so we have a single id instead of a group of IDs for line segments
 		self.pts = [convertToPoint(v) for v in pts]
 
 	def createShape(self, canvas):

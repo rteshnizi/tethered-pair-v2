@@ -2,12 +2,10 @@ from model.entity import Entity
 from utils.cgal.drawing import CreateLine
 from  utils.vertexUtils import convertToPoint
 
-WIDTH = 3
-CABLE_ORIGIN_COLOR = "Green"
-CABLE_FINAL_COLOR = "DarkRed"
+WIDTH = 1
 
-class Cable(Entity):
-	def __init__(self, name, pts: list, isOrigin=False):
+class Path(Entity):
+	def __init__(self, name, pts: list, color):
 		"""
 		params
 		===
@@ -18,14 +16,13 @@ class Cable(Entity):
 
 		pts: A list of at least 2 utils.cgal.types.Point
 		"""
-		super().__init__(color=CABLE_ORIGIN_COLOR if isOrigin else CABLE_FINAL_COLOR, name=name)
+		super().__init__(color=color, name=name)
 		if isinstance(pts, list):
 			if len(pts) < 2:
-				raise RuntimeError("at least 2 Points are needed for a Cable")
-		# for cable we draw a polygon just so we have a single id instead of a group of IDs for line segments
+				raise RuntimeError("at least 2 Points are needed for a Path")
 		self.pts = [convertToPoint(v) for v in pts]
 
 	def createShape(self, canvas):
 		if (self.canvasId): return
 		self.canvas = canvas
-		self.canvasId = CreateLine(self.canvas.tkCanvas, pointsList=self.pts, color=self.color, tag=self.name, width=WIDTH)
+		self.canvasId = CreateLine(self.canvas.tkCanvas, pointsList=self.pts, color=self.color, tag=self.name, width=WIDTH, arrow=True)
