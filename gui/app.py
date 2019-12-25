@@ -21,7 +21,7 @@ class TetheredPairApp(tk.Frame):
 		self._dbg = {
 			'printMouseEvents': tk.IntVar(master=self.master, value=0),
 			'runTriangulation': tk.IntVar(master=self.master, value=0),
-			'runTighten': tk.IntVar(master=self.master, value=1)
+			'runTighten': tk.IntVar(master=self.master, value=0)
 		}
 		self.createDropdown()
 		self.createButtons()
