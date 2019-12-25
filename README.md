@@ -36,10 +36,6 @@ Work in progress.
 
 1. VS Code
 	* This whole project was developed in VS Code so it's setup to work with it.
-2. `PyLint` for linting
-	* on Ubuntu `sudo apt install pylint`
-3. `AutoPep8` for formatting
-	* on Ubuntu `sudo apt install python-autopep8`
 
 ## TODO:
 
