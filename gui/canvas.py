@@ -8,6 +8,7 @@ from model.destination import Destination
 from model.obstacle import Obstacle
 from model.robot import Robot
 from model.preset import Preset
+from model.path import Path
 from utils.cgal.types import Point
 
 class Canvas(object):
@@ -50,5 +51,20 @@ class Canvas(object):
 		c2.createShape(self)
 		print(cable)
 
+	def _getPathPtsFromNode(self, node: Node, getBeginningOfCable: bool):
+		path = []
+		while node:
+			path.append(node.cable[0 if getBeginningOfCable else -1])
+			node = node.parent
+		return reversed(path)
+
 	def renderSolution(self, solutionNode: Node):
-		print(solutionNode)
+		p1 = self._getPathPtsFromNode(solutionNode, True)
+		p2 = self._getPathPtsFromNode(solutionNode, False)
+		path = Path("P1", p1, self.model.robots[0].color)
+		self.model.entities[path.name] = path
+		path.createShape(self)
+		path = Path("P2", p2, self.model.robots[1].color)
+		self.model.entities[path.name] = path
+		path.createShape(self)
+		self._renderCable(solutionNode.cable)
