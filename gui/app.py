@@ -7,11 +7,9 @@ from algorithm.aStar import aStar
 from algorithm.cableAlgorithms import testTightenCable
 from algorithm.triangulation import testTriangulation
 
-cwd = os.path.dirname(__file__)
-presetsDir = os.path.join(cwd, "..", "presets")
-
 class TetheredPairApp(tk.Frame):
 	def __init__(self):
+		self._presetsDir = os.path.join(os.path.dirname(__file__), "..", "presets")
 		self.master = tk.Tk()
 		self.master.title("Tethered Pair Simulation")
 		self.master.geometry("1100x800")
@@ -40,8 +38,30 @@ class TetheredPairApp(tk.Frame):
 	def shouldDebugTighten(self) -> bool:
 		return self._dbg['runTighten'].get() == 1
 
+	def _getFiles(self):
+		isJson = lambda f: f.lower().endswith(".json")
+		isNumbered = lambda f: f[:-5].isdigit()
+		isStr = lambda f: not f[:-5].isdigit()
+		# Get JSON files
+		files = os.listdir(self._presetsDir)
+		files = filter(isJson, files)
+		# Separate numbered file names from string files names. They should be sorted separately
+		numberedFiles = []
+		stringFiles = []
+		for fName in files:
+			try:
+				withoutExt = fName[:-5] # Remove json from the end
+				withoutExt = int(withoutExt) # convert to int or raise exception (meaning it's a string)
+				numberedFiles.append(withoutExt)
+			except:
+				stringFiles.append(fName)
+		# Sort files: string files names first, numbered test cases second
+		numberedFiles = ["%d.json" % fName for fName in sorted(numberedFiles)]
+		stringFiles = sorted(stringFiles)
+		return stringFiles + numberedFiles
+
 	def createDropdown(self):
-		options = sorted(os.listdir(presetsDir))
+		options = self._getFiles()
 		self.chosenPreset.set(options[0])
 		self.presets = tk.OptionMenu(self.master, self.chosenPreset, *options)
 		self.presets.pack(side=tk.TOP)
@@ -53,7 +73,7 @@ class TetheredPairApp(tk.Frame):
 
 	def loadPreset(self):
 		mapPath = self.chosenPreset.get()
-		mapPath = os.path.join(presetsDir, mapPath)
+		mapPath = os.path.join(self._presetsDir, mapPath)
 		mapPath = os.path.abspath(mapPath)
 		self.readMapJson(mapPath)
 
@@ -70,7 +90,7 @@ class TetheredPairApp(tk.Frame):
 		self.runBtn.pack(side=tk.TOP)
 
 	def selectMapFile(self):
-		mapPath = filedialog.askopenfilename(initialdir=presetsDir, title="Select Map", filetypes=(("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed
+		mapPath = filedialog.askopenfilename(initialdir=self._presetsDir, title="Select Map", filetypes=(("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed
 		if (not mapPath):
 			return
 		mapPath = os.path.abspath(mapPath)
