@@ -1,3 +1,5 @@
+from tkinter import LAST
+
 from model.modelService import Model
 from utils.cgal.types import Point, Vector
 
@@ -47,7 +49,7 @@ def CreatePolygon(canvas, pointsList, outline, fill, width, tag):
 	bindMouseEvent(canvas, shape)
 	return shape
 
-def CreateLine(canvas, pointsList, color, tag, width=1, dash=()):
+def CreateLine(canvas, pointsList, color, tag, width=1, dash=(), arrow=False):
 	"""
 	Returns shape id
 
@@ -64,7 +66,7 @@ def CreateLine(canvas, pointsList, color, tag, width=1, dash=()):
 	coords = []
 	for p in pointsList:
 		coords += [p.x(), p.y()]
-	shape = canvas.create_line(coords, fill=color, width=width, dash=dash, tag=tag)
+	shape = canvas.create_line(coords, fill=color, width=width, dash=dash, tag=tag, arrow=LAST if arrow else None)
 	bindMouseEvent(canvas, shape)
 	return shape
 
