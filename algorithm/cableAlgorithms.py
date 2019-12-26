@@ -14,7 +14,6 @@ VertList = List[Vertex]
 def testTightenCable(debugTri=False):
 	return tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debugTri)
 
-
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) -> VertList:
 	"""
 	This is an altered version of "Hershberger, J., & Snoeyink, J. (1994). Computing minimum length paths of a given homotopy class."
@@ -178,22 +177,31 @@ def findSleeve(allTries: list):
 	"""
 	# First get rid of the frozensets
 	allTries = [next(iter(t)) for t in allTries]
-	triIndices = {}
+	# Remove consecutively repeated triangles
 	trimmed = []
-	for i in range(len(allTries)):
-		if allTries[i] not in triIndices:
-			triIndices[allTries[i]] = i
-			trimmed.append(allTries[i])
+	for tri in allTries:
+		if len(trimmed) > 0 and trimmed[-1] == tri: continue
+		trimmed.append(tri)
+	# Remove palindromes
+	allTries = trimmed
+	trimmed = []
+	for tri in allTries:
+		if len(trimmed) > 1 and trimmed[-2] == tri:
+			trimmed.pop()
 		else:
-			trimmed = trimmed[:triIndices[allTries[i]] + 1]
-	return trimmed
+			trimmed.append(tri)
 
-	# prevTri = allTries[0]
-	# trimmed = [prevTri]
-	# for i in range(1, len(allTries)):
-	# 	if allTries[i] != prevTri: trimmed.append(allTries[i])
-	# 	prevTri = allTries[i]
-	# return trimmed
+	# triIndices = {}
+	# trimmed = []
+	# for i in range(len(allTries)):
+	# 	tri = allTries[i]
+	# 	if tri not in triIndices:
+	# 		triIndices[tri] = i
+	# 		trimmed.append(tri)
+	# 	else:
+	# 		trimmed = trimmed[:triIndices[tri] + 1]
+
+	return trimmed
 
 def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
 	# We need to do this because the funnel algorithm assumes that the path lies inside the triangulation
