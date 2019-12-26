@@ -1,4 +1,4 @@
-class Model:
+class Model(object):
 	class __PrivateModel:
 		def __init__(self):
 			self.MAX_CABLE = 0
@@ -7,10 +7,10 @@ class Model:
 			self.obstacles = []
 			self.vertices = [] # This is strictly obstacle vertices
 			self.cable = [] # Initial Cable Config
-			self.visualElements = [] # Holds only visualization elements
-			self._vertexByLocation = {} # This is all vertices including robots and destinations
 			self.canvas = None # The Canvas class (not the tk.Canvas object)
 			self.app = None # To read GUI attributes
+			self._vertexByLocation = {} # This is all vertices including robots and destinations
+			self._vertexObjects = []
 
 	instance = None
 
@@ -37,10 +37,20 @@ class Model:
 		self.instance.MAX_CABLE = l
 
 	def addVertexByLocation(self, vert):
-		self._vertexByLocation[ptToStringId(vert.loc)] = vert
+		self.instance._vertexByLocation[ptToStringId(vert.loc)] = vert
 
 	def getVertexByLocation(self, x, y):
-		return self._vertexByLocation.get(xyToStringId(x, y), None)
+		return self.instance._vertexByLocation.get(xyToStringId(x, y), None)
+
+	@property
+	def allVertexObjects(self):
+		"""
+		This returns everything that is an instance of Vertex.
+		the vertices member only holds Obstacle vertices.
+		"""
+		if not self.instance._vertexObjects:
+			self.instance._vertexObjects = self.instance.vertices + self.instance.robots + [self.instance.robots[0].destination, self.instance.robots[1].destination]
+		return self.instance._vertexObjects
 
 def ptToStringId(pt):
 	"""

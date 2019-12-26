@@ -10,7 +10,6 @@ from utils.cgal.types import Polygon
 model = Model()
 
 def aStar() -> Node:
-	processReducedVisibilityGraph()
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
 	root = Node(cable=model.cable)
 	q.enqueue(root)
@@ -19,26 +18,21 @@ def aStar() -> Node:
 		if isAtDestination(n):
 			print("At Destination")
 			return n # For now terminate at first solution
-		VA = findGaps(n.cable[0], model.robots[0])
-		VB = findGaps(n.cable[-1], model.robots[-1])
-		for va in VA:
-			for vb in VB:
+		# VA = findGaps(n.cable[0], model.robots[0])
+		# VB = findGaps(n.cable[-1], model.robots[-1])
+		for va in n.cable[0].gaps:
+			for vb in n.cable[-1].gaps:
 				# For now I deliberately avoid cross movement because it crashes the triangulation
 				# In reality we can fix this by mirorring the space (like I did in the previous paper)
-				if isThereCrossMovement(n.cable, va.vrt, vb.vrt):
+				if isThereCrossMovement(n.cable, va, vb):
 					continue
-				newCable = tightenCable(n.cable, va.vrt, vb.vrt)
+				newCable = tightenCable(n.cable, va, vb)
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
 					child = Node(cable=newCable, parent=n)
 					n.children.append(child)
 					q.enqueue(child)
 	return None
-
-def processReducedVisibilityGraph() -> None:
-	# TODO: Here I should assign
-	pass
-	# for v in model.vertices:
 
 def isThereCrossMovement(cable, dest1, dest2):
 	# I've also included the case where the polygon is not simple

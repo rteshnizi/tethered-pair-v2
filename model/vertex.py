@@ -18,14 +18,14 @@ class Vertex(Entity):
 
 	adjacent: list The two other vertices of the owner obstacle, adjacent to this vertex
 
-	gaps: list of the vertices adjacent to this vertex on the reduced visibility graph
+	gaps: a set of the vertices adjacent to this vertex on the reduced visibility graph. The term Gap is borrowed from Gap Navigation
 	"""
 	def __init__(self, name, loc, ownerObs=None, color=VERTEX_COLOR):
 		super().__init__(color=color, name=name)
 		self.loc = loc
 		self.ownerObs = ownerObs
-		self.adjacent = []
-		self.gaps = []
+		self.adjacentOnObstacle = set()
+		self.gaps = set()
 
 	def createShape(self, canvas):
 		if (self.canvasId): return

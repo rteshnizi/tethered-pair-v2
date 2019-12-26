@@ -4,6 +4,7 @@ from model.modelService import Model
 from model.vertex import Vertex
 from utils.cgal.drawing import CreatePolygon
 from utils.cgal.types import Polygon
+from utils.vertexUtils import ptToStringId
 
 OBSTACLE_COLOR = "Grey"
 mode = Model()
@@ -21,6 +22,7 @@ class Obstacle(Entity):
 		"""
 		super().__init__(color=OBSTACLE_COLOR, name=name)
 		self.vertices = []
+		self._vertexByLocation = {}
 		self._pts = pts
 		self.polygon = Polygon()
 		for pt in self._pts:
@@ -31,6 +33,7 @@ class Obstacle(Entity):
 		for i in range(0, len(pts)):
 			v = Vertex(name="%s-%d" % (self.name, i), loc=pts[i], ownerObs=self)
 			self.vertices.append(v)
+			self._vertexByLocation[ptToStringId(v)] = v
 
 	def createShape(self, canvas):
 		if self.canvasId: return
@@ -42,6 +45,16 @@ class Obstacle(Entity):
 
 	def enclosesPoint(self, pt):
 		return Geom.isInsidePoly(self.polygon, pt)
+
+	def getVertex(self, pt) -> Vertex:
+		return self._vertexByLocation.get(ptToStringId(pt), None)
+
+	def areAdjacent(self, pt1, pt2) -> bool:
+		v1 = self.getVertex(pt1)
+		if not v1: return False
+		v2 = self.getVertex(pt2)
+		if not v2: return False
+		return v2 in v1.adjacentOnObstacle
 
 	def intersection(self, line):
 		"""

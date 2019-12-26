@@ -1,6 +1,7 @@
 import json
 import os
 
+from algorithm.visibility import processReducedVisibilityGraph
 from model.modelService import Model
 from model.cable import Cable
 from model.destination import Destination
@@ -21,6 +22,7 @@ class Preset(object):
 		with open(self.path, 'r') as jsonFile:
 			self._parsedJson = json.load(jsonFile)
 		self._populateModel()
+		processReducedVisibilityGraph()
 
 	def _populateModel(self):
 		for e in self._parsedJson:
@@ -34,6 +36,7 @@ class Preset(object):
 				self._createObstacles(self._parsedJson[e])
 			else:
 				sys.stderr.write('unexpected json parameter %s' % e)
+
 
 	def _createCableAndRobots(self, ptList):
 		self._createRobots([ptList[0], ptList[-1]])
@@ -79,7 +82,7 @@ class Preset(object):
 				v = o.vertices[j]
 				prevV = o.vertices[j - 1]
 				nextV = o.vertices[j + 1 if j + 1 < numVerts else 0]
-				v.adjacent = [prevV, nextV]
+				v.adjacentOnObstacle = {prevV, nextV}
 				self.model.entities[v.name] = v
 				self.model.vertices.append(v)
 				self.model.addVertexByLocation(v)

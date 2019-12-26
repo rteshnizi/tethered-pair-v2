@@ -72,7 +72,7 @@ def pushCableAwayFromObstacles(cable: VertList, dest1: Vertex, dest2: Vertex) ->
 		for o in model.obstacles:
 			for v in o.vertices:
 				if convertToPoint(v) != convertToPoint(c): continue
-				vects = [Geom.getEpsilonVector(n, v) for n in v.adjacent]
+				vects = [Geom.getEpsilonVector(n, v) for n in v.adjacentOnObstacle]
 				if len(vects) != 2: raise RuntimeError("There should only be 2 adjacent vertices to any vertex")
 				epsVect = Geom.getEpsilonVectorFromVect(vects[0] + vects[1])
 				pushedC = convertToPoint(c) + epsVect

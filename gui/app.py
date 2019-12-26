@@ -6,6 +6,7 @@ from gui.canvas import Canvas
 from algorithm.aStar import aStar
 from algorithm.cableAlgorithms import testTightenCable
 from algorithm.triangulation import testTriangulation
+from algorithm.visibility import processReducedVisibilityGraph
 
 class TetheredPairApp(tk.Frame):
 	def __init__(self):
@@ -17,9 +18,10 @@ class TetheredPairApp(tk.Frame):
 		self.pack()
 		self.chosenPreset = tk.StringVar(master=self.master)
 		self._dbg = {
-			'printMouseEvents': tk.IntVar(master=self.master, value=0),
-			'runTriangulation': tk.IntVar(master=self.master, value=0),
-			'runTighten': tk.IntVar(master=self.master, value=0)
+			'Print Mouse': tk.IntVar(master=self.master, value=0),
+			'Test Vis Graph': tk.IntVar(master=self.master, value=0),
+			'Test Triangulation': tk.IntVar(master=self.master, value=0),
+			'Test Tighten Alg': tk.IntVar(master=self.master, value=0)
 		}
 		self.createDropdown()
 		self.createButtons()
@@ -28,15 +30,19 @@ class TetheredPairApp(tk.Frame):
 
 	@property
 	def shouldPrintMouse(self) -> bool:
-		return self._dbg['printMouseEvents'].get() == 1
+		return self._dbg['Print Mouse'].get() == 1
 
 	@property
 	def shouldDebugTriangulation(self) -> bool:
-		return self._dbg['runTriangulation'].get() == 1
+		return self._dbg['Test Triangulation'].get() == 1
 
 	@property
 	def shouldDebugTighten(self) -> bool:
-		return self._dbg['runTighten'].get() == 1
+		return self._dbg['Test Tighten Alg'].get() == 1
+
+	@property
+	def shouldDebugVisGraph(self) -> bool:
+		return self._dbg['Test Vis Graph'].get() == 1
 
 	def _getJsonPresets(self):
 		isJson = lambda f: f.lower().endswith(".json")
@@ -104,15 +110,14 @@ class TetheredPairApp(tk.Frame):
 		self.runBtn["state"] = tk.NORMAL
 
 	def createDebugOptions(self):
-		checkbox = tk.Checkbutton(master=self.master, text='Print Mouse', variable=self._dbg['printMouseEvents'])
-		checkbox.pack(side=tk.TOP)
-		checkbox = tk.Checkbutton(master=self.master, text='Test Triangulation', variable=self._dbg['runTriangulation'])
-		checkbox.pack(side=tk.TOP)
-		checkbox = tk.Checkbutton(master=self.master, text='Test Tighten Alg', variable=self._dbg['runTighten'])
-		checkbox.pack(side=tk.TOP)
+		for (text, variable) in self._dbg.items():
+			checkbox = tk.Checkbutton(master=self.master, text=text, variable=variable)
+			checkbox.pack(side=tk.TOP)
 
 	def run(self):
-		if not self.shouldDebugTighten and self.shouldDebugTriangulation:
+		if self.shouldDebugVisGraph:
+			processReducedVisibilityGraph(True)
+		elif not self.shouldDebugTighten and self.shouldDebugTriangulation:
 			tri = testTriangulation()
 			print("triangles:", tri.triangleCount)
 		elif self.shouldDebugTighten:

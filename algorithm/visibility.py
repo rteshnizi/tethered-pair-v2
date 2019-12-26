@@ -1,5 +1,6 @@
 import utils.cgal.geometry as Geom
 from model.modelService import Model
+from model.debugEdge import DebugEdge
 from model.robot import Robot
 from utils.cgal.types import Ray, Segment, intersection
 from utils.vertexUtils import convertToPoint
@@ -15,6 +16,32 @@ class LabeledVert(object):
 	def __repr__(self):
 		return "<%s, %s>" % (self.vrt.name, self.rbt.name)
 
+def processReducedVisibilityGraph(debug=False) -> None:
+	"""
+	Note that reduced visibility graph is unidirectional. That is, there might be and edge v -> u but not the other way around
+	"""
+	for v in model.allVertexObjects:
+		for u in model.allVertexObjects:
+			# The below 2 edge cases rarely happen, but it happens when the robot or destination are exactly at a vertex of an obstacle
+			if _isRobotOrDestinationAndOnObstacleButNotAdjacent(v, u): continue
+			if _isRobotOrDestinationAndOnObstacleButNotAdjacent(u, v): continue
+
+			if v.loc == u.loc: continue
+			# If they belong to the same obstacle but are not adjacent, they aren't u is not visible
+			if v.ownerObs and u.ownerObs and v.ownerObs.name == u.ownerObs.name and u not in v.adjacentOnObstacle: continue
+			if _isGap(v, u):
+				v.gaps.add(u)
+
+	if not debug: return
+	counter = 0
+	for v in model.allVertexObjects:
+		for u in v.gaps:
+			e = DebugEdge("%s=>%s" % (v.name, u.name), [convertToPoint(v), convertToPoint(u)], isDirected=True)
+			model.entities[e.name] = e
+			e.createShape(model.canvas)
+			counter += 1
+	print("Edges: %d" % counter)
+
 def findGaps(v, r: Robot):
 	# TODO: Only look at gaps that are inside the bounding box (or partially inside)
 	if v.loc == r.destination.loc:
@@ -29,11 +56,27 @@ def findGaps(v, r: Robot):
 			verts.append(LabeledVert(u, r))
 	return verts
 
+def _isRobotOrDestinationAndOnObstacleButNotAdjacent(candidate, obstacleVert):
+	# FIXME: This is buggy:
+	# What if candidate is a robot but obstacleVert is also a robot that happens to be on the same obstacle but are not adjacent
+
+	# candidate is not a robot or destination
+	if candidate.ownerObs: return False
+	# obstacleVert is a robot or destination
+	if not obstacleVert.ownerObs: return False
+	# The robot or destination is on the given obstacle
+	if not obstacleVert.ownerObs.getVertex(candidate): return False
+	# The robot or destination are on the given obstacle but is adjacent to the vertex of interest
+	if obstacleVert.ownerObs.areAdjacent(candidate, obstacleVert): return False
+	return True
+
 def _isGap(src, target) -> bool:
 	if not src.isVisible(target):
 		return False
 	# Detecting whether u is a gap for v
 	epsilon = Geom.getEpsilonVector(src, target)
+	if target.ownerObs and target.ownerObs.enclosesPoint(target.loc + epsilon):
+		return False
 	if target.ownerObs and target.ownerObs.enclosesPoint(target.loc + epsilon):
 		return False
 	return True
