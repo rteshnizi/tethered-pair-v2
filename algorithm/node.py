@@ -11,6 +11,9 @@ class Cost(object):
 		"""
 		self.vals = vals
 
+	def __repr__(self):
+		return "(%.2f, %.2f)" % (self.vals[0], self.vals[1])
+
 	def __getitem__(self, index):
 		if index != 0 and index != 1: raise IndexError("Cost has index 0 or 1 only.")
 		return self.vals[index]
@@ -50,7 +53,7 @@ class Node(object):
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
 
 	def __repr__(self):
-		return str(self.cable)
+		return "%s - %.2f" % (repr(self.cable), self.pQGetCost(self))
 
 	def _calcH(self):
 		return self._heuristic1()

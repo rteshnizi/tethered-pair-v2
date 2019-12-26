@@ -12,8 +12,8 @@ from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, Point, Polyg
 
 model = Model()
 
-def testTriangulation():
-	return Triangulation(model.cable, model.robots[0].destination, model.robots[1].destination, debug=True)
+def testTriangulation(cable, dest1, dest2):
+	return Triangulation(cable, dest1, dest2, debug=True)
 
 class FaceInfo(object):
 	"""

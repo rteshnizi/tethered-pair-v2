@@ -4,7 +4,7 @@ from tkinter import filedialog
 
 from gui.canvas import Canvas
 from algorithm.aStar import aStar
-from algorithm.cableAlgorithms import testTightenCable
+from algorithm.cableAlgorithms import testTightenCable, pushCableAwayFromObstacles
 from algorithm.triangulation import testTriangulation
 from algorithm.visibility import processReducedVisibilityGraph
 
@@ -118,7 +118,9 @@ class TetheredPairApp(tk.Frame):
 		if self.shouldDebugVisGraph:
 			processReducedVisibilityGraph(True)
 		elif not self.shouldDebugTighten and self.shouldDebugTriangulation:
-			tri = testTriangulation()
+			(cable, dest1, dest2) = (self.canvas.model.cable, self.canvas.model.robots[0].destination, self.canvas.model.robots[1].destination)
+			(cable, dest1, dest2) = pushCableAwayFromObstacles(cable, dest1, dest2)
+			tri = testTriangulation(cable, dest1, dest2)
 			print("triangles:", tri.triangleCount)
 		elif self.shouldDebugTighten:
 			cable = testTightenCable(self.shouldDebugTriangulation)
