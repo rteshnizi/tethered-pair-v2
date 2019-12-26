@@ -59,6 +59,7 @@ def findGaps(v, r: Robot):
 def _isRobotOrDestinationAndOnObstacleButNotAdjacent(candidate, obstacleVert):
 	# FIXME: This is buggy:
 	# What if candidate is a robot but obstacleVert is also a robot that happens to be on the same obstacle but are not adjacent
+	# In that case we have to first find the relevant obstacle that both of the robots/destinations are on and perform this same function
 
 	# candidate is not a robot or destination
 	if candidate.ownerObs: return False

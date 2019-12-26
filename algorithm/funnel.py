@@ -109,6 +109,8 @@ class Funnel:
 		return self._others + funnelSide + [convertToPoint(dest)]
 
 	def getShortestPath(self, dest):
+		# If sleeve is a single triangle, the path is from apex to destination
+		if len(self.sleeve) == 1: return self._others + [convertToPoint(dest)]
 		mid = Geom.midpoint(self._funnelLeft[0], self._funnelRight[0])
 		shouldGoLeft = Geom.isToTheLeft(self.apex(), mid, dest)
 		if shouldGoLeft: return self._findCandidatePath(dest, self._funnelLeft, True)
