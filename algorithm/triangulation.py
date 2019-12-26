@@ -7,7 +7,7 @@
 import utils.cgal.geometry as Geom
 import utils.vertexUtils as VertexUtils
 from model.modelService import Model
-from model.triangulationEdge import TriangulationEdge
+from model.debugEdge import DebugEdge
 from utils.cgal.types import CgalTriangulation, ConvexHull, IntRef, Point, Polygon, TriangulationFaceHandle, TriangulationFaceRef
 
 model = Model()
@@ -141,11 +141,11 @@ class Triangulation(object):
 		for i in range(0, len(self.boundaryPts) - 1):
 			pt1 = self.boundaryPts[i]
 			pt2 = self.boundaryPts[i + 1]
-			e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
+			e = DebugEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
 			e.createShape()
 		pt1 = self.boundaryPts[0]
 		pt2 = self.boundaryPts[-1]
-		e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
+		e = DebugEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
 		e.createShape()
 
 	def _insertPolygonIntoTriangulation(self, pts):
@@ -412,7 +412,7 @@ class Triangulation(object):
 			i += 1
 			if (not drawDomainOnly) and self.cgalTri.is_constrained(edge):
 				segment = self.cgalTri.segment(edge)
-				canvasE = TriangulationEdge("TE-%d" % i, segment, True)
+				canvasE = DebugEdge("TE-%d" % i, segment, True)
 				canvasE.highlightEdge(model.canvas)
 				self._addCanvasEdge(segment, canvasE)
 		#  draw triangulation edges on top of constraints
@@ -421,7 +421,7 @@ class Triangulation(object):
 			if not self.cgalTri.is_constrained(edge) and self.faceInfoMap[edge[0]].inDomain():
 			# if not self.cgalTri.is_constrained(edge):
 				segment = self.cgalTri.segment(edge)
-				canvasE = TriangulationEdge("TE-%d" % i, segment)
+				canvasE = DebugEdge("TE-%d" % i, segment)
 				canvasE.createShape(model.canvas)
 				self._addCanvasEdge(segment, canvasE)
 

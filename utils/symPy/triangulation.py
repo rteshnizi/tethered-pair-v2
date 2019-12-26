@@ -2,7 +2,7 @@ import utils.symPy.geometry as geometry
 from sympy.geometry import Polygon, Segment
 from model.modelService import Model
 from utils.priorityQ import PriorityQ
-from model.triangulationEdge import TriangulationEdge
+from model.debugEdge import DebugEdge
 
 model = Model()
 
@@ -68,9 +68,9 @@ def createEdgeList(verts):
 	for i in range(0, n):
 		e = None
 		if (i == n - 1):
-			e = TriangulationEdge(model.canvas, "TE%d" % i, [verts[-1], verts[0]])
+			e = DebugEdge(model.canvas, "TE%d" % i, [verts[-1], verts[0]])
 		else:
-			e = TriangulationEdge(model.canvas, "TE%d" % i, [verts[i], verts[i + 1]])
+			e = DebugEdge(model.canvas, "TE%d" % i, [verts[i], verts[i + 1]])
 		e.createShape()
 		edges.append(e)
 	return edges

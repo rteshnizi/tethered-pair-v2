@@ -4,12 +4,12 @@ from model.vertex import Vertex
 from utils.cgal.drawing import CreateLine
 from utils.cgal.types import Segment
 
-TRIANGULATION_COLOR = "Black"
-TRIANGULATION_CONSTRAINT_COLOR = "Red"
-TRIANGULATION_DASH_PATTERN = (3, 3)
+COLOR = "Black"
+SECONDARY_COLOR = "Red"
+DASH_PATTERN = (3, 3)
 model = Model()
 
-class TriangulationEdge(Entity):
+class DebugEdge(Entity):
 	def __init__(self, name, pts, isConstraint=False):
 		"""
 		The shape is not created by default.
@@ -25,7 +25,7 @@ class TriangulationEdge(Entity):
 
 		pts: A list of 2 utils.cgal.types.Point or a utils.cgal.types.Segment
 		"""
-		super().__init__(color=TRIANGULATION_CONSTRAINT_COLOR if isConstraint else TRIANGULATION_COLOR, name=name)
+		super().__init__(color=SECONDARY_COLOR if isConstraint else COLOR, name=name)
 		if isinstance(pts, list):
 			if len(pts) != 2:
 				raise RuntimeError("2 Points are needed for a Triangulation Edge")
@@ -38,9 +38,9 @@ class TriangulationEdge(Entity):
 	def createShape(self, canvas):
 		if (self.canvasId): return
 		self.canvas = canvas
-		self.canvasId = CreateLine(self.canvas.tkCanvas, pointsList=self.pts, color=self.color, tag=self.name, dash=TRIANGULATION_DASH_PATTERN)
+		self.canvasId = CreateLine(self.canvas.tkCanvas, pointsList=self.pts, color=self.color, tag=self.name, dash=DASH_PATTERN)
 
 	def highlightEdge(self, canvas):
 		self.removeShape()
 		self.canvas = canvas
-		self.canvasId = CreateLine(self.canvas.tkCanvas, pointsList=self.pts, color=self.color, tag=self.name, width=3, dash=TRIANGULATION_DASH_PATTERN)
+		self.canvasId = CreateLine(self.canvas.tkCanvas, pointsList=self.pts, color=self.color, tag=self.name, width=3, dash=DASH_PATTERN)

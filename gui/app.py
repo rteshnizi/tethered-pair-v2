@@ -49,11 +49,12 @@ class TetheredPairApp(tk.Frame):
 		numberedFiles = []
 		stringFiles = []
 		for fName in files:
-			try:
-				withoutExt = fName[:-5] # Remove json from the end
+			withoutExt = fName[:-5] # Remove json from the end
+			# I know this is not PyThOnIc. I don't need all these stupid exception b/c I actually have useful exceptions in my algorithm
+			if withoutExt.isdigit():
 				withoutExt = int(withoutExt) # convert to int or raise exception (meaning it's a string)
 				numberedFiles.append(withoutExt)
-			except:
+			else:
 				stringFiles.append(fName)
 		# Sort files: string files names first, numbered test cases second
 		numberedFiles = ["%d.json" % fName for fName in sorted(numberedFiles)]
