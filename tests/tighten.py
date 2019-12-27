@@ -33,6 +33,7 @@ class TestTighten(UnitTest):
 			"21.json": "[O2-2, R1, O2-0, O2-2, D2]",
 			"22.json": "[O0-2, R1, O0-0, O0-1, O1-3]",
 			"23.json": "[D1, O1-0, O1-1, O1-2, O2-0, O2-3, D2]",
+			"24.json": "[O2-3, R1]",
 		})
 
 	def run(self, verbosity=Verbosity.NONE) -> TestResults:
