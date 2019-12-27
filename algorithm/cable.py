@@ -2,7 +2,7 @@ from typing import List
 from model.vertex import Vertex
 import utils.cgal.geometry as Geom
 from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual, removeRepeatedVertsOrdered
-from algorithm.visibility import findGaps, applyMovement
+from algorithm.visibility import applyMovement
 from algorithm.triangulation import Triangulation
 from algorithm.funnel import Funnel
 from model.modelService import Model
@@ -51,11 +51,9 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 		tries = tri.getIncidentTriangles(e)
 		while not tries & currTri:
 			(flipEdge, currTri) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTri, tries)
-			if flipEdge:
-				currE = flipEdge
+			if flipEdge: currE = flipEdge
 			# FIXME: This happens if the dest1 + cable + dest2 is not a simple polygon
-			else:
-				raise RuntimeError("Deal with this at some point.")
+			else: raise RuntimeError("Deal with this at some point.")
 			allCurrentTries.append(currTri)
 			# Debugging
 			# tri.getCanvasEdge(currE).highlightEdge()
