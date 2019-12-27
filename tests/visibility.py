@@ -7,9 +7,9 @@ class TestVisibility(UnitTest):
 	def __init__(self):
 		self._presetsDir = os.path.join(os.path.dirname(__file__), "..", "presets")
 		super().__init__(name="Visibility", tests={
-			"default.json": 167,
-			"20.json": 157,
-			"22.json": 171,
+			"default.json": 186,
+			"20.json": 179,
+			"22.json": 198,
 		})
 
 	def _countEdges(self, preset: Preset):
@@ -30,13 +30,14 @@ class TestVisibility(UnitTest):
 				mapPath = os.path.join(self._presetsDir, presetName)
 				mapPath = os.path.abspath(mapPath)
 				preset = Preset(mapPath)
-				if self._countEdges(preset) == self._tests[presetName]:
+				count = self._countEdges(preset)
+				if count == self._tests[presetName]:
 					if verbosity > Verbosity.MEDIUM: self._reportSuccessfulTest(presetName)
 					results.passed += 1
 				else:
 					results.failed += 1
 					if verbosity > Verbosity.LEAST:
-						self._reportFailedTest(presetName, finalCableStr)
+						self._reportFailedTest(presetName, count)
 			except Exception as e:
 				results.exception += 1
 				if verbosity > Verbosity.NONE:
