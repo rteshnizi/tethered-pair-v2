@@ -4,7 +4,7 @@ from tkinter import filedialog
 
 from gui.canvas import Canvas
 from algorithm.aStar import aStar
-from algorithm.cableAlgorithms import testTightenCable, pushCableAwayFromObstacles
+from algorithm.cable import testTightenCable, pushCableAwayFromObstacles
 from algorithm.triangulation import testTriangulation
 from algorithm.visibility import processReducedVisibilityGraph
 

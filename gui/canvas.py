@@ -59,6 +59,9 @@ class Canvas(object):
 		return reversed(path)
 
 	def renderSolution(self, solutionNode: Node):
+		if not solutionNode:
+			print("NO SOLUTIONS")
+			return
 		p1 = self._getPathPtsFromNode(solutionNode, True)
 		p2 = self._getPathPtsFromNode(solutionNode, False)
 		path = Path("P1", p1, self.model.robots[0].color)
