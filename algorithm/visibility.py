@@ -22,11 +22,13 @@ def processReducedVisibilityGraph(debug=False) -> None:
 	"""
 	for v in model.allVertexObjects:
 		for u in model.allVertexObjects:
+			if v.loc == u.loc:
+				v.gaps.add(u)
+				continue
 			# The below 2 edge cases rarely happen, but it happens when the robot or destination are exactly at a vertex of an obstacle
 			if _isRobotOrDestinationAndOnObstacleButNotAdjacent(v, u): continue
 			if _isRobotOrDestinationAndOnObstacleButNotAdjacent(u, v): continue
 
-			if v.loc == u.loc: continue
 			# If they belong to the same obstacle but are not adjacent, they aren't u is not visible
 			if v.ownerObs and u.ownerObs and v.ownerObs.name == u.ownerObs.name and u not in v.adjacentOnObstacle: continue
 			if _isGap(v, u):
@@ -41,20 +43,6 @@ def processReducedVisibilityGraph(debug=False) -> None:
 			e.createShape(model.canvas)
 			counter += 1
 	print("Edges: %d" % counter)
-
-def findGaps(v, r: Robot):
-	# TODO: Only look at gaps that are inside the bounding box (or partially inside)
-	if v.loc == r.destination.loc:
-		return [LabeledVert(r.destination, r)]
-	verts = []
-	if _isGap(v, r.destination):
-		verts.append(LabeledVert(r.destination, r))
-	for u in model.vertices:
-		# This is for the edge case in which the destination is on the vertex exactly
-		if u.loc == r.destination.loc: continue
-		if _isGap(v, u):
-			verts.append(LabeledVert(u, r))
-	return verts
 
 def _isRobotOrDestinationAndOnObstacleButNotAdjacent(candidate, obstacleVert):
 	# FIXME: This is buggy:
