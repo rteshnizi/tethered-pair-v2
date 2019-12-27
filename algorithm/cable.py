@@ -133,7 +133,7 @@ def makeFrozenSet(members):
 	# Assume none-iterable item, therefore it's a single item
 	return frozenset([members])
 
-def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset, candidates: frozenset):
+def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset, candidates=frozenset()):
 	if len(currTries) > 1:
 		raise RuntimeError("There must only be 1 currTries")
 	# Check if the currentEdge is actually the flip edge.
