@@ -170,6 +170,7 @@ class Triangulation(object):
 
 	def _addPtToTriangulation(self, pt):
 		if self._isPtHandleInDict(pt): return (False, self.getVertexHandle(pt))
+		pt = VertexUtils.convertToPoint(pt)
 		handle = self.cgalTri.insert(pt)
 		self._insertPtHandleIntoDict(pt, handle)
 		return (True, handle)
