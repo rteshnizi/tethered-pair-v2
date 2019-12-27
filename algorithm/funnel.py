@@ -29,11 +29,11 @@ class Funnel:
 			e = list(e)
 			mid = Geom.midpoint(e[0], e[1])
 			if Geom.isToTheRight(midPrev, mid, e[0]):
-				self._updateFunnelRight2(e[0])
-				self._updateFunnelLeft2(e[1])
+				self._updateFunnelRight(e[0])
+				self._updateFunnelLeft(e[1])
 			else:
-				self._updateFunnelLeft2(e[0])
-				self._updateFunnelRight2(e[1])
+				self._updateFunnelLeft(e[0])
+				self._updateFunnelRight(e[1])
 			midPrev = mid
 
 	def _addFirstTriangleToFunnel(self, mid, pt1, pt2):
@@ -44,10 +44,10 @@ class Funnel:
 			self._funnelLeft.append(convertToPoint(pt1))
 			self._funnelRight.append(convertToPoint(pt2))
 
-	def _updateFunnelLeft2(self, candidate) -> None:
+	def _updateFunnelLeft(self, candidate) -> None:
 		(self._funnelLeft, self._funnelRight) = self._updateFunnelSide(candidate, True)
 
-	def _updateFunnelRight2(self, candidate):
+	def _updateFunnelRight(self, candidate) -> None:
 		(self._funnelRight, self._funnelLeft) = self._updateFunnelSide(candidate, False)
 
 	# TODO: Reuse _walkFunnelSide() for when we are past apex as well
