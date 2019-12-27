@@ -72,6 +72,7 @@ class Triangulation(object):
 
 	def _getOriginalBoundary(self) -> None:
 		extendedCable = [self.dest1] + self.cable + [self.dest2]
+		extendedCable = VertexUtils.removeRepeatedVertsOrdered(extendedCable)
 		self.boundaryPts = [VertexUtils.convertToPoint(vert) for vert in extendedCable]
 		self.originalPolygon = Polygon()
 		for pt in self.boundaryPts:
@@ -247,12 +248,14 @@ class Triangulation(object):
 			(_, h1) = self._addPtToTriangulation(self.cable[i])
 			(_, h2) = self._addPtToTriangulation(self.cable[i + 1])
 			self.cgalTri.insert_constraint(h1, h2)
-		(_, h1) = self._addPtToTriangulation(self.src1)
-		(_, h2) = self._addPtToTriangulation(self.dest1)
-		self.cgalTri.insert_constraint(h1, h2)
-		(_, h1) = self._addPtToTriangulation(self.src2)
-		(_, h2) = self._addPtToTriangulation(self.dest2)
-		self.cgalTri.insert_constraint(h1, h2)
+		if VertexUtils.convertToPoint(self.src1) != VertexUtils.convertToPoint(self.dest1):
+			(_, h1) = self._addPtToTriangulation(self.src1)
+			(_, h2) = self._addPtToTriangulation(self.dest1)
+			self.cgalTri.insert_constraint(h1, h2)
+		if VertexUtils.convertToPoint(self.src2) != VertexUtils.convertToPoint(self.dest2):
+			(_, h1) = self._addPtToTriangulation(self.src2)
+			(_, h2) = self._addPtToTriangulation(self.dest2)
+			self.cgalTri.insert_constraint(h1, h2)
 
 	def _triangulate(self):
 		"""

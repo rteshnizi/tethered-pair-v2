@@ -20,14 +20,16 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 
 	https://doi.org/10.1016/0925-7721(94)90010-8
 	"""
+	(cable, dest1, dest2) = preprocessTheCable(cable, dest1, dest2)
 	(cable, dest1, dest2) = pushCableAwayFromObstacles(cable, dest1, dest2)
+	longCable = getLongCable(cable, dest1, dest2)
+	longCable = removeRepeatedVertsOrdered(longCable)
+	if len(longCable) == 2: return [getClosestVertex(pt) for pt in longCable]
 	tri = Triangulation(cable, dest1, dest2, debug=debugTri)
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
 		return [dest1, dest2]
 	allCurrentTries = []
-	longCable = getLongCable(cable, dest1, dest2)
-	if len(longCable) == 2: return [getClosestVertex(pt) for pt in longCable]
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
 	currTri = tri.getIncidentTriangles(currE)
@@ -63,6 +65,17 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 	sleeve = findSleeve(allCurrentTries)
 	return getShortestPath(tri, dest1, dest2, sleeve)
 
+def preprocessTheCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
+	"""
+	If moves are happening along the current cable
+	"""
+	if convertToPoint(dest2) == convertToPoint(cable[-2]):
+		cable[-1] = dest2
+	if convertToPoint(dest1) == convertToPoint(cable[1]):
+		cable[0] = dest1
+	cable = removeRepeatedVertsOrdered(cable)
+	return (cable, dest1, dest2)
+
 def pushCableAwayFromObstacles(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
 	transformed = [dest1] + cable + [dest2]
 	for i in range(len(transformed)):
@@ -93,10 +106,16 @@ def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
 	# FIXME: Check for colinearity instead of exact location
+	if len(cable) == 0:
+		return [dest1, dest2]
 	if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
 		copy = cable[1:-1]
-		copy[0] = dest1
-		copy[-1] = dest2
+		if len(copy) == 0:
+			copy.append(dest1)
+			copy.append(dest2)
+		else:
+			copy[0] = dest1
+			copy[-1] = dest2
 		return copy
 	if convertToPoint(cable[1]) == convertToPoint(dest1):
 		copy = cable[1:]

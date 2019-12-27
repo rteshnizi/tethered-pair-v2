@@ -17,8 +17,10 @@ def aStar() -> Node:
 		if isAtDestination(n):
 			print("At Destination")
 			return n # For now terminate at first solution
+		print(n)
 		for va in n.cable[0].gaps:
 			for vb in n.cable[-1].gaps:
+				print("%s-%s" % (va.name, vb.name))
 				# For now I deliberately avoid cross movement because it crashes the triangulation
 				# In reality we can fix this by mirorring the space (like I did in the previous paper)
 				if isThereCrossMovement(n.cable, va, vb):
