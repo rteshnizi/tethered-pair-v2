@@ -46,7 +46,7 @@ class Node(object):
 		self.parent = parent
 		self.f = Cost()
 		if parent:
-			self.f = Cost([parent.f[0] + vertexDistance(parent.cable[0], cable[0]), parent.f[1] + vertexDistance(parent.cable[1], cable[1])])
+			self.f = Cost([parent.f[0] + vertexDistance(parent.cable[0], cable[0]), parent.f[1] + vertexDistance(parent.cable[-1], cable[-1])])
 		self.h = self._calcH()
 		self.g = self._calcG()
 		self.children = []
