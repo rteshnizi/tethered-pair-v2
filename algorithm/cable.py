@@ -27,6 +27,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 		return [dest1, dest2]
 	allCurrentTries = []
 	longCable = getLongCable(cable, dest1, dest2)
+	if len(longCable) == 2: return [getClosestVertex(pt) for pt in longCable]
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
 	currTri = tri.getIncidentTriangles(currE)
