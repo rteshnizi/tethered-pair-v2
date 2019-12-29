@@ -16,6 +16,15 @@ def testTightenCable(debugTri=False):
 
 def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) -> VertList:
 	"""
+	Here we force the sleeve to be made up of the triangles to the left and to the right of the edges.
+	Whichever leads to a shorter path we accept that one.
+	"""
+	pl = _tightenCable(cable, dest1, dest2, True, debugTri)
+	pr = _tightenCable(cable, dest1, dest2, False, False) # only one of them should print the triangulation edges
+	return pl if Geom.lengthOfCurve(pl) < Geom.lengthOfCurve(pr) else pr
+
+def _tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, isLeft:bool, debugTri=False) -> VertList:
+	"""
 	This is an altered version of "Hershberger, J., & Snoeyink, J. (1994). Computing minimum length paths of a given homotopy class."
 
 	https://doi.org/10.1016/0925-7721(94)90010-8
@@ -33,17 +42,18 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
 	currTri = tri.getIncidentTriangles(currE)
-	if len(currTri) != 1:
-		# randomly pick one. If this is the wrong triangle, the pivot algorithm will fix itself.
-		# However, the resulting sleeve will have repeated triangles. This will be taken care of in findSleeve()
-		# FIXME: Needs testing
-		currTri = frozenset([next(iter(currTri))])
-		# for t in currTries:
-		# 	currTries = getTrueInitTri(currE, getEdge(longCable[1], longCable[2]), frozenset([t]), tri)
-		# 	if len(currTries) == 1:
-		# 		break
-		# 	else:
-		# 		raise RuntimeError("I don't want to live on this planet anymore.")
+	currTri = chooseTriangleBySide(longCable[0], longCable[1], currTri, isLeft)
+	# if len(currTri) != 1:
+	# 	# randomly pick one. If this is the wrong triangle, the pivot algorithm will fix itself.
+	# 	# However, the resulting sleeve will have repeated triangles. This will be taken care of in findSleeve()
+	# 	# FIXME: Needs testing
+	# 	currTri = frozenset([next(iter(currTri))])
+	# 	# for t in currTries:
+	# 	# 	currTries = getTrueInitTri(currE, getEdge(longCable[1], longCable[2]), frozenset([t]), tri)
+	# 	# 	if len(currTries) == 1:
+	# 	# 		break
+	# 	# 	else:
+	# 	# 		raise RuntimeError("I don't want to live on this planet anymore.")
 	for i in range(1, len(longCable) - 1):
 		allCurrentTries.append(currTri)
 		e = getEdge(longCable[i], longCable[i + 1])
@@ -52,6 +62,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 			raise RuntimeError("The intersection of e and currE must yield only 1 vertex")
 		pivot = next(iter(pivot))
 		tries = tri.getIncidentTriangles(e)
+		tries = chooseTriangleBySide(longCable[i], longCable[i + 1], tries, isLeft)
 		while not tries & currTri:
 			(flipEdge, currTri) = getFlipEdgeAndCurrentTriangle(tri, pivot, currE, currTri, tries)
 			if flipEdge: currE = flipEdge
@@ -64,6 +75,16 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 		currE = e
 	sleeve = findSleeve(allCurrentTries)
 	return getShortestPath(tri, dest1, dest2, sleeve)
+
+def chooseTriangleBySide(v1, v2, tries, pickLeft):
+	if len(tries) == 1: return tries
+	isOnTheCorrectSide = Geom.isToTheLeft if pickLeft else Geom.isToTheRight
+	for tri in tries:
+		pts = [tri.vertex(i).point() for i in [0, 1, 2]]
+		center = Geom.centroid(pts)
+		if isOnTheCorrectSide(v1, v2, center): return frozenset({tri})
+	raise RuntimeError("Weird! Right?")
+
 
 def preprocessTheCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
 	"""

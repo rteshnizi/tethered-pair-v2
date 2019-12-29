@@ -24,9 +24,9 @@ class Obstacle(Entity):
 		self.vertices = []
 		self._vertexByLocation = {}
 		self._pts = pts
-		self.polygon = Polygon()
-		for pt in self._pts:
-			self.polygon.push_back(pt)
+		self.polygon = Polygon(self._pts)
+		# for pt in self._pts:
+			# self.polygon.push_back(pt)
 		self.createVertices(pts)
 
 	def createVertices(self, pts):

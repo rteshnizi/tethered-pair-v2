@@ -8,19 +8,18 @@ from utils.cgal.types import Polygon
 
 model = Model()
 
-def aStar() -> Node:
+def aStar(debug=False) -> Node:
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
-	root = Node(cable=model.cable)
+	root = Node(cable=model.cable, parent=None)
 	q.enqueue(root)
 	while not q.isEmpty():
 		n: Node = q.dequeue()
 		if isAtDestination(n):
-			print("At Destination")
+			if debug: print("At Destination")
 			return n # For now terminate at first solution
-		print(n)
+		if debug: print(n)
 		for va in n.cable[0].gaps:
 			for vb in n.cable[-1].gaps:
-				print("%s-%s" % (va.name, vb.name))
 				# For now I deliberately avoid cross movement because it crashes the triangulation
 				# In reality we can fix this by mirorring the space (like I did in the previous paper)
 				if isThereCrossMovement(n.cable, va, vb):
@@ -28,6 +27,7 @@ def aStar() -> Node:
 				newCable = tightenCable(n.cable, va, vb)
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
+					if debug: print("%s-%s" % (va.name, vb.name))
 					child = Node(cable=newCable, parent=n)
 					n.children.append(child)
 					q.enqueue(child)
@@ -35,9 +35,9 @@ def aStar() -> Node:
 
 def isThereCrossMovement(cable, dest1, dest2):
 	# I've also included the case where the polygon is not simple
-	p = Polygon()
-	for v in getLongCable(cable, dest1, dest2):
-		p.push_back(convertToPoint(v))
+	p = Polygon(getLongCable(cable, dest1, dest2))
+	# for v in getLongCable(cable, dest1, dest2):
+	# 	p.push_back(convertToPoint(v))
 	return not p.is_simple()
 
 def isAtDestination(n) -> bool:

@@ -58,9 +58,9 @@ def getAllIntersectingObstacles(vertices):
 	:returns: A tuple of two arrays, First array are fully inside, second array is partially inside
 	"""
 	result = ([], [])
-	poly = Polygon()
-	for vert in vertices:
-		poly.push_back(convertToPoint(vert))
+	poly = Polygon([convertToPoint(v) for v in vertices])
+	# for vert in vertices:
+	# 	poly.push_back(convertToPoint(vert))
 	for obs in model.obstacles:
 		isIn = False
 		isOut = False

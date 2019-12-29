@@ -127,7 +127,7 @@ class TetheredPairApp(tk.Frame):
 			cable = testTightenCable(self.shouldDebugTriangulation)
 			self.canvas._renderCable(cable)
 		else:
-			solutionNode = aStar()
-			self.canvas.renderSolution(solutionNode)
+			solutionNode = aStar(True)
+			self.canvas.renderSolution(solutionNode, True)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED

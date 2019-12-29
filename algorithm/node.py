@@ -38,7 +38,7 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent=None, fractions=[1, 1]):
+	def __init__(self, cable, parent, fractions=[1, 1]):
 		"""
 
 		"""

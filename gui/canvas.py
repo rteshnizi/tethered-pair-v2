@@ -44,7 +44,7 @@ class Canvas(object):
 		# Bring original cable to the top
 		c1: Cable = self.model.entities["CABLE-O"]
 		c1.removeShape()
-		c1.createShape(self)
+		# c1.createShape(self)
 		# Create final cable configuration
 		c2 = Cable("CABLE-D", cable)
 		self.model.entities[c2.name] = c2
@@ -56,14 +56,17 @@ class Canvas(object):
 		while node:
 			path.append(node.cable[0 if getBeginningOfCable else -1])
 			node = node.parent
-		return reversed(path)
+		return path[::-1]
 
-	def renderSolution(self, solutionNode: Node):
+	def renderSolution(self, solutionNode: Node, debug=False):
 		if not solutionNode:
 			print("NO SOLUTIONS")
 			return
 		p1 = self._getPathPtsFromNode(solutionNode, True)
 		p2 = self._getPathPtsFromNode(solutionNode, False)
+		if debug:
+			print("p1:", p1)
+			print("p2:", p2)
 		path = Path("P1", p1, self.model.robots[0].color)
 		self.model.entities[path.name] = path
 		path.createShape(self)

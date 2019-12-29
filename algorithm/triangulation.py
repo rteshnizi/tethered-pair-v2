@@ -74,9 +74,9 @@ class Triangulation(object):
 		extendedCable = [self.dest1] + self.cable + [self.dest2]
 		extendedCable = VertexUtils.removeRepeatedVertsOrdered(extendedCable)
 		self.boundaryPts = [VertexUtils.convertToPoint(vert) for vert in extendedCable]
-		self.originalPolygon = Polygon()
-		for pt in self.boundaryPts:
-			self.originalPolygon.push_back(pt)
+		self.originalPolygon = Polygon(self.boundaryPts)
+		# for pt in self.boundaryPts:
+		# 	self.originalPolygon.push_back(pt)
 
 	def _dealWithPartialObstacles(self) -> None:
 		"""
@@ -87,9 +87,9 @@ class Triangulation(object):
 		self.fullyEnclosedPolygons = [obs.polygon for obs in self.fullyEnclosedPolygons]
 		for obs in self.partiallyEnclosedObstacles:
 			pts = Geom.polygonAndObstacleIntersection(self.boundaryPts, obs)
-			poly = Polygon()
-			for pt in pts:
-				poly.push_back(pt)
+			poly = Polygon(pts)
+			# for pt in pts:
+			# 	poly.push_back(pt)
 			self.fullyEnclosedPolygons.append(poly)
 
 		# re = Geom.polygonAndObstacleIntersection(self.boundaryPts, self.partiallyEnclosedObstacles[0])
