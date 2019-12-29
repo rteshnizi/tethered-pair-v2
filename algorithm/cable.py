@@ -19,6 +19,7 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 	Here we force the sleeve to be made up of the triangles to the left and to the right of the edges.
 	Whichever leads to a shorter path we accept that one.
 	"""
+	cable = cable.copy() # The method mutates the list object
 	pl = _tightenCable(cable, dest1, dest2, True, debugTri)
 	pr = _tightenCable(cable, dest1, dest2, False, False) # only one of them should print the triangulation edges
 	return pl if Geom.lengthOfCurve(pl) < Geom.lengthOfCurve(pr) else pr

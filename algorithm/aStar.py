@@ -17,7 +17,7 @@ def aStar(debug=False) -> Node:
 		if isAtDestination(n):
 			if debug: print("At Destination")
 			return n # For now terminate at first solution
-		if debug: print(n)
+		if debug: print("-------------NEW NODE-------------", n)
 		for va in n.cable[0].gaps:
 			for vb in n.cable[-1].gaps:
 				# For now I deliberately avoid cross movement because it crashes the triangulation
@@ -27,7 +27,7 @@ def aStar(debug=False) -> Node:
 				newCable = tightenCable(n.cable, va, vb)
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
-					if debug: print("%s-%s" % (va.name, vb.name))
+					if debug: print("*******ADDING******* %s-%s" % (va.name, vb.name))
 					child = Node(cable=newCable, parent=n)
 					n.children.append(child)
 					q.enqueue(child)
@@ -35,8 +35,9 @@ def aStar(debug=False) -> Node:
 
 def isThereCrossMovement(cable, dest1, dest2):
 	# I've also included the case where the polygon is not simple
-	p = Polygon(getLongCable(cable, dest1, dest2))
+	cable = getLongCable(cable, dest1, dest2)
+	p = Polygon([convertToPoint(v) for v in cable])
 	return not p.is_simple()
 
 def isAtDestination(n) -> bool:
-	return convertToPoint(n.cable[0]) == convertToPoint(model.robots[0].destination) and convertToPoint(n.cable[-1]) == convertToPoint(model.robots[-1].destination)
+	return convertToPoint(n.cable[0]) == convertToPoint(model.robots[0].destination) and convertToPoint(n.cable[-1]) == convertToPoint(model.robots[1].destination)

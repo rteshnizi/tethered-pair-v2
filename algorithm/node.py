@@ -60,11 +60,23 @@ class Node(object):
 
 	def _heuristic1(self):
 		h1 = vertexDistance(self.cable[0], model.robots[0].destination)
-		h2 = vertexDistance(self.cable[-1], model.robots[-1].destination)
+		h2 = vertexDistance(self.cable[-1], model.robots[1].destination)
 		return Cost([h1, h2])
 
 	def _calcG(self):
 		return Cost([self.f[0] + self.h[0], self.f[1] + self.h[1]])
+
+	def _getPath(self, getBeginningOfCable: bool):
+		path = []
+		node = self
+		while node:
+			path.append(node.cable[0 if getBeginningOfCable else -1])
+			node = node.parent
+		return path[::-1]
+
+	def getPaths(self) -> list:
+		paths = [self._getPath(True), self._getPath(False)]
+		return paths
 
 	@staticmethod
 	def pQGetCost(n):

@@ -2,10 +2,11 @@ import sys
 
 from tests.visibility import TestVisibility
 from tests.tighten import TestTighten
+from tests.aStar import TestAStar
 from tests.unitTest import Verbosity
 
 def main(verbosity=Verbosity.NONE):
-	unitTests = [TestVisibility(), TestTighten()]
+	unitTests = [TestVisibility(), TestTighten(), TestAStar()]
 	for test in unitTests:
 		print("Running %s: %d test cases" % (test.name, test.numTests))
 		result = test.run(verbosity)
