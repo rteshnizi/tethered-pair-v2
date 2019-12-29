@@ -9,6 +9,8 @@ class TestAStar(UnitTest):
 		self._presetsDir = os.path.join(os.path.dirname(__file__), "..", "presets")
 		super().__init__(name="aStar", tests={
 			"10.json": ["[R1, D1]", "[R2, D2]"],
+			"aStar1.json": ["[R1, O0-1, O0-2, D1]", "[R2, O1-0, O1-3, D2]"]
+			"aStar2.json": ["[R1, D1]", "[R2, D2]"]
 		})
 
 	def _isCorrectSolution(self, paths: list, presetName: str):

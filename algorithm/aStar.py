@@ -10,6 +10,7 @@ model = Model()
 
 def aStar(debug=False) -> Node:
 	q = PriorityQ(key=Node.pQGetCost) # The Priority Queue container
+	if debug: print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
 	root = Node(cable=model.cable, parent=None)
 	q.enqueue(root)
 	while not q.isEmpty():

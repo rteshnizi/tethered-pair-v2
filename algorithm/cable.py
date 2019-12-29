@@ -19,9 +19,10 @@ def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) 
 	Here we force the sleeve to be made up of the triangles to the left and to the right of the edges.
 	Whichever leads to a shorter path we accept that one.
 	"""
-	cable = cable.copy() # The method mutates the list object
-	pl = _tightenCable(cable, dest1, dest2, True, debugTri)
-	pr = _tightenCable(cable, dest1, dest2, False, False) # only one of them should print the triangulation edges
+	cableCopy = cable[:] # The method mutates the list object
+	pl = _tightenCable(cableCopy, dest1, dest2, True, debugTri)
+	cableCopy = cable[:] # The method mutates the list object
+	pr = _tightenCable(cableCopy, dest1, dest2, False, False) # only one of them should print the triangulation edges
 	return pl if Geom.lengthOfCurve(pl) < Geom.lengthOfCurve(pr) else pr
 
 def _tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, isLeft:bool, debugTri=False) -> VertList:
@@ -33,12 +34,13 @@ def _tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, isLeft:bool, de
 	(cable, dest1, dest2) = preprocessTheCable(cable, dest1, dest2)
 	(cable, dest1, dest2) = pushCableAwayFromObstacles(cable, dest1, dest2)
 	longCable = getLongCable(cable, dest1, dest2)
+	if len(longCable) == 2: return [getClosestVertex(pt) for pt in longCable]
 	longCable = removeRepeatedVertsOrdered(longCable)
 	if len(longCable) == 2: return [getClosestVertex(pt) for pt in longCable]
 	tri = Triangulation(cable, dest1, dest2, debug=debugTri)
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
-		return [dest1, dest2]
+		return [getClosestVertex(pt) for pt in [dest1, dest2]]
 	allCurrentTries = []
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
