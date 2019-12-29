@@ -59,8 +59,6 @@ def getAllIntersectingObstacles(vertices):
 	"""
 	result = ([], [])
 	poly = Polygon([convertToPoint(v) for v in vertices])
-	# for vert in vertices:
-	# 	poly.push_back(convertToPoint(vert))
 	for obs in model.obstacles:
 		isIn = False
 		isOut = False

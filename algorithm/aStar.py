@@ -36,8 +36,6 @@ def aStar(debug=False) -> Node:
 def isThereCrossMovement(cable, dest1, dest2):
 	# I've also included the case where the polygon is not simple
 	p = Polygon(getLongCable(cable, dest1, dest2))
-	# for v in getLongCable(cable, dest1, dest2):
-	# 	p.push_back(convertToPoint(v))
 	return not p.is_simple()
 
 def isAtDestination(n) -> bool:
