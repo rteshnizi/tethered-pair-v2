@@ -3,17 +3,20 @@ import os
 from model.preset import Preset
 from algorithm.aStar import aStar
 from tests.unitTest import UnitTest, TestResults, Verbosity
+from utils.vertexUtils import removeRepeatedVertsOrdered
 
 class TestAStar(UnitTest):
 	def __init__(self):
 		self._presetsDir = os.path.join(os.path.dirname(__file__), "..", "presets")
 		super().__init__(name="aStar", tests={
 			"10.json": ["[R1, D1]", "[R2, D2]"],
-			"aStar1.json": ["[R1, O0-1, O0-2, D1]", "[R2, O1-0, O1-3, D2]"]
-			"aStar2.json": ["[R1, D1]", "[R2, D2]"]
+			"aStar1.json": ["[R1, O0-1, O0-2, D1]", "[R2, O1-0, O1-3, D2]"],
+			"aStar2.json": ["[R1, D1]", "[R2, D2]"],
+			"aStar3.json": ["[R1, D1]", "[R2, O3-1, D2]"],
 		})
 
 	def _isCorrectSolution(self, paths: list, presetName: str):
+		paths = [removeRepeatedVertsOrdered(p) for p in paths]
 		return repr(paths[0]) == self._tests[presetName][0] and repr(paths[1]) == self._tests[presetName][1]
 
 	def run(self, verbosity=Verbosity.NONE) -> TestResults:

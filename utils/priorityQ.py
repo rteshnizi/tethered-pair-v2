@@ -5,14 +5,16 @@ See https://stackoverflow.com/a/8875823/750567
 import heapq
 
 class PriorityQ(object):
-	def __init__(self, key, initial=None):
+	def __init__(self, key1, key2, initial=None):
 		"""
 		initial: The initial data array
 
-		key: a function to return the key (or the cost) associated with the given item
+		key1: a function to return the primary key (or the cost) associated with the given item
+		key2: a function to return the secondary key (or the cost) associated with the given item to be used as tie breaker for key1
 		"""
-		self.counter = 0
-		self.key = key
+		self._counter = 0
+		self._key1 = key1
+		self._key2 = key2
 		if initial:
 			self._data = [self._createTuple(item) for item in initial]
 			heapq.heapify(self._data)
@@ -20,7 +22,10 @@ class PriorityQ(object):
 			self._data = []
 
 	def __repr__(self):
-		return 'Q(count = %d)' % len(self._data)
+		return 'Q(count = %d)' % len(self)
+
+	def __len__(self):
+		return len(self._data)
 
 	def _createTuple(self, item):
 		"""
@@ -30,8 +35,8 @@ class PriorityQ(object):
 		* The second is just a sequence id in order to avoid comparison between items if the keys happen to be equal
 		* The third is the item itself
 		"""
-		self.counter += 1
-		return (self.key(item), self.counter, item)
+		self._counter += 1 # TODO: Use length of _data? I don't know if this was done on purpose. I can look into it later.
+		return (self._key1(item), self._key2(item), self._counter, item)
 
 	def enqueue(self, item):
 		item = self._createTuple(item)
@@ -42,4 +47,4 @@ class PriorityQ(object):
 		return heapq.heappop(self._data)[-1]
 
 	def isEmpty(self):
-		return len(self._data) == 0
+		return len(self) == 0

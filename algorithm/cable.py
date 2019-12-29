@@ -245,14 +245,15 @@ def findSleeve(allTries: list):
 
 	return trimmed
 
-def getShortestPath(tri: Triangulation, src: Vertex, dst: Vertex, sleeve: list):
+def getShortestPath(tri: Triangulation, dest1: Vertex, dest2: Vertex, sleeve: list):
 	# We need to do this because the funnel algorithm assumes that the path lies inside the triangulation
 	if len(sleeve) == 0:
 		raise RuntimeError("Here we are.")
-	funnel = Funnel(src, tri, sleeve)
-	pathPt = funnel.getShortestPath(dst)
+	funnel = Funnel(dest1, tri, sleeve)
+	pathPt = funnel.getShortestPath(dest2)
 	pathVt = [getClosestVertex(pt) for pt in pathPt]
 	pathVt = removeRepeatedVertsOrdered(pathVt)
+	if len(pathVt) < 2: return [getClosestVertex(dest1), getClosestVertex(dest2)]
 	return pathVt
 
 def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:

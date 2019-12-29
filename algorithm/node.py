@@ -12,7 +12,8 @@ class Cost(object):
 		self.vals = vals
 
 	def __repr__(self):
-		return "(%.2f, %.2f)" % (self.vals[0], self.vals[1])
+		c1 = ("%.2f" % self.vals[0]).ljust(7)
+		return "(%s, %.2f)" % (c1, self.vals[1])
 
 	def __getitem__(self, index):
 		if index != 0 and index != 1: raise IndexError("Cost has index 0 or 1 only.")
@@ -53,7 +54,7 @@ class Node(object):
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
 
 	def __repr__(self):
-		return "%s - %.2f" % (repr(self.cable), self.pQGetCost(self))
+		return "%s - %s" % (repr(self.cable), repr(self.g))
 
 	def _calcH(self):
 		return self._heuristic1()
@@ -79,8 +80,15 @@ class Node(object):
 		return paths
 
 	@staticmethod
-	def pQGetCost(n):
+	def pQGetPrimaryCost(n):
 		"""
 		Since the optimization metric is minimizing the max, this function returns the max of the two costs
 		"""
 		return n.g.max()[0]
+
+	@staticmethod
+	def pQGetSecondaryCost(n):
+		"""
+		Since the optimization metric is minimizing the max, this function returns the max of the two costs
+		"""
+		return n.g.min()[0]

@@ -10,6 +10,7 @@ from model.robot import Robot
 from model.preset import Preset
 from model.path import Path
 from utils.cgal.types import Point
+import utils.cgal.geometry as Geom
 
 class Canvas(object):
 	def __init__(self, master, app):
@@ -49,7 +50,7 @@ class Canvas(object):
 		c2 = Cable("CABLE-D", cable)
 		self.model.entities[c2.name] = c2
 		c2.createShape(self)
-		print("CABLE-D", cable)
+		print("CABLE-D", cable, "(%.2f)" % Geom.lengthOfCurve(cable))
 
 	def renderSolution(self, solutionNode: Node, debug=False):
 		if not solutionNode:
