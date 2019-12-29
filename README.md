@@ -46,3 +46,4 @@ Work in progress.
 5. ~~Add a cable entity whose shape is a line (for debugging)~~
 6. ~~Add a case with initial cable config not being straight (Sep 3, 2019)~~
 7. ~~Crashes on Windows (Dec 22, 2019)~~
+8. Optimize code performance (Dec 28, 2019)
