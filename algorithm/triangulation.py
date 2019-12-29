@@ -59,9 +59,7 @@ class Triangulation(object):
 		# List of points that define the boundary of triangulation
 		self.boundaryPts = []
 		self._getOriginalBoundary()
-		# self._dealWithPartialObstacles()
 		self._getConvexHull()
-		# self._debugConvexHull()
 
 		self.cgalTri = CgalTriangulation()
 		self._triangulate()
@@ -75,29 +73,6 @@ class Triangulation(object):
 		extendedCable = VertexUtils.removeRepeatedVertsOrdered(extendedCable)
 		self.boundaryPts = [VertexUtils.convertToPoint(vert) for vert in extendedCable]
 		self.originalPolygon = Polygon(self.boundaryPts)
-
-	def _dealWithPartialObstacles(self) -> None:
-		"""
-		EXPERIMENTAL CODE: NOT IN USE
-		==
-		"""
-		(self.fullyEnclosedPolygons, self.partiallyEnclosedObstacles) = Geom.getAllIntersectingObstacles(self.boundaryPts)
-		self.fullyEnclosedPolygons = [obs.polygon for obs in self.fullyEnclosedPolygons]
-		for obs in self.partiallyEnclosedObstacles:
-			pts = Geom.polygonAndObstacleIntersection(self.boundaryPts, obs)
-			poly = Polygon(pts)
-			self.fullyEnclosedPolygons.append(poly)
-
-		# re = Geom.polygonAndObstacleIntersection(self.boundaryPts, self.partiallyEnclosedObstacles[0])
-		# for i in range(0, len(re) - 1):
-		# 	pt1 = re[i]
-		# 	pt2 = re[i + 1]
-		# 	e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
-		# 	e.createShape()
-		# pt1 = re[0]
-		# pt2 = re[-1]
-		# e = TriangulationEdge(model.canvas, "TE-%d" % i, [pt1, pt2], True)
-		# e.createShape()
 
 	def _getConvexHull(self) -> None:
 		"""
