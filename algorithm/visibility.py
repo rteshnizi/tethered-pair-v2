@@ -22,8 +22,11 @@ def processReducedVisibilityGraph(debug=False) -> None:
 	"""
 	for v in model.allVertexObjects:
 		for u in model.allVertexObjects:
-			if v.loc == u.loc:
+			if v.name == u.name and (v.name == "D1" or v.name == "D2"):
 				v.gaps.add(u)
+				continue
+			if v.loc == u.loc:
+				# v.gaps.add(u)
 				continue
 			# The below 2 edge cases rarely happen, but it happens when the robot or destination are exactly at a vertex of an obstacle
 			if _isRobotOrDestinationAndOnObstacleButNotAdjacent(v, u): continue
