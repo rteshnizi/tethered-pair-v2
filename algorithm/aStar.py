@@ -26,9 +26,9 @@ def aStar(debug=False) -> Node:
 			if debug: print("At Destination after visiting %d nodes" % count)
 			return n # For now terminate at first solution
 		for va in n.cable[0].gaps:
-			if goingBack(n, va, 0): continue
+			if isUndoingLastMove(n, va, 0): continue
 			for vb in n.cable[-1].gaps:
-				if goingBack(n, vb, -1): continue
+				if isUndoingLastMove(n, vb, -1): continue
 				if areBothStaying(n, va, vb): continue
 				# For now I deliberately avoid cross movement because it crashes the triangulation
 				# In reality we can fix this by mirorring the space (like I did in the previous paper)
@@ -47,9 +47,11 @@ def aStar(debug=False) -> Node:
 							print("ADDING %s @ %s" % (verts, repr(child.f)))
 						nodeMap[cableStr] = child
 						q.enqueue(child)
+				else:
+					pass
 	return None
 
-def goingBack(node, v, index):
+def isUndoingLastMove(node, v, index):
 	if not node.parent: return False
 	if convertToPoint(node.parent.cable[index]) != convertToPoint(v): return False
 	return True
