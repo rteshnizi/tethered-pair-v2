@@ -1,0 +1,342 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CABLE_FINAL_COLOR	../model/cable.py	/^CABLE_FINAL_COLOR = "DarkRed"$/;"	kind:variable	line:7
+CABLE_ORIGIN_COLOR	../model/cable.py	/^CABLE_ORIGIN_COLOR = "Green"$/;"	kind:variable	line:6
+COLOR	../model/debugEdge.py	/^COLOR = "Black"$/;"	kind:variable	line:7
+Cable	../model/cable.py	/^class Cable(Entity):$/;"	kind:class	line:9
+Canvas	../gui/canvas.py	/^class Canvas(object):$/;"	kind:class	line:15
+Cost	../algorithm/node.py	/^class Cost(object):$/;"	kind:class	line:8
+CreateCircle	../utils/cgal/drawing.py	/^def CreateCircle(canvas, center, radius, outline, fill, width, tag):$/;"	kind:function	line:8
+CreateCircle	../utils/symPy/drawing.py	/^def CreateCircle(canvas, center, radius, outline, fill, width):$/;"	kind:function	line:3
+CreateLine	../utils/cgal/drawing.py	/^def CreateLine(canvas, pointsList, color, tag, width=1, dash=(), arrow=False):$/;"	kind:function	line:52
+CreateLine	../utils/symPy/drawing.py	/^def CreateLine(canvas, pointsList, color, width = 1, dash = ()):$/;"	kind:function	line:39
+CreatePolygon	../utils/cgal/drawing.py	/^def CreatePolygon(canvas, pointsList, outline, fill, width, tag):$/;"	kind:function	line:31
+CreatePolygon	../utils/symPy/drawing.py	/^def CreatePolygon(canvas, pointsList, outline, fill, width):$/;"	kind:function	line:22
+DASH_PATTERN	../model/debugEdge.py	/^DASH_PATTERN = (3, 3)$/;"	kind:variable	line:9
+DESTINATION_RADIUS	../model/destination.py	/^DESTINATION_RADIUS = 5$/;"	kind:variable	line:4
+DebugEdge	../model/debugEdge.py	/^class DebugEdge(Entity):$/;"	kind:class	line:12
+Destination	../model/destination.py	/^class Destination(Vertex):$/;"	kind:class	line:6
+EPSILON_MULTIPLIER	../utils/cgal/geometry.py	/^EPSILON_MULTIPLIER = SMALL_DISTANCE \/ 2 # in pixels$/;"	kind:variable	line:14
+EPSILON_MULTIPLIER	../utils/symPy/geometry.py	/^EPSILON_MULTIPLIER = 0.000001 # 1e-6$/;"	kind:variable	line:10
+Entity	../model/entity.py	/^class Entity(ABC):$/;"	kind:class	line:5
+FaceInfo	../algorithm/triangulation.py	/^class FaceInfo(object):$/;"	kind:class	line:18
+Funnel	../algorithm/funnel.py	/^class Funnel:$/;"	kind:class	line:6
+INFINITY_COST	../algorithm/node.py	/^INFINITY_COST = inf$/;"	kind:variable	line:5
+LEAST	../tests/unitTest.py	/^	LEAST = 1$/;"	kind:variable	line:6
+LabeledVert	../algorithm/visibility.py	/^class LabeledVert(object):$/;"	kind:class	line:11
+MEDIUM	../tests/unitTest.py	/^	MEDIUM = 2$/;"	kind:variable	line:7
+MOST	../tests/unitTest.py	/^	MOST = 3$/;"	kind:variable	line:8
+Model	../model/modelService.py	/^class Model(object):$/;"	kind:class	line:1
+NONE	../tests/unitTest.py	/^	NONE = 0$/;"	kind:variable	line:5
+Node	../algorithm/node.py	/^class Node(object):$/;"	kind:class	line:39
+OBSTACLE_COLOR	../model/obstacle.py	/^OBSTACLE_COLOR = "Grey"$/;"	kind:variable	line:9
+Obstacle	../model/obstacle.py	/^class Obstacle(Entity):$/;"	kind:class	line:12
+Path	../model/path.py	/^class Path(Entity):$/;"	kind:class	line:7
+PointOrSegmentNone	../utils/cgal/types.py	/^PointOrSegmentNone = Union[Point, Segment, None]$/;"	kind:variable	line:22
+Preset	../model/preset.py	/^class Preset(object):$/;"	kind:class	line:12
+PriorityQ	../utils/priorityQ.py	/^class PriorityQ(object):$/;"	kind:class	line:7
+ROBOT_RADIUS	../model/robot.py	/^ROBOT_RADIUS = 5$/;"	kind:variable	line:4
+ROBOT_WIDTH	../model/robot.py	/^ROBOT_WIDTH = 2$/;"	kind:variable	line:5
+RemoveShape	../utils/cgal/drawing.py	/^def RemoveShape(canvas, shapeId):$/;"	kind:function	line:87
+RemoveShape	../utils/symPy/drawing.py	/^def RemoveShape(canvas, shapeId):$/;"	kind:function	line:56
+Robot	../model/robot.py	/^class Robot(Vertex):$/;"	kind:class	line:7
+SECONDARY_COLOR	../model/debugEdge.py	/^SECONDARY_COLOR = "Red"$/;"	kind:variable	line:8
+SMALL_DISTANCE	../utils/vertexUtils.py	/^SMALL_DISTANCE = 1 # in pixels$/;"	kind:variable	line:5
+TestAStar	../tests/aStar.py	/^class TestAStar(UnitTest):$/;"	kind:class	line:8
+TestResults	../tests/unitTest.py	/^class TestResults(object):$/;"	kind:class	line:10
+TestTighten	../tests/tighten.py	/^class TestTighten(UnitTest):$/;"	kind:class	line:7
+TestVisibility	../tests/visibility.py	/^class TestVisibility(UnitTest):$/;"	kind:class	line:6
+TetheredPairApp	../gui/app.py	/^class TetheredPairApp(tk.Frame):$/;"	kind:class	line:11
+Triangulation	../algorithm/triangulation.py	/^class Triangulation(object):$/;"	kind:class	line:31
+UnitTest	../tests/unitTest.py	/^class UnitTest(ABC):$/;"	kind:class	line:21
+VERTEX_COLOR	../model/vertex.py	/^VERTEX_COLOR = "Purple"$/;"	kind:variable	line:7
+Verbosity	../tests/unitTest.py	/^class Verbosity(IntEnum):$/;"	kind:class	line:4
+VertList	../algorithm/cable.py	/^VertList = List[Vertex]$/;"	kind:variable	line:12
+Vertex	../model/vertex.py	/^class Vertex(Entity):$/;"	kind:class	line:10
+WIDTH	../model/cable.py	/^WIDTH = 3$/;"	kind:variable	line:5
+WIDTH	../model/path.py	/^WIDTH = 1$/;"	kind:variable	line:5
+__CDTFaceHandleRepr	../utils/cgal/types.py	/^def __CDTFaceHandleRepr(self: TriangulationFaceHandle):$/;"	kind:function	line:74
+__PrivateModel	../model/modelService.py	/^	class __PrivateModel:$/;"	kind:class	line:2
+__Pt2Hash	../utils/cgal/types.py	/^def __Pt2Hash(self):$/;"	kind:function	line:48
+__Pt2Repr	../utils/cgal/types.py	/^def __Pt2Repr(self):$/;"	kind:function	line:43
+__Ray2Repr	../utils/cgal/types.py	/^def __Ray2Repr(self: Ray):$/;"	kind:function	line:53
+__Seg2Repr	../utils/cgal/types.py	/^def __Seg2Repr(self: Segment):$/;"	kind:function	line:59
+__Vec2Repr	../utils/cgal/types.py	/^def __Vec2Repr(self):$/;"	kind:function	line:64
+__Vec3Repr	../utils/cgal/types.py	/^def __Vec3Repr(self):$/;"	kind:function	line:69
+__getattr__	../model/modelService.py	/^	def __getattr__(self, name):$/;"	kind:member	line:27
+__getitem__	../algorithm/node.py	/^	def __getitem__(self, index):$/;"	kind:member	line:19
+__init__	../algorithm/funnel.py	/^	def __init__(self, src: Point, triangulation: Triangulation, sleeve: list):$/;"	kind:member	line:7
+__init__	../algorithm/node.py	/^	def __init__(self, cable, parent: "Node", fractions=[1, 1]):$/;"	kind:member	line:43
+__init__	../algorithm/node.py	/^	def __init__(self, vals=[INFINITY_COST, INFINITY_COST]):$/;"	kind:member	line:9
+__init__	../algorithm/triangulation.py	/^	def __init__(self):$/;"	kind:member	line:22
+__init__	../algorithm/triangulation.py	/^	def __init__(self, cable: list, dest1, dest2, debug=False):$/;"	kind:member	line:32
+__init__	../algorithm/visibility.py	/^	def __init__(self, vertex, robot):$/;"	kind:member	line:12
+__init__	../gui/app.py	/^	def __init__(self):$/;"	kind:member	line:12
+__init__	../gui/canvas.py	/^	def __init__(self, master, app):$/;"	kind:member	line:16
+__init__	../model/cable.py	/^	def __init__(self, name, pts: list, isOrigin=False):$/;"	kind:member	line:10
+__init__	../model/debugEdge.py	/^	def __init__(self, name, pts, isConstraint=False, isDirected=False):$/;"	kind:member	line:13
+__init__	../model/destination.py	/^	def __init__(self, robot, loc):$/;"	kind:member	line:7
+__init__	../model/entity.py	/^	def __init__(self, color, name):$/;"	kind:member	line:6
+__init__	../model/modelService.py	/^		def __init__(self):$/;"	kind:member	line:3
+__init__	../model/modelService.py	/^	def __init__(self, forceCreation=False):$/;"	kind:member	line:17
+__init__	../model/obstacle.py	/^	def __init__(self, name, pts):$/;"	kind:member	line:13
+__init__	../model/path.py	/^	def __init__(self, name, pts: list, color):$/;"	kind:member	line:8
+__init__	../model/preset.py	/^	def __init__(self, path):$/;"	kind:member	line:13
+__init__	../model/robot.py	/^	def __init__(self, color, name, loc):$/;"	kind:member	line:8
+__init__	../model/vertex.py	/^	def __init__(self, name, loc, ownerObs=None, color=VERTEX_COLOR):$/;"	kind:member	line:23
+__init__	../tests/aStar.py	/^	def __init__(self):$/;"	kind:member	line:9
+__init__	../tests/tighten.py	/^	def __init__(self):$/;"	kind:member	line:8
+__init__	../tests/unitTest.py	/^	def __init__(self, name):$/;"	kind:member	line:11
+__init__	../tests/unitTest.py	/^	def __init__(self, name, tests: dict):$/;"	kind:member	line:25
+__init__	../tests/visibility.py	/^	def __init__(self):$/;"	kind:member	line:7
+__init__	../utils/priorityQ.py	/^	def __init__(self, key1, key2, initial=None):$/;"	kind:member	line:8
+__init__.py	../algorithm/__init__.py	1;"	kind:file	line:1
+__init__.py	../model/__init__.py	1;"	kind:file	line:1
+__init__.py	../tests/__init__.py	1;"	kind:file	line:1
+__init__.py	../utils/__init__.py	1;"	kind:file	line:1
+__len__	../utils/priorityQ.py	/^	def __len__(self):$/;"	kind:member	line:27
+__repr__	../algorithm/node.py	/^	def __repr__(self):$/;"	kind:member	line:15
+__repr__	../algorithm/node.py	/^	def __repr__(self):$/;"	kind:member	line:51
+__repr__	../algorithm/visibility.py	/^	def __repr__(self):$/;"	kind:member	line:16
+__repr__	../model/entity.py	/^	def __repr__(self):$/;"	kind:member	line:12
+__repr__	../tests/unitTest.py	/^	def __repr__(self):$/;"	kind:member	line:18
+__repr__	../tests/unitTest.py	/^	def __repr__(self):$/;"	kind:member	line:33
+__repr__	../utils/priorityQ.py	/^	def __repr__(self):$/;"	kind:member	line:24
+_addCanvasEdge	../algorithm/triangulation.py	/^	def _addCanvasEdge(self, segment, canvasEdge):$/;"	kind:member	line:212
+_addFirstTriangleToFunnel	../algorithm/funnel.py	/^	def _addFirstTriangleToFunnel(self, mid, pt1, pt2):$/;"	kind:member	line:39
+_addPtToTriangulation	../algorithm/triangulation.py	/^	def _addPtToTriangulation(self, pt):$/;"	kind:member	line:143
+_build	../algorithm/funnel.py	/^	def _build(self):$/;"	kind:member	line:20
+_build	../model/preset.py	/^	def _build(self):$/;"	kind:member	line:19
+_calcF	../algorithm/node.py	/^	def _calcF(self) -> Cost:$/;"	kind:member	line:62
+_calcH	../algorithm/node.py	/^	def _calcH(self) -> Cost:$/;"	kind:member	line:54
+_convertVertListToDict	../utils/vertexUtils.py	/^def _convertVertListToDict(verts: list) -> dict:$/;"	kind:function	line:18
+_countEdges	../tests/visibility.py	/^	def _countEdges(self, preset: Preset):$/;"	kind:member	line:15
+_countTriangles	../algorithm/triangulation.py	/^	def _countTriangles(self):$/;"	kind:member	line:243
+_createCableAndRobots	../model/preset.py	/^	def _createCableAndRobots(self, ptList):$/;"	kind:member	line:41
+_createDestinations	../model/preset.py	/^	def _createDestinations(self, ptList):$/;"	kind:member	line:62
+_createObstacles	../model/preset.py	/^	def _createObstacles(self, obsArr):$/;"	kind:member	line:72
+_createRobots	../model/preset.py	/^	def _createRobots(self, ptList):$/;"	kind:member	line:51
+_createTuple	../utils/priorityQ.py	/^	def _createTuple(self, item):$/;"	kind:member	line:30
+_debugConvexHull	../algorithm/triangulation.py	/^	def _debugConvexHull(self):$/;"	kind:member	line:112
+_filterNonDomainTriangle	../algorithm/triangulation.py	/^	def _filterNonDomainTriangle(self, face: TriangulationFaceHandle):$/;"	kind:member	line:270
+_findCandidatePath	../algorithm/funnel.py	/^	def _findCandidatePath(self, dest, funnelSide: list, isCheckingLeft: bool):$/;"	kind:member	line:106
+_getClosestVertex	../utils/vertexUtils.py	/^def _getClosestVertex(pt):$/;"	kind:function	line:83
+_getConvexHull	../algorithm/triangulation.py	/^	def _getConvexHull(self) -> None:$/;"	kind:member	line:77
+_getCoordinateList	../utils/shapely/geometry.py	/^def _getCoordinateList(verts):$/;"	kind:function	line:5
+_getJsonPresets	../gui/app.py	/^	def _getJsonPresets(self):$/;"	kind:member	line:47
+_getOriginalBoundary	../algorithm/triangulation.py	/^	def _getOriginalBoundary(self) -> None:$/;"	kind:member	line:71
+_getPath	../algorithm/node.py	/^	def _getPath(self, getBeginningOfCable: bool):$/;"	kind:member	line:65
+_heuristic1	../algorithm/node.py	/^	def _heuristic1(self) -> Cost:$/;"	kind:member	line:57
+_insertCableConstraints	../algorithm/triangulation.py	/^	def _insertCableConstraints(self) -> None:$/;"	kind:member	line:217
+_insertPolygonIntoTriangulation	../algorithm/triangulation.py	/^	def _insertPolygonIntoTriangulation(self, pts):$/;"	kind:member	line:123
+_insertPtHandleIntoDict	../algorithm/triangulation.py	/^	def _insertPtHandleIntoDict(self, pt, handle):$/;"	kind:member	line:150
+_isCorrectSolution	../tests/aStar.py	/^	def _isCorrectSolution(self, paths: list, presetName: str):$/;"	kind:member	line:18
+_isFace	../algorithm/triangulation.py	/^	def _isFace(self, faceHandle: TriangulationFaceHandle):$/;"	kind:member	line:251
+_isFaceSurroundedByCable	../algorithm/triangulation.py	/^	def _isFaceSurroundedByCable(self, face: TriangulationFaceHandle):$/;"	kind:member	line:257
+_isGap	../algorithm/visibility.py	/^def _isGap(src, target) -> bool:$/;"	kind:function	line:62
+_isPtHandleInDict	../algorithm/triangulation.py	/^	def _isPtHandleInDict(self, pt) -> bool:$/;"	kind:member	line:159
+_isRobotOrDestinationAndOnObstacleButNotAdjacent	../algorithm/visibility.py	/^def _isRobotOrDestinationAndOnObstacleButNotAdjacent(candidate, obstacleVert):$/;"	kind:function	line:47
+_markInteriorTriangles	../algorithm/triangulation.py	/^	def _markInteriorTriangles(self):$/;"	kind:member	line:163
+_markInteriorTrianglesBFS	../algorithm/triangulation.py	/^	def _markInteriorTrianglesBFS(self, startFace, nestingLvl, borderEdges):$/;"	kind:member	line:192
+_populateModel	../model/preset.py	/^	def _populateModel(self):$/;"	kind:member	line:27
+_renderCable	../gui/canvas.py	/^	def _renderCable(self, cable):$/;"	kind:member	line:43
+_renderPreset	../gui/canvas.py	/^	def _renderPreset(self):$/;"	kind:member	line:39
+_reportException	../tests/unitTest.py	/^	def _reportException(self, testName, exception):$/;"	kind:member	line:47
+_reportFailedTest	../tests/unitTest.py	/^	def _reportFailedTest(self, testName, received):$/;"	kind:member	line:42
+_reportSkippedTest	../tests/unitTest.py	/^	def _reportSkippedTest(self, testName):$/;"	kind:member	line:36
+_reportSuccessfulTest	../tests/unitTest.py	/^	def _reportSuccessfulTest(self, testName):$/;"	kind:member	line:39
+_reset	../gui/canvas.py	/^	def _reset(self):$/;"	kind:member	line:32
+_tightenCable	../algorithm/cable.py	/^def _tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, isLeft:bool, debugTri=False) -> VertList:$/;"	kind:function	line:28
+_triangulate	../algorithm/triangulation.py	/^	def _triangulate(self):$/;"	kind:member	line:231
+_updateFunnelLeft	../algorithm/funnel.py	/^	def _updateFunnelLeft(self, candidate) -> None:$/;"	kind:member	line:47
+_updateFunnelRight	../algorithm/funnel.py	/^	def _updateFunnelRight(self, candidate) -> None:$/;"	kind:member	line:50
+_updateFunnelSide	../algorithm/funnel.py	/^	def _updateFunnelSide(self, candidate, isUpdatingLeft: bool):$/;"	kind:member	line:54
+_walkFunnelSide	../algorithm/funnel.py	/^	def _walkFunnelSide(self, target, funnelSide: list, isCheckingLeft: bool) -> int:$/;"	kind:member	line:88
+aStar	../algorithm/aStar.py	/^def aStar(debug=False) -> Node:$/;"	kind:function	line:11
+aStar.py	../algorithm/aStar.py	1;"	kind:file	line:1
+aStar.py	../tests/aStar.py	1;"	kind:file	line:1
+addVectorToPoint	../utils/cgal/geometry.py	/^def addVectorToPoint(pt, dx, dy):$/;"	kind:function	line:175
+addVertexByLocation	../model/modelService.py	/^	def addVertexByLocation(self, vert):$/;"	kind:member	line:39
+allVertexObjects	../model/modelService.py	/^	def allVertexObjects(self):$/;"	kind:member	line:46
+almostEqual	../utils/vertexUtils.py	/^def almostEqual(v1, v2) -> tuple:$/;"	kind:function	line:67
+apex	../algorithm/funnel.py	/^	def apex(self):$/;"	kind:member	line:17
+app.py	../gui/app.py	1;"	kind:file	line:1
+appendIfNotRepeated	../utils/vertexUtils.py	/^def appendIfNotRepeated(vrtList, vrt):$/;"	kind:function	line:56
+applyMovement	../algorithm/visibility.py	/^def applyMovement(cable, dest, isZeroEndMoving: bool):$/;"	kind:function	line:74
+areAdjacent	../model/obstacle.py	/^	def areAdjacent(self, pt1, pt2) -> bool:$/;"	kind:member	line:50
+areBothStaying	../algorithm/aStar.py	/^def areBothStaying(parent, va, vb):$/;"	kind:function	line:55
+areEdgesEqual	../algorithm/cable.py	/^def areEdgesEqual(e1 ,e2) -> bool:$/;"	kind:function	line:166
+areTrianglesNeighbor	../algorithm/triangulation.py	/^	def areTrianglesNeighbor(self, faceHandle1: TriangulationFaceHandle, faceHandle2: TriangulationFaceHandle):$/;"	kind:member	line:412
+bindMouseEvent	../utils/cgal/drawing.py	/^def bindMouseEvent(canvas, shape):$/;"	kind:function	line:73
+buildPreset	../gui/canvas.py	/^	def buildPreset(self, jsonPath):$/;"	kind:member	line:24
+cable.py	../algorithm/cable.py	1;"	kind:file	line:1
+cable.py	../model/cable.py	1;"	kind:file	line:1
+canvas.py	../gui/canvas.py	1;"	kind:file	line:1
+centroid	../utils/cgal/geometry.py	/^def centroid(pts):$/;"	kind:function	line:137
+chooseTriangleBySide	../algorithm/cable.py	/^def chooseTriangleBySide(v1, v2, tries, pickLeft):$/;"	kind:function	line:82
+convertToPoint	../utils/vertexUtils.py	/^def convertToPoint(vert):$/;"	kind:function	line:7
+createButtons	../gui/app.py	/^	def createButtons(self):$/;"	kind:member	line:87
+createDebugOptions	../gui/app.py	/^	def createDebugOptions(self):$/;"	kind:member	line:112
+createDropdown	../gui/app.py	/^	def createDropdown(self):$/;"	kind:member	line:70
+createPolygonFromVertices	../utils/symPy/geometry.py	/^def createPolygonFromVertices(verts):$/;"	kind:function	line:18
+createSegmentFromVertices	../utils/symPy/geometry.py	/^def createSegmentFromVertices(v1, v2):$/;"	kind:function	line:15
+createShape	../model/cable.py	/^	def createShape(self, canvas):$/;"	kind:member	line:27
+createShape	../model/debugEdge.py	/^	def createShape(self, canvas):$/;"	kind:member	line:41
+createShape	../model/destination.py	/^	def createShape(self, canvas):$/;"	kind:member	line:18
+createShape	../model/entity.py	/^	def createShape(self, canvas):$/;"	kind:member	line:22
+createShape	../model/obstacle.py	/^	def createShape(self, canvas):$/;"	kind:member	line:36
+createShape	../model/path.py	/^	def createShape(self, canvas):$/;"	kind:member	line:25
+createShape	../model/robot.py	/^	def createShape(self, canvas):$/;"	kind:member	line:22
+createShape	../model/vertex.py	/^	def createShape(self, canvas):$/;"	kind:member	line:30
+createVertices	../model/obstacle.py	/^	def createVertices(self, pts):$/;"	kind:member	line:30
+cross	../utils/symPy/geometry.py	/^def cross(vec1, vec2):$/;"	kind:function	line:28
+crossProduct	../utils/cgal/types.py	/^def crossProduct(vec1: Vector, vec2: Vector) -> Vector3D:$/;"	kind:function	line:25
+debugEdge.py	../model/debugEdge.py	1;"	kind:file	line:1
+dequeue	../utils/priorityQ.py	/^	def dequeue(self):$/;"	kind:member	line:45
+destination.py	../model/destination.py	1;"	kind:file	line:1
+doPops	../algorithm/visibility.py	/^def doPops(cable, dest, isZeroEndMoving):$/;"	kind:function	line:79
+doPushes	../algorithm/visibility.py	/^def doPushes(cable, dest, isZeroEndMoving):$/;"	kind:function	line:92
+drawEdges	../algorithm/triangulation.py	/^	def drawEdges(self, drawDomainOnly=False):$/;"	kind:member	line:383
+drawing.py	../utils/cgal/drawing.py	1;"	kind:file	line:1
+drawing.py	../utils/symPy/drawing.py	1;"	kind:file	line:1
+enclosesPoint	../model/obstacle.py	/^	def enclosesPoint(self, pt):$/;"	kind:member	line:44
+enclosesVertex	../model/obstacle.py	/^	def enclosesVertex(self, vrt):$/;"	kind:member	line:41
+enqueue	../utils/priorityQ.py	/^	def enqueue(self, item):$/;"	kind:member	line:41
+entity.py	../model/entity.py	1;"	kind:file	line:1
+eraseDrawnEdges	../algorithm/triangulation.py	/^	def eraseDrawnEdges(self):$/;"	kind:member	line:407
+extrudeVertsWithEpsilonVect	../utils/cgal/geometry.py	/^def extrudeVertsWithEpsilonVect(verts) -> List[Point]:$/;"	kind:function	line:161
+findSleeve	../algorithm/cable.py	/^def findSleeve(allTries: list):$/;"	kind:function	line:216
+funnel.py	../algorithm/funnel.py	1;"	kind:file	line:1
+geometry.py	../utils/cgal/geometry.py	1;"	kind:file	line:1
+geometry.py	../utils/shapely/geometry.py	1;"	kind:file	line:1
+geometry.py	../utils/symPy/geometry.py	1;"	kind:file	line:1
+getAllIntersectingObstacles	../utils/cgal/geometry.py	/^def getAllIntersectingObstacles(vertices):$/;"	kind:function	line:50
+getCanvasEdge	../algorithm/triangulation.py	/^	def getCanvasEdge(self, vertexSet):$/;"	kind:member	line:403
+getCgalEdge	../algorithm/triangulation.py	/^	def getCgalEdge(self, vertexSet):$/;"	kind:member	line:284
+getClosestVertex	../utils/vertexUtils.py	/^def getClosestVertex(pt):$/;"	kind:function	line:106
+getCommonEdge	../algorithm/triangulation.py	/^	def getCommonEdge(self, faceHandle1: TriangulationFaceHandle, faceHandle2: TriangulationFaceHandle):$/;"	kind:member	line:420
+getConvexHullFromPoint	../utils/symPy/geometry.py	/^def getConvexHullFromPoint(ptList):$/;"	kind:function	line:55
+getConvexHullFromVertex	../utils/symPy/geometry.py	/^def getConvexHullFromVertex(vertList):$/;"	kind:function	line:52
+getEdge	../algorithm/cable.py	/^def getEdge(vert1, vert2) -> frozenset:$/;"	kind:function	line:156
+getEpsilonVector	../utils/cgal/geometry.py	/^def getEpsilonVector(frm, to) -> Vector:$/;"	kind:function	line:30
+getEpsilonVector	../utils/symPy/geometry.py	/^def getEpsilonVector(v1, v2):$/;"	kind:function	line:21
+getEpsilonVectorFromVect	../utils/cgal/geometry.py	/^def getEpsilonVectorFromVect(vect) -> Vector:$/;"	kind:function	line:22
+getFlipEdgeAndCurrentTriangle	../algorithm/cable.py	/^def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE: frozenset, currTries: frozenset, candidates=frozenset()):$/;"	kind:function	line:179
+getIncidentEdges	../algorithm/triangulation.py	/^	def getIncidentEdges(self, vert, faceHandle: TriangulationFaceHandle):$/;"	kind:member	line:349
+getIncidentTriangles	../algorithm/triangulation.py	/^	def getIncidentTriangles(self, vertexSet):$/;"	kind:member	line:326
+getInnerVertices	../utils/symPy/geometry.py	/^def getInnerVertices(v1, v2, v3):$/;"	kind:function	line:42
+getLongCable	../algorithm/cable.py	/^def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:$/;"	kind:function	line:131
+getPaths	../algorithm/node.py	/^	def getPaths(self) -> list:$/;"	kind:member	line:73
+getPoppingStitchLines	../algorithm/visibility.py	/^def getPoppingStitchLines(cable: list, isZeroEndMoving: bool) -> list:$/;"	kind:function	line:117
+getShortestPath	../algorithm/cable.py	/^def getShortestPath(tri: Triangulation, dest1: Vertex, dest2: Vertex, sleeve: list):$/;"	kind:function	line:248
+getShortestPath	../algorithm/funnel.py	/^	def getShortestPath(self, dest):$/;"	kind:member	line:111
+getTrueInitTri	../algorithm/cable.py	/^def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):$/;"	kind:function	line:117
+getVertex	../model/obstacle.py	/^	def getVertex(self, pt) -> Vertex:$/;"	kind:member	line:47
+getVertexByLocation	../model/modelService.py	/^	def getVertexByLocation(self, x, y):$/;"	kind:member	line:42
+getVertexHandle	../algorithm/triangulation.py	/^	def getVertexHandle(self, vertex):$/;"	kind:member	line:312
+goingBack	../algorithm/aStar.py	/^def goingBack(node, v, index):$/;"	kind:function	line:50
+highlightEdge	../model/debugEdge.py	/^	def highlightEdge(self, canvas):$/;"	kind:member	line:46
+inDomain	../algorithm/triangulation.py	/^	def inDomain(self):$/;"	kind:member	line:28
+instance	../model/modelService.py	/^	instance = None$/;"	kind:variable	line:15
+intersectPolygonAndSegment	../utils/cgal/geometry.py	/^def intersectPolygonAndSegment(poly: Polygon, segment: Segment) -> List[PointOrSegmentNone]:$/;"	kind:function	line:143
+intersectSegmentAndSegment	../utils/cgal/geometry.py	/^def intersectSegmentAndSegment(src1, dest1, src2, dest2) -> List[PointOrSegmentNone]:$/;"	kind:function	line:155
+intersection	../model/obstacle.py	/^	def intersection(self, line):$/;"	kind:member	line:57
+intersection	../utils/cgal/types.py	/^def intersection(obj1, obj2) -> PointOrSegmentNone:$/;"	kind:function	line:30
+isAtDestination	../algorithm/aStar.py	/^def isAtDestination(n) -> bool:$/;"	kind:function	line:68
+isEmpty	../utils/priorityQ.py	/^	def isEmpty(self):$/;"	kind:member	line:49
+isInsidePoly	../utils/cgal/geometry.py	/^def isInsidePoly(poly, pt) -> bool:$/;"	kind:function	line:38
+isInsidePoly	../utils/symPy/geometry.py	/^def isInsidePoly(poly1, polyList):$/;"	kind:function	line:62
+isMarked	../algorithm/triangulation.py	/^	def isMarked(self):$/;"	kind:member	line:25
+isOnPoly	../utils/cgal/geometry.py	/^def isOnPoly(poly: Polygon, pt) -> bool:$/;"	kind:function	line:44
+isPointInsideOriginalPolygon	../algorithm/triangulation.py	/^	def isPointInsideOriginalPolygon(self, vert):$/;"	kind:member	line:277
+isPointInsideTriangle	../algorithm/triangulation.py	/^	def isPointInsideTriangle(self, faceHandle: TriangulationFaceHandle, pt) -> bool:$/;"	kind:member	line:430
+isThereCrossMovement	../algorithm/aStar.py	/^def isThereCrossMovement(cable, dest1, dest2):$/;"	kind:function	line:60
+isToTheLeft	../utils/cgal/geometry.py	/^def isToTheLeft(ref1, ref2, target) -> bool:$/;"	kind:function	line:106
+isToTheRight	../utils/cgal/geometry.py	/^def isToTheRight(ref1, ref2, target) -> bool:$/;"	kind:function	line:90
+isVisible	../model/vertex.py	/^	def isVisible(self, other):$/;"	kind:member	line:43
+isVisible	../utils/cgal/geometry.py	/^def isVisible(v1, v2):$/;"	kind:function	line:180
+lengthOfCurve	../utils/cgal/geometry.py	/^def lengthOfCurve(pts: list):$/;"	kind:function	line:128
+loadPreset	../gui/app.py	/^	def loadPreset(self):$/;"	kind:member	line:81
+main	../main.py	/^def main():$/;"	kind:function	line:3
+main	../test.py	/^def main(verbosity=Verbosity.NONE):$/;"	kind:function	line:8
+main.py	../main.py	1;"	kind:file	line:1
+makeFrozenSet	../algorithm/cable.py	/^def makeFrozenSet(members):$/;"	kind:function	line:173
+max	../algorithm/node.py	/^	def max(self):$/;"	kind:member	line:31
+midpoint	../utils/cgal/geometry.py	/^def midpoint(vrt1, vrt2) -> Point:$/;"	kind:function	line:122
+min	../algorithm/node.py	/^	def min(self):$/;"	kind:member	line:23
+mode	../model/obstacle.py	/^mode = Model()$/;"	kind:variable	line:10
+model	../algorithm/aStar.py	/^model = Model()$/;"	kind:variable	line:9
+model	../algorithm/cable.py	/^model = Model()$/;"	kind:variable	line:10
+model	../algorithm/node.py	/^model = Model()$/;"	kind:variable	line:4
+model	../algorithm/triangulation.py	/^model = Model()$/;"	kind:variable	line:13
+model	../algorithm/visibility.py	/^model = Model()$/;"	kind:variable	line:9
+model	../model/debugEdge.py	/^model = Model()$/;"	kind:variable	line:10
+model	../model/vertex.py	/^model = Model()$/;"	kind:variable	line:8
+model	../utils/cgal/drawing.py	/^model = Model()$/;"	kind:variable	line:6
+model	../utils/cgal/geometry.py	/^model = Model()$/;"	kind:variable	line:13
+model	../utils/cgal/types.py	/^model = Model()$/;"	kind:variable	line:23
+model	../utils/symPy/geometry.py	/^model = Model()$/;"	kind:variable	line:9
+model	../utils/vertexUtils.py	/^model = Model()$/;"	kind:variable	line:4
+modelService.py	../model/modelService.py	1;"	kind:file	line:1
+mouseHandler	../utils/cgal/drawing.py	/^def mouseHandler(event):$/;"	kind:function	line:76
+node.py	../algorithm/node.py	1;"	kind:file	line:1
+numTests	../tests/unitTest.py	/^	def numTests(self):$/;"	kind:member	line:30
+obstacle.py	../model/obstacle.py	1;"	kind:file	line:1
+pQGetPrimaryCost	../algorithm/node.py	/^	def pQGetPrimaryCost(n):$/;"	kind:member	line:91
+pQGetSecondaryCost	../algorithm/node.py	/^	def pQGetSecondaryCost(n):$/;"	kind:member	line:98
+path.py	../model/path.py	1;"	kind:file	line:1
+polygonAndObstacleIntersection	../utils/cgal/geometry.py	/^def polygonAndObstacleIntersection(polyVerts, obstacle) -> List[Point]:$/;"	kind:function	line:170
+polygonIntersection	../utils/shapely/geometry.py	/^def polygonIntersection(verts1, verts2):$/;"	kind:function	line:13
+preprocessTheCable	../algorithm/cable.py	/^def preprocessTheCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:$/;"	kind:function	line:92
+preset.py	../model/preset.py	1;"	kind:file	line:1
+print.py	../utils/print.py	1;"	kind:file	line:1
+priorityQ.py	../utils/priorityQ.py	1;"	kind:file	line:1
+processReducedVisibilityGraph	../algorithm/visibility.py	/^def processReducedVisibilityGraph(debug=False) -> None:$/;"	kind:function	line:19
+ptToStringId	../model/modelService.py	/^def ptToStringId(pt):$/;"	kind:function	line:55
+ptToStringId	../utils/vertexUtils.py	/^def ptToStringId(vert):$/;"	kind:function	line:15
+pushCableAwayFromObstacles	../algorithm/cable.py	/^def pushCableAwayFromObstacles(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:$/;"	kind:function	line:103
+pushVertEpsilonInside	../algorithm/triangulation.py	/^	def pushVertEpsilonInside(self, vert, faceHandle: TriangulationFaceHandle) -> Point:$/;"	kind:member	line:368
+readMapJson	../gui/app.py	/^	def readMapJson(self, absolutePath):$/;"	kind:member	line:106
+removeNoNameMembers	../utils/vertexUtils.py	/^def removeNoNameMembers(verts: list) -> list:$/;"	kind:function	line:46
+removeRepeatedVertsOrdered	../utils/vertexUtils.py	/^def removeRepeatedVertsOrdered(verts: list) -> list:$/;"	kind:function	line:33
+removeRepeatedVertsUnordered	../utils/vertexUtils.py	/^def removeRepeatedVertsUnordered(verts: list) -> list:$/;"	kind:function	line:24
+removeShape	../model/entity.py	/^	def removeShape(self):$/;"	kind:member	line:15
+renderSolution	../gui/canvas.py	/^	def renderSolution(self, solutionNode: Node, debug=False):$/;"	kind:member	line:55
+robot.py	../model/robot.py	1;"	kind:file	line:1
+run	../gui/app.py	/^	def run(self):$/;"	kind:member	line:117
+run	../tests/aStar.py	/^	def run(self, verbosity=Verbosity.NONE) -> TestResults:$/;"	kind:member	line:22
+run	../tests/tighten.py	/^	def run(self, verbosity=Verbosity.NONE) -> TestResults:$/;"	kind:member	line:40
+run	../tests/unitTest.py	/^	def run(self, verbosity:Verbosity=Verbosity.NONE) -> TestResults:$/;"	kind:member	line:52
+run	../tests/visibility.py	/^	def run(self, verbosity=Verbosity.NONE) -> TestResults:$/;"	kind:member	line:22
+selectMapFile	../gui/app.py	/^	def selectMapFile(self):$/;"	kind:member	line:99
+setApp	../model/modelService.py	/^	def setApp(self, app):$/;"	kind:member	line:33
+setCanvas	../model/modelService.py	/^	def setCanvas(self, canvas):$/;"	kind:member	line:30
+setMaxCable	../model/modelService.py	/^	def setMaxCable(self, l):$/;"	kind:member	line:36
+setSubtractPoints	../utils/vertexUtils.py	/^def setSubtractPoints(verts1: list, verts2: list) -> list:$/;"	kind:function	line:61
+shouldDebugTighten	../gui/app.py	/^	def shouldDebugTighten(self) -> bool:$/;"	kind:member	line:40
+shouldDebugTriangulation	../gui/app.py	/^	def shouldDebugTriangulation(self) -> bool:$/;"	kind:member	line:36
+shouldDebugVisGraph	../gui/app.py	/^	def shouldDebugVisGraph(self) -> bool:$/;"	kind:member	line:44
+shouldPrintMouse	../gui/app.py	/^	def shouldPrintMouse(self) -> bool:$/;"	kind:member	line:32
+test.py	../test.py	1;"	kind:file	line:1
+testTightenCable	../algorithm/cable.py	/^def testTightenCable(debugTri=False):$/;"	kind:function	line:14
+testTriangulation	../algorithm/triangulation.py	/^def testTriangulation(cable, dest1, dest2):$/;"	kind:function	line:15
+tighten.py	../tests/tighten.py	1;"	kind:file	line:1
+tightenCable	../algorithm/cable.py	/^def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) -> VertList:$/;"	kind:function	line:17
+tightenCableClassic	../algorithm/cable.py	/^def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:$/;"	kind:function	line:259
+triangleHasVertex	../algorithm/triangulation.py	/^	def triangleHasVertex(self, faceHandle: TriangulationFaceHandle, vertex):$/;"	kind:member	line:415
+triangulation.py	../algorithm/triangulation.py	1;"	kind:file	line:1
+types.py	../utils/cgal/types.py	1;"	kind:file	line:1
+unitTest.py	../tests/unitTest.py	1;"	kind:file	line:1
+updateParent	../algorithm/node.py	/^	def updateParent(self, newParent: "Node") -> None:$/;"	kind:member	line:77
+verbosity	../test.py	/^	verbosity = Verbosity.NONE$/;"	kind:variable	line:17
+vertex.py	../model/vertex.py	1;"	kind:file	line:1
+vertexDistance	../utils/cgal/geometry.py	/^def vertexDistance(v1, v2):$/;"	kind:function	line:16
+vertexDistance	../utils/symPy/geometry.py	/^def vertexDistance(v1, v2):$/;"	kind:function	line:12
+vertexUtils.py	../utils/vertexUtils.py	1;"	kind:file	line:1
+visibility.py	../algorithm/visibility.py	1;"	kind:file	line:1
+visibility.py	../tests/visibility.py	1;"	kind:file	line:1
+xyToStringId	../model/modelService.py	/^def xyToStringId(x, y):$/;"	kind:function	line:61
