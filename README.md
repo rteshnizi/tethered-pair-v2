@@ -40,9 +40,9 @@ Work in progress.
 ## TODO:
 
 1. ~~Construct a DS to access triangles and edges and pts the way we need them in the alg (Feb 8, 2019)~~
-2. Test the current impl for a case where the cable won't get more taut (Aug 6, 2019)
+2. ~~Test the current impl for a case where the cable won't get more taut (Aug 6, 2019)~~
 3. ~~We can now traverse th triangulation, maintain the funnel (Aug 6, 2019)~~
-4. Change GapDetector to reduced visibility graph calculator (Aug 19, 2019)
+4. ~~Change GapDetector to reduced visibility graph calculator (Aug 19, 2019)~~
 5. ~~Add a cable entity whose shape is a line (for debugging)~~
 6. ~~Add a case with initial cable config not being straight (Sep 3, 2019)~~
 7. ~~Crashes on Windows (Dec 22, 2019)~~
