@@ -1,7 +1,7 @@
 import utils.cgal.geometry as Geom
 from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual, removeRepeatedVertsOrdered
 from algorithm.node import Node
-from algorithm.cable import tightenCable, getLongCable
+from algorithm.cable import tightenCable, getLongCable, findSegments
 from model.modelService import Model
 from utils.priorityQ import PriorityQ
 from utils.cgal.types import Polygon
@@ -48,7 +48,7 @@ def aStar(debug=False) -> Node:
 						nodeMap[cableStr] = child
 						q.enqueue(child)
 				else:
-					pass
+					p1 = getPartialMotion(n.cable, newCable, True)
 	return None
 
 def isUndoingLastMove(node, v, index):
@@ -72,3 +72,9 @@ def isThereCrossMovement(cable, dest1, dest2):
 def isAtDestination(n) -> bool:
 	if not n: return False
 	return convertToPoint(n.cable[0]) == convertToPoint(model.robots[0].destination) and convertToPoint(n.cable[-1]) == convertToPoint(model.robots[1].destination)
+
+def getPartialMotion(oldCable, newCable, isRobotA):
+	ind = 0 if isRobotA else -1
+	src = oldCable[ind]
+	dst = newCable[ind]
+	segs = findSegments(src, dst, newCable)

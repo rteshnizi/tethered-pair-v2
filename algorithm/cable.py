@@ -88,7 +88,6 @@ def chooseTriangleBySide(v1, v2, tries, pickLeft):
 		if isOnTheCorrectSide(v1, v2, center): return frozenset({tri})
 	raise RuntimeError("Weird! Right?")
 
-
 def preprocessTheCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
 	"""
 	If moves are happening along the current cable
@@ -259,3 +258,7 @@ def getShortestPath(tri: Triangulation, dest1: Vertex, dest2: Vertex, sleeve: li
 def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	cable = applyMovement(cable, dest1, True)
 	return applyMovement(cable, dest2, False)
+
+def findSegments(src, dst, cable):
+	for i in reversed(range(1, len(cable))):
+		pass
