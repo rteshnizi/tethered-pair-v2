@@ -197,3 +197,6 @@ def isVisible(v1, v2):
 				# They don't block visibility
 				pass
 	return True
+
+def circleAndLineSegmentIntersection(pt1, pt2, center, radius):
+	return SHGeom.circleAndLineSegmentIntersection(pt1, pt2, center, radius)

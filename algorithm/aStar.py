@@ -77,4 +77,4 @@ def getPartialMotion(oldCable, newCable, isRobotA):
 	ind = 0 if isRobotA else -1
 	src = oldCable[ind]
 	dst = newCable[ind]
-	segs = findSegments(src, dst, newCable)
+	segs = findSegments(src, dst, oldCable, newCable)

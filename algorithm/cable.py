@@ -259,6 +259,23 @@ def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=Fal
 	cable = applyMovement(cable, dest1, True)
 	return applyMovement(cable, dest2, False)
 
-def findSegments(src, dst, cable):
-	for i in reversed(range(1, len(cable))):
-		pass
+def findSegments(src, dst, oldCable, newCable):
+	if swappingSpots(src, dst, cable):
+		return []
+	if len(cable) == 2:
+	# this is a special case because we can't extend the cable
+		d = solveForD(src, dst, cable[0], model.MAX_CABLE)
+	for i in reversed(range(1, )):
+		l = getLengthOfCableUpToIndex(cable, i)
+		remaining = model.MAX_CABLE - l
+
+def getLengthOfCableUpToIndex(cable, ind):
+	if ind <= 0 or ind >= len(cable):
+		return 0
+	return Geom.lengthOfCurve(cable[:ind])
+
+def solveForD(src, dst, center, radius):
+	"""
+	Given the src and dst to create a line segment, and the center of a circle, find the intersection
+	"""
+	return Geom.circleAndLineSegmentIntersection(src, dst, center, radius)
