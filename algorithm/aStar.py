@@ -1,8 +1,10 @@
 import utils.cgal.geometry as Geom
+from math import fabs, nan
 from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual, removeRepeatedVertsOrdered
 from algorithm.node import Node
 from algorithm.cable import tightenCable, getLongCable, findSegments
 from model.modelService import Model
+from model.vertex import Vertex
 from utils.priorityQ import PriorityQ
 from utils.cgal.types import Polygon
 
@@ -49,6 +51,8 @@ def aStar(debug=False) -> Node:
 						q.enqueue(child)
 				else:
 					p1 = getPartialMotion(n.cable, newCable, True)
+					p1 = getPartialMotion(n.cable, newCable, False)
+					reza = 0
 	return None
 
 def isUndoingLastMove(node, v, index):
@@ -73,8 +77,34 @@ def isAtDestination(n) -> bool:
 	if not n: return False
 	return convertToPoint(n.cable[0]) == convertToPoint(model.robots[0].destination) and convertToPoint(n.cable[-1]) == convertToPoint(model.robots[1].destination)
 
-def getPartialMotion(oldCable, newCable, isRobotA):
+def getPartialMotion(oldCable, newCable, isRobotA) -> float:
 	ind = 0 if isRobotA else -1
+	other = -1 if isRobotA else 0
 	src = oldCable[ind]
 	dst = newCable[ind]
-	segs = findSegments(src, dst, oldCable, newCable)
+	n = len(newCable)
+	start = 0
+	end = 1
+	while fabs(start - end) > 1e-5:
+		frac = (start + end) / 2
+		newDst = Geom.getPointOnLineSegment(src, dst, frac)
+		v = Vertex(name="tmp-a", loc=newDst, ownerObs=None)
+		model.addTempVertex(v, isRobotA)
+		tight = tightenCable(oldCable, v, newCable[other])
+		l = Geom.lengthOfCurve(tight)
+		if l <= model.MAX_CABLE:
+			print("YAY")
+		else:
+			print("NAY")
+		model.removeEntity(v)
+		ttt = 0
+	if n == 2:
+		pt = newCable[0]
+		h = Geom.pointAndLineDistance(pt, src, dst)
+		traveledDist = Geom.reversePythagorean(model.MAX_CABLE, h)
+		rrrr = Geom.reza(src, dst, pt, traveledDist)
+		yolo = 0
+	for i in reversed(range(1, n - 1)):
+		v1 = newCable[i - 1]
+		v2 = newCable[i]
+		Geom.getLineSegAndRayIntersection(src, dst, v1, v2)

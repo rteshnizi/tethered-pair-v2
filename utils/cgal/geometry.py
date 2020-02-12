@@ -1,9 +1,9 @@
 from typing import List
 import numpy as np
-from utils.cgal.types import Line, Point, PointOrSegmentNone, Polygon, Segment, Vector, crossProduct, intersection
+from utils.cgal.types import Line, Point, PointOrSegmentNone, Polygon, Ray, Segment, Vector, crossProduct, intersection
 import utils.shapely.geometry as SHGeom
 from utils.vertexUtils import convertToPoint, removeRepeatedVertsOrdered, SMALL_DISTANCE
-from math import sqrt
+from math import sqrt, fabs, nan
 
 from model.modelService import Model
 
@@ -19,13 +19,28 @@ def vertexDistance(v1, v2):
 	vec = pt1 - pt2
 	return sqrt(vec.squared_length())
 
-def getEpsilonVectorFromVect(vect) -> Vector:
+def getUnitVectorFromVect(vect) -> Vector:
 	"""
 	Returns a Vector which represents an epsilon vector
 	"""
 	l = sqrt(vect.squared_length())
-	vect = (vect / l) * EPSILON_MULTIPLIER
+	vect = (vect / l)
 	return vect
+
+def getUnitVector(frm, to) -> Vector:
+	"""
+	Returns a Vector which represents an epsilon vector
+	"""
+	toPt = convertToPoint(to)
+	frmPt = convertToPoint(frm)
+	return getUnitVectorFromVect(toPt - frmPt)
+
+def getEpsilonVectorFromVect(vect) -> Vector:
+	"""
+	Returns a Vector which represents an epsilon vector
+	"""
+	vect = getUnitVectorFromVect(vect)
+	return vect * EPSILON_MULTIPLIER
 
 def getEpsilonVector(frm, to) -> Vector:
 	"""
@@ -74,18 +89,6 @@ def getAllIntersectingObstacles(vertices):
 			else:
 				result[1].append(obs)
 	return result
-
-# FIXME: This method is buggy. I have seen a case where line.has_on(pt2) == False
-# def isColinear(ref1, ref2, target) -> bool:
-# 	"""
-# 	Given the two reference points, determine if target is colinear with line segment formed by ref1->ref2
-# 	"""
-# 	pt1 = convertToPoint(ref1)
-# 	pt2 = convertToPoint(ref2)
-# 	ptTarget = convertToPoint(target)
-
-# 	line = Line(pt1, pt2)
-# 	return line.has_on(ptTarget)
 
 def isToTheRight(ref1, ref2, target) -> bool:
 	"""
@@ -200,3 +203,65 @@ def isVisible(v1, v2):
 
 def circleAndLineSegmentIntersection(pt1, pt2, center, radius):
 	return SHGeom.circleAndLineSegmentIntersection(pt1, pt2, center, radius)
+
+def pointAndLineDistance(pt, lPt1, lPt2):
+	"""https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points"""
+	pt = convertToPoint(pt)
+	(x0, y0) = (pt.x(), pt.y())
+	lPt1 = convertToPoint(lPt1)
+	(x1, y1) = (lPt1.x(), lPt1.y())
+	lPt2 = convertToPoint(lPt2)
+	(x2, y2) = (lPt2.x(), lPt2.y())
+	d = fabs(((y2 - y1) * x0) - ((x2 - x1) * y0) + x2 * y1 - y2 * x1) / vertexDistance(lPt1, lPt2)
+	return d
+
+def reversePythagorean(hypotenuse, a):
+	"""given the length of hypotenuse and one of the right angle sides, find the other"""
+	return sqrt(hypotenuse * hypotenuse - a * a)
+
+def getLineSegAndRayIntersection(ls1, ls2, rayFrom, rayTo):
+	lsPt1 = convertToPoint(ls1)
+	lsPt2 = convertToPoint(ls2)
+	ryPt1 = convertToPoint(rayFrom)
+	ryPt2 = convertToPoint(rayTo)
+	l = Segment(lsPt1, lsPt2)
+	r = Ray(ryPt1, ryPt2)
+	pt = intersection(l, r)
+	pass
+
+def getPointOnLineSegmentFraction(ls1, ls2, pt):
+	"""
+	Given a line segment (that has direction) from ls1 to ls2, what fraction of the line does pt fall on
+	"""
+	ls1 = convertToPoint(ls1)
+	ls2 = convertToPoint(ls2)
+	segment = Segment(ls1, ls2)
+	if not segment.has_on(pt): return nan
+	v1 = segment.to_vector()
+	pt = convertToPoint(pt)
+	v2 = pt - ls1
+	areInSameDirection = True if (v2 * v1) >= 0 else False
+	d1 = sqrt(v1.squared_length())
+	d2 = sqrt(v2.squared_length())
+	return d1 / d2 if areInSameDirection else -1 * (d1 / d2)
+
+def getPointOnLineSegment(v1, v2, frac) -> Point:
+	"""
+	given frac in [0,1] find the point that falls an frac of the distance from v1 to v2
+	"""
+	v1 = convertToPoint(v1)
+	v2 = convertToPoint(v2)
+	vect = v1 - v2
+	return v1 + (vect * frac)
+
+def reza(src, dst, pt, d):
+	src = convertToPoint(src)
+	dst = convertToPoint(dst)
+	s1 = Segment(src, dst)
+	l1 = s1.supporting_line()
+	pt = convertToPoint(pt)
+	l2  = l1.perpendicular(pt)
+	inter = intersection(l1, l2)
+	v1 = getUnitVector(src, dst)
+	end = inter + v1 * d
+	return getPointOnLineSegmentFraction(src, dst, end)

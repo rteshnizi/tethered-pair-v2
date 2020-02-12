@@ -120,4 +120,17 @@ def getClosestVertex(pt):
 		if eq:
 			candidate = v
 			if dist == 0: return candidate
+
+	if "tmp-a" in model.entities:
+		eq, dist = almostEqual(pt, model.entities["tmp-a"])
+		if eq:
+			candidate = model.entities["tmp-a"]
+			if dist == 0: return candidate
+
+	if "tmp-b" in model.entities:
+		eq, dist = almostEqual(pt, model.entities["tmp-b"])
+		if eq:
+			candidate = model.entities["tmp-b"]
+			if dist == 0: return candidate
+
 	return candidate

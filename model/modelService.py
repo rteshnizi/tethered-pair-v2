@@ -11,6 +11,9 @@ class Model(object):
 			self.app = None # To read GUI attributes
 			self._vertexByLocation = {} # This is all vertices including robots and destinations
 			self._vertexObjects = []
+			self.tempVertices = {} # This is used in partial calculation
+			self._tmpACounter = 0
+			self._tmpBCounter = 0
 
 	instance = None
 
@@ -38,9 +41,29 @@ class Model(object):
 
 	def addVertexByLocation(self, vert):
 		self.instance._vertexByLocation[ptToStringId(vert.loc)] = vert
+		if vert.name.startswith("tmp-a") or vert.name.startswith("tmp-b"):
+			self.instance.tempVertices[vert.name] = vert.name
 
 	def getVertexByLocation(self, x, y):
 		return self.instance._vertexByLocation.get(xyToStringId(x, y), None)
+
+	def removeEntity(self, entity):
+		entity.removeShape()
+		self.instance.entities.pop(entity.name, None)
+		if hasattr(entity, "loc"):
+			self.instance._vertexByLocation.pop(ptToStringId(entity.loc), None)
+			if entity.name.startswith("tmp-a") or entity.name.startswith("tmp-b"):
+				self.instance.tempVertices.pop(ptToStringId(entity.loc), None)
+
+	def addTempVertex(self, vert, isA):
+		if isA:
+			vert.name = "tmp-a-%d" % self.instance._tmpACounter
+			self.instance._tmpACounter += 1
+		else:
+			vert.name = "tmp-b-%d" % self.instance._tmpBCounter
+			self.instance._tmpBCounter += 1
+		self.instance.entities[vert.name] = vert
+		self.addVertexByLocation(vert)
 
 	@property
 	def allVertexObjects(self):

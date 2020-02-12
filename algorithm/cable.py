@@ -259,6 +259,7 @@ def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=Fal
 	cable = applyMovement(cable, dest1, True)
 	return applyMovement(cable, dest2, False)
 
+# TODO: THe below code is not in use
 def findSegments(src, dst, oldCable, newCable):
 	if swappingSpots(src, dst, cable):
 		return []
