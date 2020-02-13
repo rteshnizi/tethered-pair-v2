@@ -15,7 +15,9 @@
 		"Vect",
 		"Verts",
 		"cgal",
+		"fabs",
 		"homotopy",
+		"isnan",
 		"numpy",
 		"sympy"
 	]

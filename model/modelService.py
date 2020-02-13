@@ -53,7 +53,7 @@ class Model(object):
 		if hasattr(entity, "loc"):
 			self.instance._vertexByLocation.pop(ptToStringId(entity.loc), None)
 			if entity.name.startswith("tmp-a") or entity.name.startswith("tmp-b"):
-				self.instance.tempVertices.pop(ptToStringId(entity.loc), None)
+				self.instance.tempVertices.pop(entity.name, None)
 
 	def addTempVertex(self, vert, isA):
 		if isA:
