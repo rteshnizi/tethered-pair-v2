@@ -42,7 +42,7 @@ class Model(object):
 	def addVertexByLocation(self, vert):
 		self.instance._vertexByLocation[ptToStringId(vert.loc)] = vert
 		if vert.name.startswith("tmp-a") or vert.name.startswith("tmp-b"):
-			self.instance.tempVertices[vert.name] = vert.name
+			self.instance.tempVertices[vert.name] = vert
 
 	def getVertexByLocation(self, x, y):
 		return self.instance._vertexByLocation.get(xyToStringId(x, y), None)
