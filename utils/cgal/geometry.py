@@ -90,17 +90,24 @@ def getAllIntersectingObstacles(vertices):
 				result[1].append(obs)
 	return result
 
+def rightHandRuleCrossProduct(common, v1, v2):
+	"""
+	Calculate the cross product of common -> v1, common -> v2
+	"""
+	ptCommon = convertToPoint(common)
+	pt1 = convertToPoint(v1)
+	pt2 = convertToPoint(v2)
+
+	vec1 = pt1 - ptCommon
+	vec2 = pt2 - ptCommon
+	return crossProduct(vec1, vec2)
+
+
 def isToTheRight(ref1, ref2, target) -> bool:
 	"""
 	Given the two reference points, determine if target is to the Right of the line segment formed by ref1->ref2
 	"""
-	pt1 = convertToPoint(ref1)
-	pt2 = convertToPoint(ref2)
-	ptTarget = convertToPoint(target)
-
-	vec1 = pt2 - pt1
-	vec2 = ptTarget - pt1
-	cVec3D = crossProduct(vec1, vec2)
+	cVec3D = rightHandRuleCrossProduct(ref1, ref2, target)
 	# NOTE: In a standard coordinate system, negative indicates being to the right (right-hand rule: https://en.wikipedia.org/wiki/Right-hand_rule)
 	# BUTT in our system (the TkInter Canvas), origin is the top left of the screen and y increases the lower a point is
 	# return cVec3D.z() < 0
@@ -108,19 +115,19 @@ def isToTheRight(ref1, ref2, target) -> bool:
 
 def isToTheLeft(ref1, ref2, target) -> bool:
 	"""
-	Given the two reference points, determine if target is to the Right of the line segment formed by ref1->ref2
+	Given the two reference points, determine if target is to the Left of the line segment formed by ref1->ref2
 	"""
-	pt1 = convertToPoint(ref1)
-	pt2 = convertToPoint(ref2)
-	ptTarget = convertToPoint(target)
-
-	vec1 = pt2 - pt1
-	vec2 = ptTarget - pt1
-	cVec3D = crossProduct(vec1, vec2)
+	cVec3D = rightHandRuleCrossProduct(ref1, ref2, target)
 	# NOTE: In a standard coordinate system, negative indicates being to the right (right-hand rule: https://en.wikipedia.org/wiki/Right-hand_rule)
 	# BUTT in our system (the TkInter Canvas), origin is the top left of the screen and y increases the lower a point is
-	# return cVec3D.z() < 0
 	return cVec3D.z() < 0
+
+def isCollinear(ref1, ref2, target) -> bool:
+	"""
+	Given the two reference points, determine if target is collinear with the line segment formed by ref1->ref2
+	"""
+	cVec3D = rightHandRuleCrossProduct(ref1, ref2, target)
+	return cVec3D.z() == 0
 
 def midpoint(vrt1, vrt2) -> Point:
 	pt1 = convertToPoint(vrt1)
@@ -251,17 +258,5 @@ def getPointOnLineSegment(v1, v2, frac) -> Point:
 	"""
 	v1 = convertToPoint(v1)
 	v2 = convertToPoint(v2)
-	vect = v1 - v2
+	vect = v2 - v1
 	return v1 + (vect * frac)
-
-def reza(src, dst, pt, d):
-	src = convertToPoint(src)
-	dst = convertToPoint(dst)
-	s1 = Segment(src, dst)
-	l1 = s1.supporting_line()
-	pt = convertToPoint(pt)
-	l2  = l1.perpendicular(pt)
-	inter = intersection(l1, l2)
-	v1 = getUnitVector(src, dst)
-	end = inter + v1 * d
-	return getPointOnLineSegmentFraction(src, dst, end)

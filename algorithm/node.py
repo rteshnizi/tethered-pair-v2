@@ -40,7 +40,7 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent: "Node", fractions=[1, 1]):
+	def __init__(self, cable, parent: "Node", fractions):
 		self.cable = cable
 		self.g = Cost()
 		self.h = Cost()
