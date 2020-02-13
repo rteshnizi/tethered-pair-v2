@@ -23,7 +23,7 @@ def aStar(debug=False) -> Node:
 		n: Node = q.dequeue()
 		count += 1
 		# visited.add(n)
-		if debug: print("-------------%s @ MAX=%.2f, MIN=%.2f-------------" % (repr(n.cable), Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n)))
+		if debug: print("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable)))
 		if isAtDestination(n):
 			if debug: print("At Destination after visiting %d nodes" % count)
 			return n # For now terminate at first solution
@@ -38,17 +38,7 @@ def aStar(debug=False) -> Node:
 				newCable = tightenCable(n.cable, va, vb)
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
-					cableStr = getCableId(newCable)
-					if cableStr in nodeMap:
-						nodeMap[cableStr].updateParent(n)
-					else:
-						child = Node(cable=newCable, parent=n)
-						# if child in visited: continue
-						if debug:
-							verts = ("%s-%s" % (va.name, vb.name)).ljust(9)
-							print("ADDING %s @ %s" % (verts, repr(child.f)))
-						nodeMap[cableStr] = child
-						q.enqueue(child)
+					addChildNode(newCable, n, nodeMap, q, debug)
 				# else:
 				# 	frac = getPartialMotion(n.cable, newCable, True)
 				# 	if isnan(frac): pass
@@ -81,8 +71,16 @@ def isAtDestination(n) -> bool:
 def getCableId(cable, fractions=[1, 1]) -> str:
 	return "%s-[%.6f, %.6f]" % (repr(cable), fractions[0], fractions[0])
 
-def addChildNode(cable, parent, fractions=[1, 1]):
-	pass
+def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None:
+	cableStr = getCableId(newCable)
+	if cableStr in nodeMap:
+		nodeMap[cableStr].updateParent(parent)
+		if debug: print("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
+	else:
+		child = Node(cable=newCable, parent=parent)
+		if debug: print("ADDING %s @ %s" % (repr(child.f), cableStr))
+		nodeMap[cableStr] = child
+		pQ.enqueue(child)
 
 def getPartialMotion(oldCable, newCable, isRobotA) -> float:
 	me = 0 if isRobotA else -1
