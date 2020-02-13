@@ -35,12 +35,14 @@ def removeRepeatedVertsOrdered(verts: list) -> list:
 	Takes a list (ordered) of Vertex and removes items that are sequentially repeated
 	"""
 	trimmed = []
-	prev = ptToStringId(verts[-1])
+	# FIXME: For the lif of me, I don't know what's the logic behind making the list circular. Maybe there is a point to it?
+	# prev = ptToStringId(verts[-1])
+	prevId = ""
 	for vert in verts:
 		idStr = ptToStringId(vert)
-		if prev != idStr:
+		if prevId != idStr:
 			trimmed.append(vert)
-			prev = idStr
+			prevId = idStr
 	return trimmed
 
 def removeNoNameMembers(verts: list) -> list:

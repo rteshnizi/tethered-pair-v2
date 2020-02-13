@@ -27,12 +27,12 @@ def aStar(debug=False) -> Node:
 		if isAtDestination(n):
 			if debug: print("At Destination after visiting %d nodes" % count)
 			return n # For now terminate at first solution
-		Va = n.cable[0].gaps if n.fractions[0] == 1 else {n.cable[0]}
-		Va = Va if n.cable[0].name != "D1" else {n.cable[0]}
+		# Va = n.cable[0].gaps if n.fractions[0] == 1 else {n.cable[0]}
+		Va = n.cable[0].gaps if n.cable[0].name != "D1" else {n.cable[0]}
 		for va in Va:
 			if isUndoingLastMove(n, va, 0): continue
-			Vb = n.cable[-1].gaps if n.fractions[1] == 1 else {n.cable[-1]}
-			Vb = Vb if n.cable[-1].name != "D2" else {n.cable[-1]}
+			# Vb = n.cable[-1].gaps if n.fractions[1] == 1 else {n.cable[-1]}
+			Vb = n.cable[-1].gaps if n.cable[-1].name != "D2" else {n.cable[-1]}
 			for vb in Vb:
 				if isUndoingLastMove(n, vb, -1): continue
 				if areBothStaying(n, va, vb): continue
@@ -43,11 +43,11 @@ def aStar(debug=False) -> Node:
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
 					addChildNode(newCable, n, nodeMap, q, debug)
-				# else:
-				# 	frac = getPartialMotion(n.cable, newCable, True)
-				# 	if not isnan(frac): addChildNode(newCable, n, nodeMap, q, debug, fractions=[frac, 1])
-				# 	frac = getPartialMotion(n.cable, newCable, False)
-				# 	if not isnan(frac): addChildNode(newCable, n, nodeMap, q, debug, fractions=[1, frac])
+				else:
+					(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=True, debug=debug)
+					if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[frac, 1])
+					(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=False, debug=debug)
+					if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[1, frac])
 	return None
 
 def isUndoingLastMove(node, v, index):
@@ -74,7 +74,8 @@ def isAtDestination(n) -> bool:
 	return convertToPoint(n.cable[0]) == convertToPoint(model.robots[0].destination) and convertToPoint(n.cable[-1]) == convertToPoint(model.robots[1].destination)
 
 def getCableId(cable, fractions) -> str:
-	return "%s-[%.6f, %.6f]" % (repr(cable), fractions[0], fractions[1])
+	# return "%s-[%.6f, %.6f]" % (repr(cable), fractions[0], fractions[1])
+	return repr(cable)
 
 def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None:
 	cableStr = getCableId(newCable, fractions)
@@ -87,7 +88,7 @@ def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None
 		nodeMap[cableStr] = child
 		pQ.enqueue(child)
 
-def getPartialMotion(oldCable, newCable, isRobotA) -> float:
+def getPartialMotion(oldCable, newCable, isRobotA, debug) -> list:
 	me = 0 if isRobotA else -1
 	other = -1 if isRobotA else 0
 	src = oldCable[me]
@@ -95,22 +96,40 @@ def getPartialMotion(oldCable, newCable, isRobotA) -> float:
 	start = 0
 	end = 1
 	maxFrac = nan
+	maxFracCable = None
 	maxVert = None
+	lastDistance = nan
+	searchThreshold = 1e-2
+	distanceThreshold = 1
 	# Binary search for an approximation of the fraction
-	while fabs(start - end) > 1e-5:
+	while (isnan(lastDistance) or lastDistance > distanceThreshold) and fabs(start - end) > searchThreshold:
 		frac = (start + end) / 2
 		newDst = Geom.getPointOnLineSegment(src, dst, frac)
-		v = Vertex(name="", loc=newDst, ownerObs=None)
+		if debug:
+			inObstacle = False
+			for o in model.obstacles:
+				if o.enclosesPoint(newDst):
+					inObstacle = True
+					break
+			if inObstacle:
+				raise RuntimeError("WHUT?")
+		v = model.getVertexByLocation(newDst.x(), newDst.y())
+		# if not v: v = getClosestVertex(newDst)
+		if not v: v = Vertex(name="tmp-vert", loc=newDst, ownerObs=None)
 		model.addTempVertex(v, isRobotA)
 		tight = tightenCable(oldCable, v, newCable[other]) if isRobotA else tightenCable(oldCable, newCable[other], v)
 		l = Geom.lengthOfCurve(tight)
 		if l <= model.MAX_CABLE:
 			maxFrac = frac
+			maxFracCable = tight
+			lastDistance = Geom.vertexDistance(v, maxVert if maxVert else dst)
 			maxVert = v
 			start = (start + end) / 2
 		else:
 			end = (start + end) / 2
-		model.removeEntity(v)
+		model.removeTempVertex(v)
 	# Save this vertex for future searches
-	if maxVert: model.addTempVertex(maxVert, isRobotA)
-	return maxFrac
+	if maxVert:
+		model.addTempVertex(maxVert, isRobotA)
+		maxVert.gaps.add(dst)
+	return (maxFrac, maxFracCable)

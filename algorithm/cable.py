@@ -117,28 +117,28 @@ def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
 	return tries & currTri
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
-	# FIXME: Check for colinearity instead of exact location
 	if len(cable) == 0:
 		return [dest1, dest2]
-	if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
-		copy = cable[1:-1]
-		if len(copy) == 0:
-			copy.append(dest1)
-			copy.append(dest2)
-		else:
-			copy[0] = dest1
-			copy[-1] = dest2
-		return copy
-	if convertToPoint(cable[1]) == convertToPoint(dest1):
-		copy = cable[1:]
-		copy.append(dest2)
-		copy[0] = dest1
-		return copy
-	if convertToPoint(cable[-2]) == convertToPoint(dest2):
-		copy = cable[:-1]
-		copy.insert(0, dest1)
-		copy[-1] = dest2
-		return copy
+	# We now check for collinearity in preprocessTheCable(), so the below code should be irrelevant
+	# if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
+	# 	copy = cable[1:-1]
+	# 	if len(copy) == 0:
+	# 		copy.append(dest1)
+	# 		copy.append(dest2)
+	# 	else:
+	# 		copy[0] = dest1
+	# 		copy[-1] = dest2
+	# 	return copy
+	# if convertToPoint(cable[1]) == convertToPoint(dest1):
+	# 	copy = cable[1:]
+	# 	copy.append(dest2)
+	# 	copy[0] = dest1
+	# 	return copy
+	# if convertToPoint(cable[-2]) == convertToPoint(dest2):
+	# 	copy = cable[:-1]
+	# 	copy.insert(0, dest1)
+	# 	copy[-1] = dest2
+	# 	return copy
 	return [dest1] + cable + [dest2]
 
 def getEdge(vert1, vert2) -> frozenset:
@@ -177,6 +177,22 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 	edges = cgalTriangulation.getIncidentEdges(pivot, tri)
 	e = edges - makeFrozenSet(currE)
 	if e:
+		# FIXME: Why is there still edges that fall inside an obstacle? Run case.json and you'll see
+		# For very rare edge case where there are still edges that fall inside an obstacle
+		# This fix assumes convex obstacles
+		if len(e) != 1:
+			eList = []
+			for edge in e:
+				inObstacle = False
+				for o in model.obstacles:
+					verts = list(edge)
+					mid = Geom.midpoint(verts[0], verts[1])
+					if o.enclosesPoint(mid):
+						inObstacle = True
+						break
+				if not inObstacle: eList.append(edge)
+			e = frozenset(eList)
+		# This is for error detection, don't delete this, it's not related to the above bug fix
 		if len(e) != 1:
 			cgalTriangulation.drawEdges()
 			raise RuntimeError("There must only be 1 flipEdge")
