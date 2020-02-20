@@ -14,49 +14,38 @@ VertList = List[Vertex]
 def testTightenCable(debugTri=False):
 	return tightenCable(model.cable, model.robots[0].destination, model.robots[1].destination, debugTri)
 
-def tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, debugTri=False) -> VertList:
+def tightenCable(cable: VertList, destA: Vertex, destB: Vertex, debugTri=False) -> VertList:
 	"""
 	Here we force the sleeve to be made up of the triangles to the left and to the right of the edges.
 	Whichever leads to a shorter path we accept that one.
 	"""
 	cableCopy = cable[:] # The method mutates the list object
-	pl = _tightenCable(cableCopy, dest1, dest2, True, debugTri)
+	pl = _tightenCable(cableCopy, destA, destB, True, debugTri)
 	cableCopy = cable[:] # The method mutates the list object
-	pr = _tightenCable(cableCopy, dest1, dest2, False, False) # only one of them should print the triangulation edges
+	pr = _tightenCable(cableCopy, destA, destB, False, False) # only one of them should print the triangulation edges
 	return pl if Geom.lengthOfCurve(pl) < Geom.lengthOfCurve(pr) else pr
 
-def _tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, isLeft:bool, debugTri=False) -> VertList:
+def _tightenCable(cable: VertList, destA: Vertex, destB: Vertex, isLeft:bool, debugTri=False) -> VertList:
 	"""
 	This is an altered version of "Hershberger, J., & Snoeyink, J. (1994). Computing minimum length paths of a given homotopy class."
 
 	https://doi.org/10.1016/0925-7721(94)90010-8
 	"""
-	(cable, dest1, dest2) = preprocessTheCable(cable, dest1, dest2)
-	(cable, dest1, dest2) = pushCableAwayFromObstacles(cable, dest1, dest2)
-	longCable = getLongCable(cable, dest1, dest2)
+	(cable, destA, destB) = preprocessTheCable(cable, destA, destB)
+	(cable, destA, destB) = pushCableAwayFromObstacles(cable, destA, destB)
+	longCable = getLongCable(cable, destA, destB)
 	if len(longCable) == 2: return [getClosestVertex(pt) for pt in longCable]
 	longCable = removeRepeatedVertsOrdered(longCable)
 	if len(longCable) == 2: return [getClosestVertex(pt) for pt in longCable]
-	tri = Triangulation(cable, dest1, dest2, debug=debugTri)
+	tri = Triangulation(cable, destA, destB, debug=debugTri)
 	# Edge case where the two robots go to the same point and cable is not making contact
 	if tri.triangleCount == 1:
-		return [getClosestVertex(pt) for pt in [dest1, dest2]]
+		return [getClosestVertex(pt) for pt in [destA, destB]]
 	allCurrentTries = []
 	# We represent an edge by a python set to make checks easier
 	currE = getEdge(longCable[0], longCable[1])
 	currTri = tri.getIncidentTriangles(currE)
 	currTri = chooseTriangleBySide(longCable[0], longCable[1], currTri, isLeft)
-	# if len(currTri) != 1:
-	# 	# randomly pick one. If this is the wrong triangle, the pivot algorithm will fix itself.
-	# 	# However, the resulting sleeve will have repeated triangles. This will be taken care of in findSleeve()
-	# 	# FIXME: Needs testing
-	# 	currTri = frozenset([next(iter(currTri))])
-	# 	# for t in currTries:
-	# 	# 	currTries = getTrueInitTri(currE, getEdge(longCable[1], longCable[2]), frozenset([t]), tri)
-	# 	# 	if len(currTries) == 1:
-	# 	# 		break
-	# 	# 	else:
-	# 	# 		raise RuntimeError("I don't want to live on this planet anymore.")
 	for i in range(1, len(longCable) - 1):
 		allCurrentTries.append(currTri)
 		e = getEdge(longCable[i], longCable[i + 1])
@@ -77,7 +66,7 @@ def _tightenCable(cable: VertList, dest1: Vertex, dest2: Vertex, isLeft:bool, de
 		currTri = tries & currTri
 		currE = e
 	sleeve = findSleeve(allCurrentTries)
-	return getShortestPath(tri, dest1, dest2, sleeve)
+	return getShortestPath(tri, destA, destB, sleeve)
 
 def chooseTriangleBySide(v1, v2, tries, pickLeft):
 	if len(tries) == 1: return tries
@@ -88,19 +77,19 @@ def chooseTriangleBySide(v1, v2, tries, pickLeft):
 		if isOnTheCorrectSide(v1, v2, center): return frozenset({tri})
 	raise RuntimeError("Weird! Right?")
 
-def preprocessTheCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
+def preprocessTheCable(cable: VertList, destA: Vertex, destB: Vertex) -> tuple:
 	"""
 	If moves are happening along the current cable
 	"""
-	if convertToPoint(dest2) == convertToPoint(cable[-2]):
-		cable[-1] = dest2
-	if convertToPoint(dest1) == convertToPoint(cable[1]):
-		cable[0] = dest1
+	if convertToPoint(destB) == convertToPoint(cable[-2]) or Geom.isCollinear(cable[-2], cable[-1], destB):
+		cable[-1] = destB
+	if convertToPoint(destA) == convertToPoint(cable[1]) or Geom.isCollinear(cable[1], cable[0], destA):
+		cable[0] = destA
 	cable = removeRepeatedVertsOrdered(cable)
-	return (cable, dest1, dest2)
+	return (cable, destA, destB)
 
-def pushCableAwayFromObstacles(cable: VertList, dest1: Vertex, dest2: Vertex) -> tuple:
-	transformed = [dest1] + cable + [dest2]
+def pushCableAwayFromObstacles(cable: VertList, destA: Vertex, destB: Vertex) -> tuple:
+	transformed = [destA] + cable + [destB]
 	for i in range(len(transformed)):
 		c = transformed[i]
 		for o in model.obstacles:
@@ -128,28 +117,28 @@ def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
 	return tries & currTri
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
-	# FIXME: Check for colinearity instead of exact location
 	if len(cable) == 0:
 		return [dest1, dest2]
-	if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
-		copy = cable[1:-1]
-		if len(copy) == 0:
-			copy.append(dest1)
-			copy.append(dest2)
-		else:
-			copy[0] = dest1
-			copy[-1] = dest2
-		return copy
-	if convertToPoint(cable[1]) == convertToPoint(dest1):
-		copy = cable[1:]
-		copy.append(dest2)
-		copy[0] = dest1
-		return copy
-	if convertToPoint(cable[-2]) == convertToPoint(dest2):
-		copy = cable[:-1]
-		copy.insert(0, dest1)
-		copy[-1] = dest2
-		return copy
+	# We now check for collinearity in preprocessTheCable(), so the below code should be irrelevant
+	# if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
+	# 	copy = cable[1:-1]
+	# 	if len(copy) == 0:
+	# 		copy.append(dest1)
+	# 		copy.append(dest2)
+	# 	else:
+	# 		copy[0] = dest1
+	# 		copy[-1] = dest2
+	# 	return copy
+	# if convertToPoint(cable[1]) == convertToPoint(dest1):
+	# 	copy = cable[1:]
+	# 	copy.append(dest2)
+	# 	copy[0] = dest1
+	# 	return copy
+	# if convertToPoint(cable[-2]) == convertToPoint(dest2):
+	# 	copy = cable[:-1]
+	# 	copy.insert(0, dest1)
+	# 	copy[-1] = dest2
+	# 	return copy
 	return [dest1] + cable + [dest2]
 
 def getEdge(vert1, vert2) -> frozenset:
@@ -188,7 +177,24 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 	edges = cgalTriangulation.getIncidentEdges(pivot, tri)
 	e = edges - makeFrozenSet(currE)
 	if e:
+		# FIXME: Why is there still edges that fall inside an obstacle? Run case.json and you'll see
+		# For very rare edge case where there are still edges that fall inside an obstacle
+		# This fix assumes convex obstacles
 		if len(e) != 1:
+			eList = []
+			for edge in e:
+				inObstacle = False
+				for o in model.obstacles:
+					verts = list(edge)
+					mid = Geom.midpoint(verts[0], verts[1])
+					if o.enclosesPoint(mid):
+						inObstacle = True
+						break
+				if not inObstacle: eList.append(edge)
+			e = frozenset(eList)
+		# This is for error detection, don't delete this, it's not related to the above bug fix
+		if len(e) != 1:
+			cgalTriangulation.drawEdges()
 			raise RuntimeError("There must only be 1 flipEdge")
 		e = next(iter(e))
 		# I don't think currTries will ever be greater than 1, so I commented the above code and replaced it with an exception at the top
@@ -258,24 +264,3 @@ def getShortestPath(tri: Triangulation, dest1: Vertex, dest2: Vertex, sleeve: li
 def tightenCableClassic(cable: VertList, dest1: Vertex, dest2: Vertex, debug=False, runAlg=True) -> VertList:
 	cable = applyMovement(cable, dest1, True)
 	return applyMovement(cable, dest2, False)
-
-def findSegments(src, dst, oldCable, newCable):
-	if swappingSpots(src, dst, cable):
-		return []
-	if len(cable) == 2:
-	# this is a special case because we can't extend the cable
-		d = solveForD(src, dst, cable[0], model.MAX_CABLE)
-	for i in reversed(range(1, )):
-		l = getLengthOfCableUpToIndex(cable, i)
-		remaining = model.MAX_CABLE - l
-
-def getLengthOfCableUpToIndex(cable, ind):
-	if ind <= 0 or ind >= len(cable):
-		return 0
-	return Geom.lengthOfCurve(cable[:ind])
-
-def solveForD(src, dst, center, radius):
-	"""
-	Given the src and dst to create a line segment, and the center of a circle, find the intersection
-	"""
-	return Geom.circleAndLineSegmentIntersection(src, dst, center, radius)

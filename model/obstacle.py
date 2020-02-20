@@ -4,7 +4,7 @@ from model.modelService import Model
 from model.vertex import Vertex
 from utils.cgal.drawing import CreatePolygon
 from utils.cgal.types import Polygon
-from utils.vertexUtils import ptToStringId
+from utils.vertexUtils import ptToStringId, convertToPoint
 
 OBSTACLE_COLOR = "Grey"
 mode = Model()
@@ -38,11 +38,8 @@ class Obstacle(Entity):
 		self.canvas = canvas
 		self.canvasId = CreatePolygon(canvas=self.canvas.tkCanvas, pointsList=self._pts, outline="", fill=self.color, width=1, tag=self.name)
 
-	def enclosesVertex(self, vrt):
-		return self.enclosesPoint(vrt.loc)
-
 	def enclosesPoint(self, pt):
-		return Geom.isInsidePoly(self.polygon, pt)
+		return Geom.isInsidePoly(self.polygon, convertToPoint(pt))
 
 	def getVertex(self, pt) -> Vertex:
 		return self._vertexByLocation.get(ptToStringId(pt), None)

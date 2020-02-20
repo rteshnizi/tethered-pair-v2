@@ -291,11 +291,11 @@ class Triangulation(object):
 
 		Remarks
 		===
-		An Edge in CGAL TRiangulation is a tuple (faceHandle, vertexIndex)
+		An Edge in CGAL Triangulation is a tuple (faceHandle, vertexIndex)
 
 		[read more](https://doc.cgal.org/latest/Triangulation_2/index.html#title3)
 		"""
-		# The input can be a vertex or a cgal Point
+		# The input can be a vertex or a cgal Point ("%.14f" % pts[0].x()) == "450.18242783709655"
 		if (len(vertexSet) != 2):
 			raise RuntimeError("vertexSet must have two members")
 		pts = [self.getVertexHandle(v) for v in vertexSet]
@@ -340,6 +340,7 @@ class Triangulation(object):
 		"""
 		edge = self.getCgalEdge(vertexSet)
 		if not edge:
+			self.drawEdges()
 			raise RuntimeError("No edge found for the vertex set")
 		(faceHandle, vertexInd) = edge
 		faces = [faceHandle, faceHandle.neighbor(vertexInd)]
