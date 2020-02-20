@@ -47,3 +47,4 @@ Work in progress.
 6. ~~Add a case with initial cable config not being straight (Sep 3, 2019)~~
 7. ~~Crashes on Windows (Dec 22, 2019)~~
 8. Optimize code performance (Dec 28, 2019)
+9. Debug test case 24 (Feb 15, 2020)

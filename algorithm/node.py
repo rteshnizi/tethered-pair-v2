@@ -45,6 +45,7 @@ class Node(object):
 		self.g = Cost()
 		self.h = Cost()
 		self.f = Cost()
+		self.parent = None
 		self.updateParent(parent)
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
 
@@ -58,6 +59,9 @@ class Node(object):
 		h1 = vertexDistance(self.cable[0], model.robots[0].destination)
 		h2 = vertexDistance(self.cable[-1], model.robots[1].destination)
 		return Cost([h1, h2])
+
+	def _heuristic2(self) -> Cost:
+		return Cost([0, 0])
 
 	def _calcF(self) -> Cost:
 		return Cost([self.g[0] + self.h[0], self.g[1] + self.h[1]])
@@ -75,13 +79,13 @@ class Node(object):
 		return paths
 
 	def updateParent(self, newParent: "Node") -> None:
-		self.parent: Node = newParent
 		if newParent:
 			g0 = newParent.g[0] + vertexDistance(newParent.cable[0], self.cable[0])
 			g1 = newParent.g[1] + vertexDistance(newParent.cable[-1], self.cable[-1])
 			tentativeCost = Cost([g0, g1])
 			if tentativeCost.max()[0] < self.g.max()[0]:
 				self.g = tentativeCost
+				self.parent = newParent
 		else:
 			self.g = Cost([0, 0])
 		self.h = self._calcH()

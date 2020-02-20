@@ -123,10 +123,8 @@ def getClosestVertex(pt):
 			candidate = v
 			if dist == 0: return candidate
 
+	# For temp vertices we actually want equality
 	for tempVert in model.tempVertices.values():
-		eq, dist = almostEqual(pt, tempVert)
-		if eq:
-			candidate = tempVert
-			if dist == 0: return candidate
-
+		if convertToPoint(pt) == convertToPoint(tempVert):
+			return tempVert
 	return candidate

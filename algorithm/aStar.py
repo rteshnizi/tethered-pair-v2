@@ -19,13 +19,15 @@ def aStar(debug=False) -> Node:
 	q.enqueue(root)
 	parent: Node = None
 	count = 0
+	destinationsFound = 0
 	while not q.isEmpty():
 		n: Node = q.dequeue()
 		count += 1
 		# visited.add(n)
 		if debug: print("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable, n.fractions)))
 		if isAtDestination(n):
-			if debug: print("At Destination after visiting %d nodes" % count)
+			if debug: print("At Destination after visiting %d nodes, discovering %d configs" % (count, len(nodeMap)))
+			destinationsFound += 1
 			return n # For now terminate at first solution
 		# Va = n.cable[0].gaps if n.fractions[0] == 1 else {n.cable[0]}
 		Va = n.cable[0].gaps if n.cable[0].name != "D1" else {n.cable[0]}
@@ -39,15 +41,21 @@ def aStar(debug=False) -> Node:
 				# For now I deliberately avoid cross movement because it crashes the triangulation
 				# In reality we can fix this by mirorring the space (like I did in the previous paper)
 				if isThereCrossMovement(n.cable, va, vb): continue
-				newCable = tightenCable(n.cable, va, vb)
+				newCable = None
+				# FIXME: Defensively ignoring exceptions
+				try:
+					newCable = tightenCable(n.cable, va, vb)
+				except:
+					continue
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
 					addChildNode(newCable, n, nodeMap, q, debug)
-				else:
-					(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=True, debug=debug)
-					if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[frac, 1])
-					(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=False, debug=debug)
-					if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[1, frac])
+				# else:
+				# 	(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=True, debug=debug)
+				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[frac, 1])
+				# 	(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=False, debug=debug)
+				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[1, frac])
+	if debug: print("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
 	return None
 
 def isUndoingLastMove(node, v, index):
