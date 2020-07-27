@@ -45,6 +45,7 @@ class Node(object):
 		self.g = Cost()
 		self.h = Cost()
 		self.f = Cost()
+		self.parent: "Node" = None
 		self.updateParent(parent)
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
 
@@ -62,11 +63,11 @@ class Node(object):
 	def _calcF(self) -> Cost:
 		return Cost([self.g[0] + self.h[0], self.g[1] + self.h[1]])
 
-	def _getPath(self, getBeginningOfCable: bool):
+	def _getPath(self, leftSide: bool):
 		path = []
 		node = self
 		while node:
-			path.append(node.cable[0 if getBeginningOfCable else -1])
+			path.append(node.cable[0 if leftSide else -1])
 			node = node.parent
 		return path[::-1]
 
@@ -75,12 +76,14 @@ class Node(object):
 		return paths
 
 	def updateParent(self, newParent: "Node") -> None:
-		self.parent: Node = newParent
+		# if not self.parent:
+		# 	self.parent = newParent
 		if newParent:
 			g0 = newParent.g[0] + vertexDistance(newParent.cable[0], self.cable[0])
 			g1 = newParent.g[1] + vertexDistance(newParent.cable[-1], self.cable[-1])
 			tentativeCost = Cost([g0, g1])
 			if tentativeCost.max()[0] < self.g.max()[0]:
+				self.parent = newParent
 				self.g = tentativeCost
 		else:
 			self.g = Cost([0, 0])
