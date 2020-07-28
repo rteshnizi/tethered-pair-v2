@@ -17,7 +17,6 @@ def aStar(debug=False) -> Node:
 	if debug: print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
 	root = Node(cable=model.cable, parent=None, fractions=[1, 1])
 	q.enqueue(root)
-	parent: Node = None
 	count = 0
 	destinationsFound = 0
 	while not q.isEmpty():
@@ -62,6 +61,9 @@ def isUndoingLastMove(node, v, index):
 	if not node.parent: return False
 	if v.name == "D1" or v.name == "D2": return False
 	if convertToPoint(node.parent.cable[index]) != convertToPoint(v): return False
+	path = node._getPath(index  == 0)
+	path = removeRepeatedVertsOrdered(path)
+	if convertToPoint(node.parent.cable[-2]) != convertToPoint(v): return False
 	return True
 
 def areBothStaying(parent, va, vb):
