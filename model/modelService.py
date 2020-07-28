@@ -41,21 +41,29 @@ class Model(object):
 
 	def addVertexByLocation(self, vert):
 		self.instance._vertexByLocation[ptToStringId(vert.loc)] = vert
-		if vert.name.startswith("tmp-a") or vert.name.startswith("tmp-b"):
+		if vert.name.startswith("tmp-"):
 			self.instance.tempVertices[vert.name] = vert
 
 	def getVertexByLocation(self, x, y):
 		return self.instance._vertexByLocation.get(xyToStringId(x, y), None)
 
-	def removeEntity(self, entity):
-		entity.removeShape()
-		self.instance.entities.pop(entity.name, None)
-		if hasattr(entity, "loc"):
-			self.instance._vertexByLocation.pop(ptToStringId(entity.loc), None)
-			if entity.name.startswith("tmp-a") or entity.name.startswith("tmp-b"):
-				self.instance.tempVertices.pop(entity.name, None)
+	def removeTempVertex(self, vert):
+		if not vert.name.startswith("tmp-"): return
+		vert.removeShape()
+		self.instance.entities.pop(vert.name, None)
+		self.instance._vertexByLocation.pop(ptToStringId(vert.loc), None)
+		self.instance.tempVertices.pop(vert.name, None)
+
+	# def removeEntity(self, entity):
+	# 	entity.removeShape()
+	# 	self.instance.entities.pop(entity.name, None)
+	# 	if hasattr(entity, "loc"):
+	# 		self.instance._vertexByLocation.pop(ptToStringId(entity.loc), None)
+	# 		if entity.name.startswith("tmp-"):
+	# 			self.instance.tempVertices.pop(entity.name, None)
 
 	def addTempVertex(self, vert, isA):
+		if not vert.name.startswith("tmp-"): return
 		if isA:
 			vert.name = "tmp-a-%d" % self.instance._tmpACounter
 			self.instance._tmpACounter += 1

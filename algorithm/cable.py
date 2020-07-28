@@ -46,17 +46,6 @@ def _tightenCable(cable: VertList, destA: Vertex, destB: Vertex, isLeft:bool, de
 	currE = getEdge(longCable[0], longCable[1])
 	currTri = tri.getIncidentTriangles(currE)
 	currTri = chooseTriangleBySide(longCable[0], longCable[1], currTri, isLeft)
-	# if len(currTri) != 1:
-	# 	# randomly pick one. If this is the wrong triangle, the pivot algorithm will fix itself.
-	# 	# However, the resulting sleeve will have repeated triangles. This will be taken care of in findSleeve()
-	# 	# FIXME: Needs testing
-	# 	currTri = frozenset([next(iter(currTri))])
-	# 	# for t in currTries:
-	# 	# 	currTries = getTrueInitTri(currE, getEdge(longCable[1], longCable[2]), frozenset([t]), tri)
-	# 	# 	if len(currTries) == 1:
-	# 	# 		break
-	# 	# 	else:
-	# 	# 		raise RuntimeError("I don't want to live on this planet anymore.")
 	for i in range(1, len(longCable) - 1):
 		allCurrentTries.append(currTri)
 		e = getEdge(longCable[i], longCable[i + 1])
@@ -92,9 +81,9 @@ def preprocessTheCable(cable: VertList, destA: Vertex, destB: Vertex) -> tuple:
 	"""
 	If moves are happening along the current cable
 	"""
-	if convertToPoint(destB) == convertToPoint(cable[-2]):
+	if convertToPoint(destB) == convertToPoint(cable[-2]) or Geom.isCollinear(cable[-2], cable[-1], destB):
 		cable[-1] = destB
-	if convertToPoint(destA) == convertToPoint(cable[1]):
+	if convertToPoint(destA) == convertToPoint(cable[1]) or Geom.isCollinear(cable[1], cable[0], destA):
 		cable[0] = destA
 	cable = removeRepeatedVertsOrdered(cable)
 	return (cable, destA, destB)
@@ -128,28 +117,28 @@ def getTrueInitTri(currE, targetEdge, currTri, tri: Triangulation):
 	return tries & currTri
 
 def getLongCable(cable: VertList, dest1: Vertex, dest2: Vertex) -> VertList:
-	# FIXME: Check for colinearity instead of exact location
 	if len(cable) == 0:
 		return [dest1, dest2]
-	if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
-		copy = cable[1:-1]
-		if len(copy) == 0:
-			copy.append(dest1)
-			copy.append(dest2)
-		else:
-			copy[0] = dest1
-			copy[-1] = dest2
-		return copy
-	if convertToPoint(cable[1]) == convertToPoint(dest1):
-		copy = cable[1:]
-		copy.append(dest2)
-		copy[0] = dest1
-		return copy
-	if convertToPoint(cable[-2]) == convertToPoint(dest2):
-		copy = cable[:-1]
-		copy.insert(0, dest1)
-		copy[-1] = dest2
-		return copy
+	# We now check for collinearity in preprocessTheCable(), so the below code should be irrelevant
+	# if convertToPoint(cable[1]) == convertToPoint(dest1) and convertToPoint(cable[-2]) == convertToPoint(dest2):
+	# 	copy = cable[1:-1]
+	# 	if len(copy) == 0:
+	# 		copy.append(dest1)
+	# 		copy.append(dest2)
+	# 	else:
+	# 		copy[0] = dest1
+	# 		copy[-1] = dest2
+	# 	return copy
+	# if convertToPoint(cable[1]) == convertToPoint(dest1):
+	# 	copy = cable[1:]
+	# 	copy.append(dest2)
+	# 	copy[0] = dest1
+	# 	return copy
+	# if convertToPoint(cable[-2]) == convertToPoint(dest2):
+	# 	copy = cable[:-1]
+	# 	copy.insert(0, dest1)
+	# 	copy[-1] = dest2
+	# 	return copy
 	return [dest1] + cable + [dest2]
 
 def getEdge(vert1, vert2) -> frozenset:
@@ -188,7 +177,24 @@ def getFlipEdgeAndCurrentTriangle(cgalTriangulation: Triangulation, pivot, currE
 	edges = cgalTriangulation.getIncidentEdges(pivot, tri)
 	e = edges - makeFrozenSet(currE)
 	if e:
+		# FIXME: Why is there still edges that fall inside an obstacle? Run case.json and you'll see
+		# For very rare edge case where there are still edges that fall inside an obstacle
+		# This fix assumes convex obstacles
 		if len(e) != 1:
+			eList = []
+			for edge in e:
+				inObstacle = False
+				for o in model.obstacles:
+					verts = list(edge)
+					mid = Geom.midpoint(verts[0], verts[1])
+					if o.enclosesPoint(mid):
+						inObstacle = True
+						break
+				if not inObstacle: eList.append(edge)
+			e = frozenset(eList)
+		# This is for error detection, don't delete this, it's not related to the above bug fix
+		if len(e) != 1:
+			cgalTriangulation.drawEdges()
 			raise RuntimeError("There must only be 1 flipEdge")
 		e = next(iter(e))
 		# I don't think currTries will ever be greater than 1, so I commented the above code and replaced it with an exception at the top
