@@ -54,14 +54,6 @@ class Model(object):
 		self.instance._vertexByLocation.pop(ptToStringId(vert.loc), None)
 		self.instance.tempVertices.pop(vert.name, None)
 
-	# def removeEntity(self, entity):
-	# 	entity.removeShape()
-	# 	self.instance.entities.pop(entity.name, None)
-	# 	if hasattr(entity, "loc"):
-	# 		self.instance._vertexByLocation.pop(ptToStringId(entity.loc), None)
-	# 		if entity.name.startswith("tmp-"):
-	# 			self.instance.tempVertices.pop(entity.name, None)
-
 	def addTempVertex(self, vert, isA):
 		if not vert.name.startswith("tmp-"): return
 		if isA:

@@ -35,14 +35,19 @@ class Preset(object):
 			elif (e == 'obstacles'):
 				self._createObstacles(self._parsedJson[e])
 			else:
-				sys.stderr.write('unexpected json parameter %s' % e)
+				print('unexpected json parameter %s' % e)
 
+	def _parsePt(self, ptString):
+		if "," in ptString:
+			return Point(*[float(c) for c in ptString.split(",")])
+		pt = self.model.entities[ptString].loc
+		return Point(pt.x(), pt.y())
 
 	def _createCableAndRobots(self, ptList):
 		self._createRobots([ptList[0], ptList[-1]])
 		self.model.cable.append(self.model.robots[0])
 		for pt in ptList[1:-1]:
-			p = Point(*[float(c) for c in pt.split(',')])
+			p = self._parsePt(pt)
 			self.model.cable.append(self.model.getVertexByLocation(p.x(), p.y()))
 		self.model.cable.append(self.model.robots[1])
 		c = Cable(name="CABLE-O", pts=self.model.cable, isOrigin=True)

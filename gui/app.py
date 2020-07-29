@@ -4,6 +4,7 @@ from tkinter import filedialog
 
 from gui.canvas import Canvas
 from algorithm.aStar import aStar
+from algorithm.dp import dynamicProg
 from algorithm.cable import testTightenCable, pushCableAwayFromObstacles, preprocessTheCable
 from algorithm.triangulation import testTriangulation
 from algorithm.visibility import processReducedVisibilityGraph
@@ -96,6 +97,12 @@ class TetheredPairApp(tk.Frame):
 		self.runBtn["command"] = self.run
 		self.runBtn.pack(side=tk.TOP)
 
+		self.runDpBtn = tk.Button(self)
+		self.runDpBtn["state"] = tk.DISABLED
+		self.runDpBtn["text"] = "DP"
+		self.runDpBtn["command"] = self.runDp
+		self.runDpBtn.pack(side=tk.TOP)
+
 	def selectMapFile(self):
 		mapPath = filedialog.askopenfilename(initialdir=self._presetsDir, title="Select Map", filetypes=(("JSON Files", "*.json"),)) # The trailing comma in filetypes is needed
 		if (not mapPath):
@@ -108,6 +115,7 @@ class TetheredPairApp(tk.Frame):
 			return
 		self.canvas.buildPreset(absolutePath)
 		self.runBtn["state"] = tk.NORMAL
+		self.runDpBtn["state"] = tk.NORMAL
 
 	def createDebugOptions(self):
 		for (text, variable) in self._dbg.items():
@@ -131,3 +139,12 @@ class TetheredPairApp(tk.Frame):
 			self.canvas.renderSolution(solutionNode, True)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED
+		self.runDpBtn["state"] = tk.DISABLED
+
+
+	def runDp(self):
+		solutionNode = dynamicProg(True)
+		self.canvas.renderSolution(solutionNode, True)
+		# Disable the button to force a reset
+		self.runBtn["state"] = tk.DISABLED
+		self.runDpBtn["state"] = tk.DISABLED

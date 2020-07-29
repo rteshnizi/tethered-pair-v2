@@ -11,7 +11,6 @@ from utils.cgal.types import Polygon
 model = Model()
 
 def aStar(debug=False) -> Node:
-	# visited = set()
 	nodeMap = {} # We keep a mpa of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
 	if debug: print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
