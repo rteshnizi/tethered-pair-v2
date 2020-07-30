@@ -1,6 +1,7 @@
 from math import inf
 from model.modelService import Model
-from utils.cgal.geometry import vertexDistance
+from utils.cgal.geometry import vertexDistance, convertToPoint
+from utils.priorityQ import PriorityQ
 model = Model()
 INFINITY_COST = inf
 
@@ -17,7 +18,7 @@ class Cost(object):
 		return "(%s, %.2f)" % (c1, self.vals[1])
 
 	def __getitem__(self, index):
-		if index != 0 and index != 1: raise IndexError("Cost has index 0 or 1 only.")
+		if index != 0 and index != 1 and index != -1: raise IndexError("Cost has index 0 or 1 or -1 only.")
 		return self.vals[index]
 
 	def min(self):
@@ -36,6 +37,17 @@ class Cost(object):
 			return (self.vals[0], 0)
 		return (self.vals[1], 1)
 
+class _SimpleNode(object):
+	def __init__(self, vert, h, parent: "_SimpleNode"):
+		self.vert = vert
+		self.parent = parent
+		self.g = vertexDistance(self.vert, self.parent.vert) + self.parent.g if self.parent else 0
+		self.h = h
+		self.f = self.h + self.g
+
+	def __repr__(self):
+		return "%s - %.2f" % (repr(self.vert), self.f)
+
 class Node(object):
 	"""
 	The definition of a node in the planning tree
@@ -53,14 +65,19 @@ class Node(object):
 		return "%s - %s" % (repr(self.cable), repr(self.f))
 
 	def _calcH(self) -> Cost:
-		return self._heuristic1()
+		return self._heuristicAStarDist()
 
-	def _heuristic1(self) -> Cost:
+	def _heuristicAStarDist(self) -> Cost:
+		h1 = self._aStar(0).g
+		h2 = self._aStar(-1).g
+		return Cost([h1, h2])
+
+	def _heuristicEuclideanDist(self) -> Cost:
 		h1 = vertexDistance(self.cable[0], model.robots[0].destination)
 		h2 = vertexDistance(self.cable[-1], model.robots[1].destination)
 		return Cost([h1, h2])
 
-	def _heuristic2(self) -> Cost:
+	def _heuristicNone(self) -> Cost:
 		return Cost([0, 0])
 
 	def _calcF(self) -> Cost:
@@ -73,6 +90,28 @@ class Node(object):
 			path.append(node.cable[0 if leftSide else -1])
 			node = node.parent
 		return path[::-1]
+
+	def _aStar(self, index) -> "_SimpleNode":
+		orig = self.cable[index]
+		dest = model.robots[index].destination
+		hFunc = lambda v: vertexDistance(v, dest)
+		nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
+		q = PriorityQ(key1=lambda n: n.f, key2=lambda n: 0) # The Priority Queue container
+		root = _SimpleNode(orig, hFunc(orig), None)
+		q.enqueue(root)
+		while not q.isEmpty():
+			n = q.dequeue()
+			if convertToPoint(n.vert) == convertToPoint(dest):
+				return n
+			for v in n.vert.gaps:
+				child = _SimpleNode(v, hFunc(v), n)
+				if v.name in nodeMap:
+					if child.f < nodeMap[v.name].f:
+						nodeMap[v.name] = child
+				else:
+					q.enqueue(child)
+					nodeMap[v.name] = child
+		return None
 
 	def getPaths(self) -> list:
 		paths = [self._getPath(True), self._getPath(False)]
