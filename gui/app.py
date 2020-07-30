@@ -93,7 +93,7 @@ class TetheredPairApp(tk.Frame):
 
 		self.runBtn = tk.Button(self)
 		self.runBtn["state"] = tk.DISABLED
-		self.runBtn["text"] = "Run"
+		self.runBtn["text"] = "A*"
 		self.runBtn["command"] = self.run
 		self.runBtn.pack(side=tk.TOP)
 
@@ -143,8 +143,9 @@ class TetheredPairApp(tk.Frame):
 
 
 	def runDp(self):
-		solutionNode = dynamicProg(True)
-		self.canvas.renderSolution(solutionNode, True)
+		(solutionCable, paths) = dynamicProg(True)
+		self.canvas._renderCable(solutionCable)
+		self.canvas._renderPaths(paths)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED
 		self.runDpBtn["state"] = tk.DISABLED

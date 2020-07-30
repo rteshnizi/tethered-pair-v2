@@ -128,3 +128,21 @@ def getClosestVertex(pt):
 		if convertToPoint(pt) == convertToPoint(tempVert):
 			return tempVert
 	return candidate
+
+def findSubCable(cable, subCable) -> int:
+	A = cable
+	B = subCable
+	i = 0
+	j = 0
+	n = len(A)
+	m = len(B)
+	while (i < n and j < m):
+		if (convertToPoint(A[i]) == convertToPoint(B[j])):
+			i += 1
+			j += 1
+			if (j == m):
+				return i - m
+		else:
+			i = i - j + 1
+			j = 0
+	return -1

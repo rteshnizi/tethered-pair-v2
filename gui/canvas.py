@@ -52,16 +52,19 @@ class Canvas(object):
 		c2.createShape(self)
 		print("CABLE-D", cable, "(%.2f)" % Geom.lengthOfCurve(cable))
 
-	def renderSolution(self, solutionNode: Node, debug=False):
-		if not solutionNode:
-			print("NO SOLUTIONS")
-			return
-		paths = solutionNode.getPaths()
-		if debug: print("paths:", paths)
+	def _renderPaths(self, paths):
+		print("paths:", paths)
 		path = Path("P1", paths[0], self.model.robots[0].color)
 		self.model.entities[path.name] = path
 		path.createShape(self)
 		path = Path("P2", paths[1], self.model.robots[1].color)
 		self.model.entities[path.name] = path
 		path.createShape(self)
+
+	def renderSolution(self, solutionNode: Node, debug=False):
+		if not solutionNode:
+			print("NO SOLUTIONS")
+			return
+		paths = solutionNode.getPaths()
 		self._renderCable(solutionNode.cable)
+		self._renderPaths(paths)

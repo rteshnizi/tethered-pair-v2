@@ -139,6 +139,7 @@ def lengthOfCurve(pts: list):
 	"""
 	Takes a curve as a list of points and calculates the total length
 	"""
+	if len(pts) < 2: return 0
 	l = 0
 	for i in range(len(pts) - 1):
 		l += vertexDistance(pts[i], pts[i + 1])

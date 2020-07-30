@@ -65,6 +65,11 @@ class Model(object):
 		self.instance.entities[vert.name] = vert
 		self.addVertexByLocation(vert)
 
+	def removeTriangulationEdges(self):
+		for key in list(self.instance.entities.keys()):
+			if not key.startswith("TE-"): continue
+			self.instance.entities[key].removeShape()
+			self.instance.entities.pop(key)
 	@property
 	def allVertexObjects(self):
 		"""
