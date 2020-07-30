@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
+from timeit import default_timer as timer
 
 from gui.canvas import Canvas
 from algorithm.aStar import aStar
@@ -19,10 +20,11 @@ class TetheredPairApp(tk.Frame):
 		self.pack()
 		self.chosenPreset = tk.StringVar(master=self.master)
 		self._dbg = {
-			'Print Mouse': tk.IntVar(master=self.master, value=0),
+			# 'Print Mouse': tk.IntVar(master=self.master, value=0),
 			'Test Vis Graph': tk.IntVar(master=self.master, value=0),
 			'Test Triangulation': tk.IntVar(master=self.master, value=0),
-			'Test Tighten Alg': tk.IntVar(master=self.master, value=0)
+			'Test Tighten Alg': tk.IntVar(master=self.master, value=0),
+			'Debug Flag': tk.IntVar(master=self.master, value=0)
 		}
 		self.createDropdown()
 		self.createButtons()
@@ -30,8 +32,13 @@ class TetheredPairApp(tk.Frame):
 		self.canvas = Canvas(self.master, self)
 
 	@property
+	def debugFlag(self) -> bool:
+		return self._dbg['Debug Flag'].get() == 1
+
+	@property
 	def shouldPrintMouse(self) -> bool:
-		return self._dbg['Print Mouse'].get() == 1
+		return False
+		# return self._dbg['Print Mouse'].get() == 1
 
 	@property
 	def shouldDebugTriangulation(self) -> bool:
@@ -135,7 +142,10 @@ class TetheredPairApp(tk.Frame):
 			cable = testTightenCable(self.shouldDebugTriangulation)
 			self.canvas._renderCable(cable)
 		else:
-			solutionNode = aStar(True)
+			start = timer()
+			solutionNode = aStar(self.debugFlag)
+			end = timer()
+			print("Elapsed time = %f" % (end - start))
 			self.canvas.renderSolution(solutionNode, True)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED
@@ -143,7 +153,10 @@ class TetheredPairApp(tk.Frame):
 
 
 	def runDp(self):
-		(solutionCable, paths) = dynamicProg(True)
+		start = timer()
+		(solutionCable, paths) = dynamicProg(self.debugFlag)
+		end = timer()
+		print("Elapsed time = %f" % (end - start))
 		self.canvas._renderCable(solutionCable)
 		self.canvas._renderPaths(paths)
 		# Disable the button to force a reset

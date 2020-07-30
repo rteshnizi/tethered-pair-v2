@@ -13,7 +13,9 @@ model = Model()
 def aStar(debug=False) -> Node:
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
-	if debug: print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
+	print("##############################################")
+	print("##################  A-STAR  ##################")
+	print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
 	root = Node(cable=model.cable, parent=None, fractions=[1, 1])
 	q.enqueue(root)
 	count = 0

@@ -11,6 +11,9 @@ from utils.cgal.types import Polygon
 model = Model()
 
 def dynamicProg(debug=False) -> list:
+	print("##############################################")
+	print("##################  D----P  ##################")
+	print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
 	distA = []
 	cableA = []
 	pathA = []
@@ -49,7 +52,7 @@ def dynamicProg(debug=False) -> list:
 		if not cableA[i]: continue
 		for j in range(i, len(model.cable)):
 			if not cableB[j]: continue
-			c = cableA[i] + model.cable[i + 1:j + 1] + cableB[j]
+			c = cableA[i] + model.cable[i + 1:j] + cableB[j]
 			if Geom.lengthOfCurve(c) > model.MAX_CABLE: continue
 			d = Cost([distA[i], distB[j]])
 			if d.max()[0] < minCost.max()[0] or (d.max()[0] == minCost.max()[0] and d.min()[0] < minCost.min()[0]):
