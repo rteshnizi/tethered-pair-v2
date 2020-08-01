@@ -26,7 +26,7 @@ def aStar(debug=False) -> Node:
 		# visited.add(n)
 		if debug: print("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable, n.fractions)))
 		if isAtDestination(n):
-			if debug: print("At Destination after visiting %d nodes, discovering %d configs" % (count, len(nodeMap)))
+			print("At Destination after visiting %d nodes, discovering %d configs" % (count, len(nodeMap)))
 			destinationsFound += 1
 			return n # For now terminate at first solution
 		# Va = n.cable[0].gaps if n.fractions[0] == 1 else {n.cable[0]}
@@ -55,7 +55,7 @@ def aStar(debug=False) -> Node:
 				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[frac, 1])
 				# 	(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=False, debug=debug)
 				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[1, frac])
-	if debug: print("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
+	print("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
 	return None
 
 def isUndoingLastMove(node, v, index):
