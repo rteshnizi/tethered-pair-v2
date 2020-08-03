@@ -19,7 +19,7 @@ class Preset(object):
 		self.fileName = os.path.basename(path)
 		self._parsedJson: dict = None
 		self._build()
-		logger.log("Preset: %s - MAX CABLE = %d" % (self.fileName, self.model.MAX_CABLE))
+		logger.log("Preset: %s" % self.fileName)
 
 	def _build(self):
 		if (not os.path.isfile(self.path)):

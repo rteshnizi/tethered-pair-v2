@@ -1,3 +1,7 @@
+from utils.logger import Logger
+
+logger = Logger()
+
 class Model(object):
 	class __PrivateModel:
 		def __init__(self):
@@ -36,8 +40,9 @@ class Model(object):
 	def setApp(self, app):
 		self.instance.app = app
 
-	def setMaxCable(self, l):
+	def setMaxCable(self, l, log=False):
 		self.instance.MAX_CABLE = l
+		logger.log("MAX CABLE = %d" % self.model.MAX_CABLE)
 
 	def addVertexByLocation(self, vert):
 		self.instance._vertexByLocation[ptToStringId(vert.loc)] = vert
