@@ -18,13 +18,14 @@ class SolutionLog:
 		self.genereted = 0
 		self._startTime = timer()
 		self._endTime = 0.0
+		self._time = -1
 
 	@property
 	def content(self) -> Solution:
 		return self._content
 
 	@content.setter
-	def content(self, value: Solution) -> float:
+	def content(self, value: Solution):
 		if self.content:
 			raise RuntimeError("Content can only be set once.")
 		self._endTime = timer()
@@ -32,4 +33,10 @@ class SolutionLog:
 
 	@property
 	def time(self):
-		return self._endTime - self._startTime
+		if self.time < 0:
+			return self._endTime - self._startTime
+		return self._time
+
+	@time.setter
+	def time(self, value: float):
+		self._time = value

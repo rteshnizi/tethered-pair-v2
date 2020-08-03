@@ -20,7 +20,7 @@ def aStar(debug=False) -> SolutionLog:
 	logger.log("##############################################")
 	logger.log("##################  A-STAR  ##################")
 	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
-	root = Node(cable=model.cable, parent=None, fractions=[1, 1])
+	root = Node(cable=model.cable, parent=None)
 	q.enqueue(root)
 	count = 0
 	destinationsFound = 0
