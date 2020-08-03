@@ -52,7 +52,7 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent: "Node", heuristicFunc=self._heuristicAStarDist, fractions=[1, 1]):
+	def __init__(self, cable, parent: "Node", heuristicFunc=None, fractions=[1, 1]):
 		self.cable = cable
 		self.g = Cost()
 		self.h = Cost()
@@ -60,7 +60,7 @@ class Node(object):
 		self.parent: "Node" = None
 		self.updateParent(parent)
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
-		self._heuristic = heuristicFunc
+		self._heuristic = heuristicFunc if heuristicFunc else self._heuristicAStarDist
 
 	def __repr__(self):
 		return "%s - %s" % (repr(self.cable), repr(self.f))

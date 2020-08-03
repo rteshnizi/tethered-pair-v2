@@ -18,7 +18,7 @@ def main():
 			preset = Preset(mapPath)
 			preset.model.setMaxCable(MAX_CABLE)
 			times = []
-			for i in range(5):
+			for i in range(3):
 				logger.log("Iter %d" % i)
 				solution = aStar()
 				times.append(solution.time)
