@@ -33,7 +33,7 @@ class SolutionLog:
 
 	@property
 	def time(self):
-		if self.time < 0:
+		if self._time < 0:
 			return self._endTime - self._startTime
 		return self._time
 
