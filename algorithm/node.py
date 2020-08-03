@@ -60,13 +60,13 @@ class Node(object):
 		self.parent: "Node" = None
 		self.updateParent(parent)
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
-		self._heuristic = heuristicFunc if heuristicFunc else self._heuristicAStarDist
+		# self._heuristic = heuristicFunc if heuristicFunc else self._heuristicAStarDist
 
 	def __repr__(self):
 		return "%s - %s" % (repr(self.cable), repr(self.f))
 
 	def _calcH(self) -> Cost:
-		return self._heuristic()
+		return self._heuristicAStarDist()
 
 	def _heuristicAStarDist(self) -> Cost:
 		h1 = self._aStar(0).g
