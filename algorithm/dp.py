@@ -3,24 +3,28 @@ from math import fabs, nan, isnan, inf
 from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual, removeRepeatedVertsOrdered, findSubCable
 from algorithm.node import Node, Cost
 from algorithm.cable import tightenCable, getLongCable
+from algorithm.solutionLog import SolutionLog, Solution
 from model.modelService import Model
 from model.vertex import Vertex
 from utils.priorityQ import PriorityQ
 from utils.cgal.types import Polygon
+from utils.logger import Logger
 
 model = Model()
+logger = Logger()
 
 def dynamicProg(debug=False) -> list:
-	print("##############################################")
-	print("##################  D----P  ##################")
-	print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
+	logger.log("##############################################")
+	logger.log("##################  D----P  ##################")
+	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
 	distA = []
 	cableA = []
 	pathA = []
 	distB = []
 	cableB = []
 	pathB = []
-	solution: Node = None
+	solution = SolutionLog(model.MAX_CABLE)
+	runningSolution: SolutionLog = None
 	for i in range(len(model.cable)):
 		indices = [0, -1]
 		for robotIndex in indices:
@@ -29,14 +33,16 @@ def dynamicProg(debug=False) -> list:
 			distArr = distA if robotIndex == 0 else distB
 			cableArr = cableA if robotIndex == 0 else cableB
 			pathArr = pathA if robotIndex == 0 else pathB
-			solution = aStarSingle(model.cable, model.robots[robotIndex].destination, baseIndex=baseIndex, robotIndex=robotIndex, enforceCable=cableSection, debug=debug)
-			if solution:
-				ind = findSubCable(solution.cable, cableSection[1:] if robotIndex == 0 else cableSection[:-1])
+			runningSolution = aStarSingle(model.cable, model.robots[robotIndex].destination, baseIndex=baseIndex, robotIndex=robotIndex, enforceCable=cableSection, debug=debug)
+			solution.expanded += runningSolution.expanded
+			solution.genereted += runningSolution.genereted
+			if runningSolution:
+				ind = findSubCable(runningSolution.content.cable, cableSection[1:] if robotIndex == 0 else cableSection[:-1])
 				if ind < 0:
 					raise RuntimeError("What?")
-				dist = solution.g[robotIndex] + Geom.lengthOfCurve(model.cable[:i + 1] if robotIndex == 0 else model.cable[i:])
-				subCable = solution.cable[:ind] if robotIndex == 0 else solution.cable[ind + len(cableSection) - 1:]
-				path = solution.getPaths()[robotIndex]
+				dist = runningSolution.content.cost[robotIndex] + Geom.lengthOfCurve(model.cable[:i + 1] if robotIndex == 0 else model.cable[i:])
+				subCable = runningSolution.content.cable[:ind] if robotIndex == 0 else runningSolution.content.cable[ind + len(cableSection) - 1:]
+				path = runningSolution.content.paths[robotIndex]
 			else:
 				dist = inf
 				subCable = None
@@ -59,15 +65,17 @@ def dynamicProg(debug=False) -> list:
 				minCost = d
 				paths = [pathA[i], pathB[j]]
 				solutionCable = c
+	solution.content = Solution(solutionCable, paths, minCost)
 	return (solutionCable, paths)
 
-def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=False) -> Node:
+def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=False) -> SolutionLog:
 	"""
 	baseIndex and robotIndex: 0 | -1
 	"""
+	solutionLog = SolutionLog()
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
-	if debug: print("Initial Cable Length = ", Geom.lengthOfCurve(cable))
+	if debug: logger.log("CABLE-O: %s - L = %.2f" % (repr(cable), Geom.lengthOfCurve(cable)))
 	root = Node(cable=cable, parent=None, fractions=[1, 1])
 	q.enqueue(root)
 	count = 0
@@ -75,11 +83,14 @@ def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=Fal
 	while not q.isEmpty():
 		n: Node = q.dequeue()
 		count += 1
-		if debug: print("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable, n.fractions)))
+		if debug: logger.log("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable, n.fractions)))
 		if isAtDestination(n, dest, robotIndex):
-			if debug: print("At Destination after visiting %d nodes, discovering %d configs" % (count, len(nodeMap)))
+			solutionLog.content = Solution.createFromNode(n)
+			solutionLog.expanded = count
+			solutionLog.genereted = len(nodeMap)
+			logger.log("At Destination after expanded %d nodes, discovering %d configs" % (solutionLog.expanded, solutionLog.genereted))
 			destinationsFound += 1
-			return n # For now terminate at first solution
+			return solutionLog
 		base = n.cable[baseIndex]
 		gaps = n.cable[robotIndex].gaps if n.cable[robotIndex].name != dest.name else {n.cable[robotIndex]}
 		for gap in gaps:
@@ -99,7 +110,7 @@ def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=Fal
 			l = Geom.lengthOfCurve(newCable)
 			if l <= model.MAX_CABLE:
 				addChildNode(newCable, n, nodeMap, q, debug)
-	if debug: print("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
+	if debug: logger.log("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
 	return None
 
 def isUndoingLastMove(node, v, index):
@@ -129,9 +140,9 @@ def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None
 	cableStr = getCableId(newCable, fractions)
 	if cableStr in nodeMap:
 		nodeMap[cableStr].updateParent(parent)
-		if debug: print("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
+		if debug: logger.log("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
 	else:
 		child = Node(cable=newCable, parent=parent, fractions=fractions)
-		if debug: print("ADDING %s @ %s" % (repr(child.f), cableStr))
+		if debug: logger.log("ADDING %s @ %s" % (repr(child.f), cableStr))
 		nodeMap[cableStr] = child
 		pQ.enqueue(child)

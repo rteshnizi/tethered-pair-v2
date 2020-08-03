@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
-from timeit import default_timer as timer
 
 from gui.canvas import Canvas
 from algorithm.aStar import aStar
@@ -121,6 +120,7 @@ class TetheredPairApp(tk.Frame):
 		if (not os.path.isfile(absolutePath)):
 			return
 		self.canvas.buildPreset(absolutePath)
+		print("Max L = %.2f" % self.canvas.model.MAX_CABLE)
 		self.runBtn["state"] = tk.NORMAL
 		self.runDpBtn["state"] = tk.NORMAL
 
@@ -142,23 +142,16 @@ class TetheredPairApp(tk.Frame):
 			cable = testTightenCable(self.shouldDebugTriangulation)
 			self.canvas._renderCable(cable)
 		else:
-			start = timer()
-			solutionNode = aStar(self.debugFlag)
-			end = timer()
-			print("Elapsed time = %f" % (end - start))
-			self.canvas.renderSolution(solutionNode, True)
+			solution = aStar(self.debugFlag)
+			self.canvas.renderSolution(solution, True)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED
 		self.runDpBtn["state"] = tk.DISABLED
 
 
 	def runDp(self):
-		start = timer()
-		(solutionCable, paths) = dynamicProg(self.debugFlag)
-		end = timer()
-		print("Elapsed time = %f" % (end - start))
-		self.canvas._renderCable(solutionCable)
-		self.canvas._renderPaths(paths)
+		solution = dynamicProg(self.debugFlag)
+		self.canvas.renderSolution(solution, True)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED
 		self.runDpBtn["state"] = tk.DISABLED

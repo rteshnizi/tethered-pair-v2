@@ -1,7 +1,7 @@
 """ TP Canvas """
 import tkinter as tk
 
-from algorithm.node import Node
+from algorithm.solutionLog import SolutionLog
 from model.modelService import Model
 from model.cable import Cable
 from model.destination import Destination
@@ -11,6 +11,9 @@ from model.preset import Preset
 from model.path import Path
 from utils.cgal.types import Point
 import utils.cgal.geometry as Geom
+from utils.logger import Logger
+
+logger = Logger()
 
 class Canvas(object):
 	def __init__(self, master, app):
@@ -61,10 +64,10 @@ class Canvas(object):
 		self.model.entities[path.name] = path
 		path.createShape(self)
 
-	def renderSolution(self, solutionNode: Node, debug=False):
-		if not solutionNode:
+	def renderSolution(self, solution: SolutionLog, debug=False):
+		if not solution:
 			print("NO SOLUTIONS")
 			return
-		paths = solutionNode.getPaths()
-		self._renderCable(solutionNode.cable)
-		self._renderPaths(paths)
+		logger.log("T = %.2f" % solution.time)
+		self._renderCable(solution.content.cable)
+		self._renderPaths(solution.content.paths)

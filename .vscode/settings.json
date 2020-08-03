@@ -19,6 +19,7 @@
 		"homotopy",
 		"isnan",
 		"numpy",
+		"strftime",
 		"sympy"
 	]
 }

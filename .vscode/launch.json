@@ -27,6 +27,18 @@
 			"linux": {
 				"program": "${workspaceFolder}/test.py"
 			}
+		},
+		{
+			"name": "Run Experiments",
+			"type": "python",
+			"request": "launch",
+			"console": "integratedTerminal",
+			"windows": {
+				"program": "${workspaceFolder}\\experiment.py"
+			},
+			"linux": {
+				"program": "${workspaceFolder}/experiment.py"
+			}
 		}
 	]
 }

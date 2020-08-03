@@ -8,13 +8,18 @@ from model.destination import Destination
 from model.obstacle import Obstacle
 from model.robot import Robot
 from utils.cgal.types import Point
+from utils.logger import Logger
+
+logger = Logger()
 
 class Preset(object):
 	def __init__(self, path):
 		self.model = Model(True)
 		self.path = path
+		self.fileName = os.path.basename(path)
 		self._parsedJson: dict = None
 		self._build()
+		logger.log("---> Preset %s Loaded" % self.fileName)
 
 	def _build(self):
 		if (not os.path.isfile(self.path)):
@@ -35,7 +40,7 @@ class Preset(object):
 			elif (e == 'obstacles'):
 				self._createObstacles(self._parsedJson[e])
 			else:
-				print('unexpected json parameter %s' % e)
+				logger.log('unexpected json parameter %s' % e)
 
 	def _parsePt(self, ptString):
 		if "," in ptString:

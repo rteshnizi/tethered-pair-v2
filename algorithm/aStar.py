@@ -7,15 +7,19 @@ from model.modelService import Model
 from model.vertex import Vertex
 from utils.priorityQ import PriorityQ
 from utils.cgal.types import Polygon
+from utils.logger import Logger
+from algorithm.solutionLog import Solution, SolutionLog
 
 model = Model()
+logger = Logger()
 
-def aStar(debug=False) -> Node:
+def aStar(debug=False) -> SolutionLog:
+	solutionLog = SolutionLog(model.MAX_CABLE)
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
-	print("##############################################")
-	print("##################  A-STAR  ##################")
-	print("Initial Cable Length = ", Geom.lengthOfCurve(model.cable))
+	logger.log("##############################################")
+	logger.log("##################  A-STAR  ##################")
+	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
 	root = Node(cable=model.cable, parent=None, fractions=[1, 1])
 	q.enqueue(root)
 	count = 0
@@ -24,11 +28,14 @@ def aStar(debug=False) -> Node:
 		n: Node = q.dequeue()
 		count += 1
 		# visited.add(n)
-		if debug: print("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable, n.fractions)))
+		if debug: logger.log("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable, n.fractions)))
 		if isAtDestination(n):
-			print("At Destination after visiting %d nodes, discovering %d configs" % (count, len(nodeMap)))
+			solutionLog.content = Solution.createFromNode(n)
+			solutionLog.expanded = count
+			solutionLog.genereted = len(nodeMap)
+			logger.log("At Destination after expanded %d nodes, discovering %d configs" % (solutionLog.expanded, solutionLog.genereted))
 			destinationsFound += 1
-			return n # For now terminate at first solution
+			return solutionLog
 		# Va = n.cable[0].gaps if n.fractions[0] == 1 else {n.cable[0]}
 		Va = n.cable[0].gaps if n.cable[0].name != "D1" else {n.cable[0]}
 		for va in Va:
@@ -55,7 +62,7 @@ def aStar(debug=False) -> Node:
 				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[frac, 1])
 				# 	(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=False, debug=debug)
 				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[1, frac])
-	print("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
+	logger.log("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
 	return None
 
 def isUndoingLastMove(node, v, index):
@@ -92,10 +99,10 @@ def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None
 	cableStr = getCableId(newCable, fractions)
 	if cableStr in nodeMap:
 		nodeMap[cableStr].updateParent(parent)
-		if debug: print("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
+		if debug: logger.log("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
 	else:
 		child = Node(cable=newCable, parent=parent, fractions=fractions)
-		if debug: print("ADDING %s @ %s" % (repr(child.f), cableStr))
+		if debug: logger.log("ADDING %s @ %s" % (repr(child.f), cableStr))
 		nodeMap[cableStr] = child
 		pQ.enqueue(child)
 
