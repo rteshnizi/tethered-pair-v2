@@ -42,7 +42,7 @@ class Model(object):
 
 	def setMaxCable(self, l, log=False):
 		self.instance.MAX_CABLE = l
-		logger.log("MAX CABLE = %d" % self.model.MAX_CABLE)
+		logger.log("MAX CABLE = %d" % self.instance.MAX_CABLE)
 
 	def addVertexByLocation(self, vert):
 		self.instance._vertexByLocation[ptToStringId(vert.loc)] = vert
