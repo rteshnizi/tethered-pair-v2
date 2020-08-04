@@ -13,22 +13,14 @@ csvData = [["CABLE-LENGTH", "EXPANDED", "GENERATED", "TIME", "PATH-A-L", "PATH-B
 
 def main():
 	presetsPath = os.path.join(os.path.dirname(__file__), "presets", "scenario-1.json")
-	for MAX_CABLE in range(200, 701, 2):
-		try:
-			mapPath = os.path.abspath(presetsPath)
-			preset = Preset(mapPath)
-			preset.model.setMaxCable(MAX_CABLE)
-			# times = []
-			# for i in range(3):
-			# 	logger.log("Iter %d" % i)
-			# 	solution = aStar()
-			# 	times.append(solution.time)
-			# solution.time = mean(times)
-			solution = aStar()
-			logSolution(solution)
-			logger.log("Elapsed time = %f" % solution.time)
-		except Exception as e:
-			logger.log(e)
+	try:
+		mapPath = os.path.abspath(presetsPath)
+		preset = Preset(mapPath)
+		solution = aStar()
+		logSolution(solution)
+		logger.log("Elapsed time = %f" % solution.time)
+	except Exception as e:
+		logger.log(e)
 	with open(logger.logFileName.replace(".log", ".csv"), "w", newline="") as csvFile:
 		csvWriter = csv.writer(csvFile, quoting=csv.QUOTE_ALL)
 		for row in csvData:
