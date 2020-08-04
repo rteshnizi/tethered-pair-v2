@@ -9,7 +9,7 @@ from utils.logger import Logger
 
 logger = Logger()
 
-csvData = [["CABLE LENGTH", "EXPANDED", "GENERATED", "TIME", "PATH-A-L", "PATH-B-L", "CABLE-L", "PATH-A", "PATH-B", "CABLE"]]
+csvData = [["CABLE-LENGTH", "EXPANDED", "GENERATED", "TIME", "PATH-A-L", "PATH-B-L", "CABLE-L", "PATH-A", "PATH-B", "CABLE"]]
 
 def main():
 	presetsPath = os.path.join(os.path.dirname(__file__), "presets", "scenario-1.json")
