@@ -20,7 +20,7 @@ def aStar(debug=False) -> SolutionLog:
 	logger.log("##############################################")
 	logger.log("##################  A-STAR  ##################")
 	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
-	root = Node(cable=model.cable, parent=None)
+	root = Node(cable=model.cable, parent=None, debug=debug)
 	q.enqueue(root)
 	count = 0
 	destinationsFound = 0
@@ -101,7 +101,7 @@ def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None
 		nodeMap[cableStr].updateParent(parent)
 		if debug: logger.log("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
 	else:
-		child = Node(cable=newCable, parent=parent, fractions=fractions)
+		child = Node(cable=newCable, parent=parent, debug=debug, fractions=fractions)
 		if debug: logger.log("ADDING %s @ %s" % (repr(child.f), cableStr))
 		nodeMap[cableStr] = child
 		pQ.enqueue(child)

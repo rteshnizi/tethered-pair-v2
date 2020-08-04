@@ -1,7 +1,11 @@
 from math import inf
+from functools import partial
 from model.modelService import Model
 from utils.cgal.geometry import vertexDistance, convertToPoint
 from utils.priorityQ import PriorityQ
+from utils.logger import Logger
+
+logger = Logger()
 model = Model()
 INFINITY_COST = inf
 
@@ -52,21 +56,33 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent: "Node", heuristicFunc=None, fractions=[1, 1]):
+	def __init__(self, cable, parent: "Node", debug=False, heuristicFuncName="_heuristicAStar", fractions=[1, 1]):
 		self.cable = cable
 		self.g = Cost()
 		self.h = Cost()
 		self.f = Cost()
+		self.debug = debug
 		self.parent: "Node" = None
+		self._heuristic = getattr(self, heuristicFuncName)
+		# self._heuristic = self._heuristicAStar
 		self.updateParent(parent)
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
-		# self._heuristic = heuristicFunc if heuristicFunc else self._heuristicAStarDist
 
 	def __repr__(self):
 		return "%s - %s" % (repr(self.cable), repr(self.f))
 
 	def _calcH(self) -> Cost:
-		return self._heuristicAStarDist()
+		return self._heuristic()
+
+	def _heuristicAStar(self) -> Cost:
+		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName="_heuristicAStarDist")
+		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1), debug=self.debug)
+		if self.debug: logger.log("T = %.2f" % solution.time)
+		if solution.time < 0:
+			i = 0
+		if not solution.content:
+			return Cost()
+		return solution.content.cost
 
 	def _heuristicAStarDist(self) -> Cost:
 		h1 = self._aStar(0).g
@@ -145,3 +161,96 @@ class Node(object):
 		Since the optimization metric is minimizing the max, this function returns the max of the two costs
 		"""
 		return n.f.min()[0]
+
+import utils.cgal.geometry as Geom
+from math import fabs, nan, isnan
+from utils.vertexUtils import convertToPoint, getClosestVertex, almostEqual, removeRepeatedVertsOrdered
+from algorithm.node import Node
+from algorithm.cable import tightenCable, getLongCable
+from model.vertex import Vertex
+from utils.cgal.types import Polygon
+from algorithm.solutionLog import Solution, SolutionLog
+
+def _privateAStar(root: Node, MAX_CABLE: int, debug=False) -> SolutionLog:
+	if debug: logger.log("_privateAStar: root = %s, MAX = %d" % (root, MAX_CABLE))
+	solutionLog = SolutionLog()
+	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
+	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
+	q.enqueue(root)
+	count = 0
+	destinationsFound = 0
+	while not q.isEmpty():
+		n: Node = q.dequeue()
+		count += 1
+		# visited.add(n)
+		if isAtDestination(n):
+			solutionLog.content = Solution.createFromNode(n)
+			solutionLog.expanded = count
+			solutionLog.genereted = len(nodeMap)
+			destinationsFound += 1
+			return solutionLog
+		# Va = n.cable[0].gaps if n.fractions[0] == 1 else {n.cable[0]}
+		Va = n.cable[0].gaps if n.cable[0].name != "D1" else {n.cable[0]}
+		for va in Va:
+			if isUndoingLastMove(n, va, 0): continue
+			# Vb = n.cable[-1].gaps if n.fractions[1] == 1 else {n.cable[-1]}
+			Vb = n.cable[-1].gaps if n.cable[-1].name != "D2" else {n.cable[-1]}
+			for vb in Vb:
+				if isUndoingLastMove(n, vb, -1): continue
+				if areBothStaying(n, va, vb): continue
+				# For now I deliberately avoid cross movement because it crashes the triangulation
+				# In reality we can fix this by mirorring the space (like I did in the previous paper)
+				if isThereCrossMovement(n.cable, va, vb): continue
+				newCable = None
+				# FIXME: Defensively ignoring exceptions
+				try:
+					newCable = tightenCable(n.cable, va, vb)
+				except:
+					continue
+				l = Geom.lengthOfCurve(newCable)
+				if l <= MAX_CABLE:
+					addChildNode(newCable, n, nodeMap, q, False)
+	solutionLog.expanded = count
+	solutionLog.genereted = len(nodeMap)
+	return solutionLog
+
+def isUndoingLastMove(node, v, index):
+	if not node.parent: return False
+	if v.name == "D1" or v.name == "D2": return False
+	if convertToPoint(node.parent.cable[index]) != convertToPoint(v): return False
+	path = node._getPath(index  == 0)
+	path = removeRepeatedVertsOrdered(path)
+	if convertToPoint(node.parent.cable[-2]) != convertToPoint(v): return False
+	return True
+
+def areBothStaying(parent, va, vb):
+	if convertToPoint(parent.cable[0]) != convertToPoint(va): return False
+	if convertToPoint(parent.cable[-1]) != convertToPoint(vb): return False
+	return True
+
+def isThereCrossMovement(cable, dest1, dest2):
+	# I've also included the case where the polygon is not simple
+	cable = getLongCable(cable, dest1, dest2)
+	cable = removeRepeatedVertsOrdered(cable)
+	if len(cable) < 3: return False
+	p = Polygon([convertToPoint(v) for v in cable])
+	return not p.is_simple()
+
+def isAtDestination(n) -> bool:
+	if not n: return False
+	return convertToPoint(n.cable[0]) == convertToPoint(model.robots[0].destination) and convertToPoint(n.cable[-1]) == convertToPoint(model.robots[1].destination)
+
+def getCableId(cable, fractions) -> str:
+	# return "%s-[%.6f, %.6f]" % (repr(cable), fractions[0], fractions[1])
+	return repr(cable)
+
+def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None:
+	cableStr = getCableId(newCable, fractions)
+	if cableStr in nodeMap:
+		nodeMap[cableStr].updateParent(parent)
+		if debug: logger.log("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
+	else:
+		child = Node(cable=newCable, parent=parent, debug=parent.debug, heuristicFuncName="_heuristicAStarDist")
+		if debug: logger.log("ADDING %s @ %s" % (repr(child.f), cableStr))
+		nodeMap[cableStr] = child
+		pQ.enqueue(child)

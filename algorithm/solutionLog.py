@@ -1,11 +1,11 @@
 from timeit import default_timer as timer
-from algorithm.node import Cost, Node
+from math import inf
 
 class Solution:
-	def createFromNode(node: Node):
+	def createFromNode(node: "Node"):
 		return Solution(node.cable, node.getPaths(), node.g)
 
-	def __init__(self, cable, paths, cost: Cost):
+	def __init__(self, cable, paths, cost: "Cost"):
 		self.cable = cable
 		self.paths = paths
 		self.cost = cost
