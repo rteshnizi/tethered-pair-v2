@@ -65,9 +65,9 @@ class Canvas(object):
 		path.createShape(self)
 
 	def renderSolution(self, solution: SolutionLog, debug=False):
-		if not solution:
+		logger.log("T = %.2f" % solution.time)
+		if not solution.content:
 			print("NO SOLUTIONS")
 			return
-		logger.log("T = %.2f" % solution.time)
 		self._renderCable(solution.content.cable)
 		self._renderPaths(solution.content.paths)

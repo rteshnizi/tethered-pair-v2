@@ -17,7 +17,7 @@ class SolutionLog:
 		self.expanded = 0
 		self.genereted = 0
 		self._startTime = timer()
-		self._endTime = 0.0
+		self._endTime = -1.0
 		self._time = -1
 
 	@property
@@ -30,6 +30,12 @@ class SolutionLog:
 			raise RuntimeError("Content can only be set once.")
 		self._endTime = timer()
 		self._content = value
+
+	def setEndTime():
+		if self._endTime< 0:
+			self._endTime = timer()
+		else:
+			raise RuntimeError("Content can only be set once.")
 
 	@property
 	def time(self):

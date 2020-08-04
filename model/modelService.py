@@ -18,6 +18,7 @@ class Model(object):
 			self.tempVertices = {} # This is used in partial calculation
 			self._tmpACounter = 0
 			self._tmpBCounter = 0
+			self.solution = None
 
 	instance = None
 
@@ -33,6 +34,9 @@ class Model(object):
 
 	def __getattr__(self, name):
 		return getattr(self.instance, name)
+
+	def setSolution(self, solution):
+		self.instance.solution = solution
 
 	def setCanvas(self, canvas):
 		self.instance.canvas = canvas

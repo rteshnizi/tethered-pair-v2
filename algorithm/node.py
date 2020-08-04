@@ -76,10 +76,10 @@ class Node(object):
 
 	def _heuristicAStar(self) -> Cost:
 		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName="_heuristicAStarDist")
-		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1), debug=self.debug)
+		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1.5), debug=self.debug)
+		model.solution.expanded += solution.expanded
+		model.solution.genereted += solution.genereted
 		if self.debug: logger.log("T = %.2f" % solution.time)
-		if solution.time < 0:
-			i = 0
 		if not solution.content:
 			return Cost()
 		return solution.content.cost
@@ -212,6 +212,7 @@ def _privateAStar(root: Node, MAX_CABLE: int, debug=False) -> SolutionLog:
 					addChildNode(newCable, n, nodeMap, q, False)
 	solutionLog.expanded = count
 	solutionLog.genereted = len(nodeMap)
+	solutionLog.setEndTime()
 	return solutionLog
 
 def isUndoingLastMove(node, v, index):

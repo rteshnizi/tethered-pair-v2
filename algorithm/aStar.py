@@ -14,7 +14,7 @@ model = Model()
 logger = Logger()
 
 def aStar(debug=False) -> SolutionLog:
-	solutionLog = SolutionLog(model.MAX_CABLE)
+	model.setSolution(SolutionLog(model.MAX_CABLE))
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
 	logger.log("##############################################")
@@ -30,12 +30,12 @@ def aStar(debug=False) -> SolutionLog:
 		# visited.add(n)
 		if debug: logger.log("-------------MAX=%.2f, MIN=%.2f @ %s-------------" % (Node.pQGetPrimaryCost(n), Node.pQGetSecondaryCost(n), getCableId(n.cable, n.fractions)))
 		if isAtDestination(n):
-			solutionLog.content = Solution.createFromNode(n)
-			solutionLog.expanded = count
-			solutionLog.genereted = len(nodeMap)
-			logger.log("At Destination after expanded %d nodes, discovering %d configs" % (solutionLog.expanded, solutionLog.genereted))
+			model.solution.content = Solution.createFromNode(n)
+			model.solution.expanded = count
+			model.solution.genereted = len(nodeMap)
+			logger.log("At Destination after expanded %d nodes, discovering %d configs" % (model.solution.expanded, model.solution.genereted))
 			destinationsFound += 1
-			return solutionLog
+			return model.solution
 		# Va = n.cable[0].gaps if n.fractions[0] == 1 else {n.cable[0]}
 		Va = n.cable[0].gaps if n.cable[0].name != "D1" else {n.cable[0]}
 		for va in Va:
@@ -63,7 +63,10 @@ def aStar(debug=False) -> SolutionLog:
 				# 	(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=False, debug=debug)
 				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[1, frac])
 	logger.log("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
-	return None
+	model.solution.expanded = count
+	model.solution.genereted = len(nodeMap)
+	model.solution.setEndTime()
+	return model.solution
 
 def isUndoingLastMove(node, v, index):
 	if not node.parent: return False
