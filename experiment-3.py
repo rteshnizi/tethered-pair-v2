@@ -12,7 +12,7 @@ logger = Logger()
 csvData = [["HEURISTIC", "EXPANDED", "GENERATED", "TIME"]]
 
 def main():
-	presetsPath = os.path.join(os.path.dirname(__file__), "presets", "scenario-1.json")
+	presetsPath = os.path.join(os.path.dirname(__file__), "presets", "aStar1.json")
 	heuristics = ["_heuristicNone", "_heuristicLineDist", "_heuristicShortestPath", "_heuristicTrmpp"]
 	for heuristic in heuristics:
 		try:
@@ -32,6 +32,12 @@ def logSolution(solution: SolutionLog):
 	if not solution:
 		logger.log("NO SOLUTIONS")
 		return
+	pathA = solution.content.paths[0]
+	pathB = solution.content.paths[1]
+	pathAL = Geom.lengthOfCurve(pathA)
+	pathBL = Geom.lengthOfCurve(pathB)
+	cable = solution.content.cable
+	cableL = Geom.lengthOfCurve(cable)
 	# ["HEURISTIC", "EXPANDED", "GENERATED", "TIME"]
 	csvRow = [solution.heuristic, solution.expanded, solution.genereted, solution.time]
 	csvData.append(csvRow)

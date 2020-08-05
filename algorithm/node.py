@@ -76,7 +76,7 @@ class Node(object):
 		return self._heuristic()
 
 	def _heuristicTrmpp(self) -> Cost:
-		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName=self.heuristicFuncName)
+		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName="_heuristicShortestPath")
 		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1) * 1.25, debug=self.debug)
 		model.solution.expanded += solution.expanded
 		model.solution.genereted += solution.genereted
