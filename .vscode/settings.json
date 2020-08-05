@@ -12,6 +12,7 @@
 	"files.trimTrailingWhitespace": true,
 	"python.formatting.provider": "autopep8",
 	"cSpell.words": [
+		"Trmpp",
 		"Vect",
 		"Verts",
 		"cgal",

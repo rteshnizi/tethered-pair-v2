@@ -13,7 +13,7 @@ from utils.logger import Logger
 model = Model()
 logger = Logger()
 
-def dynamicProg(debug=False) -> list:
+def dynamicProg(heuristic, debug=False) -> list:
 	logger.log("##############################################")
 	logger.log("##################  D----P  ##################")
 	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
@@ -33,7 +33,7 @@ def dynamicProg(debug=False) -> list:
 			distArr = distA if robotIndex == 0 else distB
 			cableArr = cableA if robotIndex == 0 else cableB
 			pathArr = pathA if robotIndex == 0 else pathB
-			runningSolution = aStarSingle(model.cable, model.robots[robotIndex].destination, baseIndex=baseIndex, robotIndex=robotIndex, enforceCable=cableSection, debug=debug)
+			runningSolution = aStarSingle(model.cable, model.robots[robotIndex].destination, baseIndex, robotIndex, heuristic, enforceCable=cableSection, debug=debug)
 			solution.expanded += runningSolution.expanded
 			solution.genereted += runningSolution.genereted
 			if runningSolution.content:
@@ -69,7 +69,7 @@ def dynamicProg(debug=False) -> list:
 	logger.log("At Destination after expanded %d nodes, discovering %d configs" % (solution.expanded, solution.genereted))
 	return solution
 
-def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=False) -> SolutionLog:
+def aStarSingle(cable, dest, baseIndex, robotIndex, heuristic, enforceCable=None, debug=False) -> SolutionLog:
 	"""
 	baseIndex and robotIndex: 0 | -1
 	"""
@@ -77,7 +77,7 @@ def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=Fal
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
 	if debug: logger.log("CABLE-O: %s - L = %.2f" % (repr(cable), Geom.lengthOfCurve(cable)))
-	root = Node(cable=cable, parent=None, fractions=[1, 1])
+	root = Node(cable=cable, parent=None, heuristicFuncName=heuristic, fractions=[1, 1])
 	q.enqueue(root)
 	count = 0
 	destinationsFound = 0
@@ -110,7 +110,7 @@ def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=Fal
 				if ind < 0: continue
 			l = Geom.lengthOfCurve(newCable)
 			if l <= model.MAX_CABLE:
-				addChildNode(newCable, n, nodeMap, q, debug)
+				addChildNode(newCable, n, nodeMap, q, heuristic, debug)
 	if debug: logger.log("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
 	solutionLog.expanded = count
 	solutionLog.genereted = len(nodeMap)
@@ -140,13 +140,13 @@ def getCableId(cable, fractions) -> str:
 	# return "%s-[%.6f, %.6f]" % (repr(cable), fractions[0], fractions[1])
 	return repr(cable)
 
-def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None:
+def addChildNode(newCable, parent, nodeMap, pQ, heuristic, debug, fractions=[1, 1]) -> None:
 	cableStr = getCableId(newCable, fractions)
 	if cableStr in nodeMap:
 		nodeMap[cableStr].updateParent(parent)
 		if debug: logger.log("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
 	else:
-		child = Node(cable=newCable, parent=parent, fractions=fractions)
+		child = Node(cable=newCable, parent=parent, heuristicFuncName=heuristic, fractions=fractions)
 		if debug: logger.log("ADDING %s @ %s" % (repr(child.f), cableStr))
 		nodeMap[cableStr] = child
 		pQ.enqueue(child)

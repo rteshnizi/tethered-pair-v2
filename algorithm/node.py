@@ -56,7 +56,7 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent: "Node", debug=False, heuristicFuncName="_heuristicAStarDist", fractions=[1, 1]):
+	def __init__(self, cable, parent: "Node", debug=False, heuristicFuncName="_heuristicShortestPath", fractions=[1, 1]):
 		self.cable = cable
 		self.g = Cost()
 		self.h = Cost()
@@ -64,7 +64,7 @@ class Node(object):
 		self.debug = debug
 		self.parent: "Node" = None
 		self._heuristic = getattr(self, heuristicFuncName)
-		# self._heuristic = self._heuristicAStar
+		# self._heuristic = self._heuristicTrmpp
 		self.updateParent(parent)
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
 
@@ -74,8 +74,8 @@ class Node(object):
 	def _calcH(self) -> Cost:
 		return self._heuristic()
 
-	def _heuristicAStar(self) -> Cost:
-		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName="_heuristicAStarDist")
+	def _heuristicTrmpp(self) -> Cost:
+		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName="_heuristicShortestPath")
 		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1) * 1.25, debug=self.debug)
 		model.solution.expanded += solution.expanded
 		model.solution.genereted += solution.genereted
@@ -84,12 +84,12 @@ class Node(object):
 			return Cost()
 		return solution.content.cost
 
-	def _heuristicAStarDist(self) -> Cost:
+	def _heuristicShortestPath(self) -> Cost:
 		h1 = self._aStar(0).g
 		h2 = self._aStar(-1).g
 		return Cost([h1, h2])
 
-	def _heuristicEuclideanDist(self) -> Cost:
+	def _heuristicLineDist(self) -> Cost:
 		h1 = vertexDistance(self.cable[0], model.robots[0].destination)
 		h2 = vertexDistance(self.cable[-1], model.robots[1].destination)
 		return Cost([h1, h2])
@@ -251,7 +251,7 @@ def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None
 		nodeMap[cableStr].updateParent(parent)
 		if debug: logger.log("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
 	else:
-		child = Node(cable=newCable, parent=parent, debug=parent.debug, heuristicFuncName="_heuristicAStarDist")
+		child = Node(cable=newCable, parent=parent, debug=parent.debug, heuristicFuncName="_heuristicShortestPath")
 		if debug: logger.log("ADDING %s @ %s" % (repr(child.f), cableStr))
 		nodeMap[cableStr] = child
 		pQ.enqueue(child)

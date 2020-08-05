@@ -14,10 +14,11 @@ class TetheredPairApp(tk.Frame):
 		self._presetsDir = os.path.join(os.path.dirname(__file__), "..", "presets")
 		self.master = tk.Tk()
 		self.master.title("Tethered Pair Simulation")
-		self.master.geometry("1100x800")
+		self.master.geometry("1100x850")
 		super().__init__(self.master)
 		self.pack()
 		self.chosenPreset = tk.StringVar(master=self.master)
+		self.chosenHeuristic = tk.StringVar(master=self.master)
 		self._dbg = {
 			# 'Print Mouse': tk.IntVar(master=self.master, value=0),
 			'Test Vis Graph': tk.IntVar(master=self.master, value=0),
@@ -97,6 +98,11 @@ class TetheredPairApp(tk.Frame):
 		self.browseBtn["command"] = self.selectMapFile
 		self.browseBtn.pack(side=tk.TOP)
 
+		heuristics = ["_heuristicNone", "_heuristicLineDist", "_heuristicShortestPath", "_heuristicTrmpp"]
+		self.chosenHeuristic.set(heuristics[2])
+		self.heuristics = tk.OptionMenu(self.master, self.chosenHeuristic, *heuristics)
+		self.heuristics.pack(side=tk.TOP)
+
 		self.runBtn = tk.Button(self)
 		self.runBtn["state"] = tk.DISABLED
 		self.runBtn["text"] = "A*"
@@ -142,7 +148,7 @@ class TetheredPairApp(tk.Frame):
 			cable = testTightenCable(self.shouldDebugTriangulation)
 			self.canvas._renderCable(cable)
 		else:
-			solution = aStar(self.debugFlag)
+			solution = aStar(self.chosenHeuristic.get() ,self.debugFlag)
 			self.canvas.renderSolution(solution, True)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED
@@ -150,7 +156,7 @@ class TetheredPairApp(tk.Frame):
 
 
 	def runDp(self):
-		solution = dynamicProg(self.debugFlag)
+		solution = dynamicProg(self.chosenHeuristic.get() ,self.debugFlag)
 		self.canvas.renderSolution(solution, True)
 		# Disable the button to force a reset
 		self.runBtn["state"] = tk.DISABLED

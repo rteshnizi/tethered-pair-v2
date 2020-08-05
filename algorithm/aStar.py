@@ -13,14 +13,14 @@ from algorithm.solutionLog import Solution, SolutionLog
 model = Model()
 logger = Logger()
 
-def aStar(debug=False) -> SolutionLog:
+def aStar(heuristic, debug=False) -> SolutionLog:
 	model.setSolution(SolutionLog(model.MAX_CABLE))
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
 	logger.log("##############################################")
 	logger.log("##################  A-STAR  ##################")
 	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
-	root = Node(cable=model.cable, parent=None, debug=debug)
+	root = Node(cable=model.cable, parent=None, heuristicFuncName=heuristic, debug=debug)
 	q.enqueue(root)
 	count = 0
 	destinationsFound = 0
@@ -56,7 +56,7 @@ def aStar(debug=False) -> SolutionLog:
 					continue
 				l = Geom.lengthOfCurve(newCable)
 				if l <= model.MAX_CABLE:
-					addChildNode(newCable, n, nodeMap, q, debug)
+					addChildNode(newCable, n, nodeMap, q, heuristic, debug)
 				# else:
 				# 	(frac, fracCable) = getPartialMotion(n.cable, newCable, isRobotA=True, debug=debug)
 				# 	if not isnan(frac): addChildNode(fracCable, n, nodeMap, q, debug, fractions=[frac, 1])
@@ -98,13 +98,13 @@ def getCableId(cable, fractions) -> str:
 	# return "%s-[%.6f, %.6f]" % (repr(cable), fractions[0], fractions[1])
 	return repr(cable)
 
-def addChildNode(newCable, parent, nodeMap, pQ, debug, fractions=[1, 1]) -> None:
+def addChildNode(newCable, parent, nodeMap, pQ, heuristic, debug, fractions=[1, 1]) -> None:
 	cableStr = getCableId(newCable, fractions)
 	if cableStr in nodeMap:
 		nodeMap[cableStr].updateParent(parent)
 		if debug: logger.log("UPDATE %s @ %s" % (repr(nodeMap[cableStr].f), cableStr))
 	else:
-		child = Node(cable=newCable, parent=parent, debug=debug, fractions=fractions)
+		child = Node(cable=newCable, parent=parent, heuristicFuncName=heuristic, debug=debug, fractions=fractions)
 		if debug: logger.log("ADDING %s @ %s" % (repr(child.f), cableStr))
 		nodeMap[cableStr] = child
 		pQ.enqueue(child)
