@@ -63,7 +63,8 @@ class Node(object):
 		self.f = Cost()
 		self.debug = debug
 		self.parent: "Node" = None
-		self._heuristic = getattr(self, heuristicFuncName)
+		self.heuristicFuncName = heuristicFuncName
+		self._heuristic = getattr(self, self.heuristicFuncName)
 		# self._heuristic = self._heuristicTrmpp
 		self.updateParent(parent)
 		self.fractions = fractions # fractions is only defined for the two ends of the cable
@@ -75,7 +76,7 @@ class Node(object):
 		return self._heuristic()
 
 	def _heuristicTrmpp(self) -> Cost:
-		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName="_heuristicShortestPath")
+		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName=self.heuristicFuncName)
 		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1) * 1.25, debug=self.debug)
 		model.solution.expanded += solution.expanded
 		model.solution.genereted += solution.genereted
@@ -173,7 +174,7 @@ from algorithm.solutionLog import Solution, SolutionLog
 
 def _privateAStar(root: Node, MAX_CABLE: int, debug=False) -> SolutionLog:
 	if debug: logger.log("_privateAStar: root = %s, MAX = %d" % (root, MAX_CABLE))
-	solutionLog = SolutionLog()
+	solutionLog = SolutionLog(root.heuristicFuncName)
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
 	q.enqueue(root)

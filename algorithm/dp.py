@@ -17,13 +17,14 @@ def dynamicProg(heuristic, debug=False) -> list:
 	logger.log("##############################################")
 	logger.log("##################  D----P  ##################")
 	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
+	logger.log("Heuristic = %s" % heuristic)
 	distA = []
 	cableA = []
 	pathA = []
 	distB = []
 	cableB = []
 	pathB = []
-	solution = SolutionLog(model.MAX_CABLE)
+	solution = SolutionLog(heuristic, model.MAX_CABLE)
 	runningSolution: SolutionLog = None
 	for i in range(len(model.cable)):
 		indices = [0, -1]
@@ -73,7 +74,7 @@ def aStarSingle(cable, dest, baseIndex, robotIndex, heuristic, enforceCable=None
 	"""
 	baseIndex and robotIndex: 0 | -1
 	"""
-	solutionLog = SolutionLog()
+	solutionLog = SolutionLog(heuristic)
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
 	if debug: logger.log("CABLE-O: %s - L = %.2f" % (repr(cable), Geom.lengthOfCurve(cable)))

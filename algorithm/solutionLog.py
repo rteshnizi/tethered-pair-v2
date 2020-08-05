@@ -11,11 +11,12 @@ class Solution:
 		self.cost = cost
 
 class SolutionLog:
-	def __init__(self, maxCable: int = 0):
+	def __init__(self, heuristic, maxCable: int = 0):
 		self._content: Solution = None
 		self.maxCable = maxCable
 		self.expanded = 0
 		self.genereted = 0
+		self.heuristic = heuristic
 		self._startTime = timer()
 		self._endTime = -1.0
 		self._time = -1

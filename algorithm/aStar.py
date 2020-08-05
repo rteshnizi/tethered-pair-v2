@@ -14,12 +14,13 @@ model = Model()
 logger = Logger()
 
 def aStar(heuristic, debug=False) -> SolutionLog:
-	model.setSolution(SolutionLog(model.MAX_CABLE))
+	model.setSolution(SolutionLog(heuristic, model.MAX_CABLE))
 	nodeMap = {} # We keep a map of nodes here to update their child-parent relationship
 	q = PriorityQ(key1=Node.pQGetPrimaryCost, key2=Node.pQGetSecondaryCost) # The Priority Queue container
 	logger.log("##############################################")
 	logger.log("##################  A-STAR  ##################")
 	logger.log("CABLE-O: %s - L = %.2f" % (repr(model.cable), Geom.lengthOfCurve(model.cable)))
+	logger.log("Heuristic = %s" % heuristic)
 	root = Node(cable=model.cable, parent=None, heuristicFuncName=heuristic, debug=debug)
 	q.enqueue(root)
 	count = 0
