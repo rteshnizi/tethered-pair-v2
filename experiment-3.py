@@ -9,7 +9,7 @@ from utils.logger import Logger
 
 logger = Logger()
 
-csvData = [["HEURISTIC", "EXPANDED", "GENERATED", "TIME"]]
+csvData = [["HEURISTIC", "EXPANDED", "GENERATED", "TIME", "PATH-A-L", "PATH-B-L", "CABLE-L", "PATH-A", "PATH-B", "CABLE"]]
 
 def main():
 	presetsPath = os.path.join(os.path.dirname(__file__), "presets", "aStar1.json")
@@ -38,8 +38,8 @@ def logSolution(solution: SolutionLog):
 	pathBL = Geom.lengthOfCurve(pathB)
 	cable = solution.content.cable
 	cableL = Geom.lengthOfCurve(cable)
-	# ["HEURISTIC", "EXPANDED", "GENERATED", "TIME"]
-	csvRow = [solution.heuristic, solution.expanded, solution.genereted, solution.time]
+	# ["HEURISTIC", "EXPANDED", "GENERATED", "TIME", "PATH-A-L", "PATH-B-L", "CABLE-L", "PATH-A", "PATH-B", "CABLE"]
+	csvRow = [solution.heuristic, solution.expanded, solution.genereted, solution.time, pathAL, pathBL, cableL, pathA, pathB, cable]
 	csvData.append(csvRow)
 	logger.log("PATHS: %s - L = [%.2f, %.2f]" % (repr(solution.content.paths), pathAL, pathBL))
 	logger.log("CABLE-D: %s - L = %.2f" % (repr(cable), cableL))
