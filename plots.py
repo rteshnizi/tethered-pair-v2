@@ -55,8 +55,10 @@ def main(path):
 		csvReader = csv.reader(csvFile, quoting=csv.QUOTE_ALL)
 		csvData = CsvData(csvReader)
 		(fig, ax) = plt.subplots()
-		R = np.linspace(0, 1, 4)
-		ax.stackplot(csvData.cableLength, csvData.expanded, np.subtract(csvData.generated, csvData.expanded), color=plt.cm.hsv(R))
+		R = np.linspace(0.7, 1, 3)
+		cmap = plt.cm.get_cmap("Blues", 256)
+		colors = cmap(R)
+		ax.stackplot(csvData.cableLength, csvData.expanded, np.subtract(csvData.generated, csvData.expanded), colors=colors)
 		plt.show()
 
 if __name__ == '__main__':
