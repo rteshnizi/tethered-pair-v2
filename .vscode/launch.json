@@ -39,6 +39,20 @@
 			"linux": {
 				"program": "${workspaceFolder}/experiment.py"
 			}
+		},
+		{
+			"name": "Run Plots",
+			"type": "python",
+			"request": "launch",
+			"console": "integratedTerminal",
+			"windows": {
+				"program": "${workspaceFolder}\\plots.py",
+				"args": ["${workspaceFolder}\\logs\\2020-08-03-00-39-37.csv"]
+			},
+			"linux": {
+				"program": "${workspaceFolder}/plots.py",
+				"args": ["${workspaceFolder}/logs/2020-08-03-00-39-37.csv"]
+			}
 		}
 	]
 }

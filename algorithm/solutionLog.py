@@ -31,7 +31,7 @@ class SolutionLog:
 		self._endTime = timer()
 		self._content = value
 
-	def setEndTime():
+	def setEndTime(self):
 		if self._endTime< 0:
 			self._endTime = timer()
 		else:

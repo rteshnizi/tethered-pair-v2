@@ -56,7 +56,7 @@ class Node(object):
 	"""
 	The definition of a node in the planning tree
 	"""
-	def __init__(self, cable, parent: "Node", debug=False, heuristicFuncName="_heuristicAStar", fractions=[1, 1]):
+	def __init__(self, cable, parent: "Node", debug=False, heuristicFuncName="_heuristicAStarDist", fractions=[1, 1]):
 		self.cable = cable
 		self.g = Cost()
 		self.h = Cost()
@@ -76,7 +76,7 @@ class Node(object):
 
 	def _heuristicAStar(self) -> Cost:
 		root = Node(cable=self.cable, parent=None, debug=self.debug, heuristicFuncName="_heuristicAStarDist")
-		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1.5), debug=self.debug)
+		solution = _privateAStar(root=root, MAX_CABLE=model.MAX_CABLE * (len(self.cable) + 1) * 1.25, debug=self.debug)
 		model.solution.expanded += solution.expanded
 		model.solution.genereted += solution.genereted
 		if self.debug: logger.log("T = %.2f" % solution.time)

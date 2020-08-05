@@ -36,7 +36,7 @@ def dynamicProg(debug=False) -> list:
 			runningSolution = aStarSingle(model.cable, model.robots[robotIndex].destination, baseIndex=baseIndex, robotIndex=robotIndex, enforceCable=cableSection, debug=debug)
 			solution.expanded += runningSolution.expanded
 			solution.genereted += runningSolution.genereted
-			if runningSolution:
+			if runningSolution.content:
 				ind = findSubCable(runningSolution.content.cable, cableSection[1:] if robotIndex == 0 else cableSection[:-1])
 				if ind < 0:
 					raise RuntimeError("What?")
@@ -66,7 +66,8 @@ def dynamicProg(debug=False) -> list:
 				paths = [pathA[i], pathB[j]]
 				solutionCable = c
 	solution.content = Solution(solutionCable, paths, minCost)
-	return (solutionCable, paths)
+	logger.log("At Destination after expanded %d nodes, discovering %d configs" % (solution.expanded, solution.genereted))
+	return solution
 
 def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=False) -> SolutionLog:
 	"""
@@ -88,7 +89,7 @@ def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=Fal
 			solutionLog.content = Solution.createFromNode(n)
 			solutionLog.expanded = count
 			solutionLog.genereted = len(nodeMap)
-			logger.log("At Destination after expanded %d nodes, discovering %d configs" % (solutionLog.expanded, solutionLog.genereted))
+			if debug: logger.log("At Destination after expanded %d nodes, discovering %d configs" % (solutionLog.expanded, solutionLog.genereted))
 			destinationsFound += 1
 			return solutionLog
 		base = n.cable[baseIndex]
@@ -111,7 +112,10 @@ def aStarSingle(cable, dest, baseIndex, robotIndex, enforceCable=None, debug=Fal
 			if l <= model.MAX_CABLE:
 				addChildNode(newCable, n, nodeMap, q, debug)
 	if debug: logger.log("Total Nodes: %d, %d configs, %d destinations" % (count, len(nodeMap), destinationsFound))
-	return None
+	solutionLog.expanded = count
+	solutionLog.genereted = len(nodeMap)
+	solutionLog.setEndTime()
+	return solutionLog
 
 def isUndoingLastMove(node, v, index):
 	if not node.parent: return False
